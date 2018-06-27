@@ -1,0 +1,11 @@
+.DS_Store
+.idea
+node_modules
+npm-debug.log
+access.log
+log
+.scratch
+jspm_packages
+
+# Serverless directories
+.serverless
