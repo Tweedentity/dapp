@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
 
-import '../ethereum-api/oraclizeAPI_0.5.sol';
+import '../../ethereum-api/oraclizeAPI_0.5.sol';
 import 'openzeppelin-solidity/contracts/ownership/HasNoEther.sol';
 
 import './TweedentityManager.sol';
