@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 
-(cd store && scripts/pre-commit.sh)
 (cd api && scripts/pre-commit.sh)
+(cd store && scripts/pre-commit.sh)
+git add -A

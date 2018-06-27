@@ -1,5 +1,5 @@
 {
-  "name": "tweedentity",
+  "name": "tweestore",
   "version": "1.5.0",
   "description": "tweedentity",
   "dependencies": {},
@@ -14,7 +14,7 @@
   "scripts": {
     "ganache-cli": "ganache-cli --mnemonic 'tweedentity'",
     "ganache-cli-verbose": "ganache-cli --mnemonic 'tweedentity' --v",
-    "bridge": "cd ethereum-bridge && node bridge -H localhost:8545 -a 9 --dev",
+    "bridge": "cd ../ethereum-bridge && node bridge -H localhost:8545 -a 9 --dev",
     "test": "truffle test",
     "clear": "rm -rf build/contracts",
     "deployToRopsten": "rm -rf build && source ../testnet.env && source ../infura.env && truffle migrate --network ropsten",

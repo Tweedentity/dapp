@@ -57,13 +57,13 @@ describe('Tweedentity Api integration tests', function () {
   			.expect(400);
   	});
 
-  	it('should call db.get on the userId', function () {
-  		return request(app)
-  			.get('/twitter/1234')
-  			.then(() => {
-  				sinon.assert.calledWith(dbGet, '1234');
-  			});
-  	});
+  	// it('should call db.get on the userId', function () {
+  	// 	return request(app)
+  	// 		.get('/twitter/1234')
+  	// 		.then(() => {
+  	// 			sinon.assert.calledWith(dbGet, '1234');
+  	// 		});
+  	// });
 
   	it('should respond with json', function () {
   		return request(app)

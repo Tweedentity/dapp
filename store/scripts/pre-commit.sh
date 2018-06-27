@@ -20,5 +20,3 @@ else
 fi
 
 npm run flatten
-git add flattened/*
-git add build/contracts/*
