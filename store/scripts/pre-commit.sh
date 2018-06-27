@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+rm -rf build
+truffle compile
+
 if [[ -n "$SKIP_TESTS" ]]
 then
 
@@ -18,3 +21,4 @@ fi
 
 npm run flatten
 git add flattened/*
+git add build/contracts/*

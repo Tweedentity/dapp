@@ -6,6 +6,8 @@ const fs = require('./fs')
 const path = require('path')
 const cheerio = require('cheerio')
 
+const utils = require('./Utils')
+
 const etherscanApiKey = process.env.ETHERSCAN_TWEEDENTITY_API_KEY
 
 let web3
@@ -160,7 +162,7 @@ class Provider {
               if (tweetSig === sig.split(' ')[0]) {
                 data = $(elem)
               } else {
-                let deSig = this.deconstructTweet(tweetSig)
+                let deSig = utils.deconstructSignature(tweetSig)
                 if (deSig.sigver === '3') {
                   someSigFound = true
                 }
@@ -201,25 +203,6 @@ class Provider {
           error: errorMessage || 'User not found'
         })
       })
-  }
-
-  deconstructTweet(tweet) {
-    try {
-      const tmp = tweet.replace(/^(|.+)tweedentity\(/, '').replace(/\)(|.+)$/, '').split(';')
-      const content = tmp[0].split(',')
-      const meta = tmp[1].split(',')
-      return {
-        shortAddr: content[0].toLowerCase(),
-        message: content[1],
-        sig: content[2],
-        sigver: content[3],
-        signer: content[4],
-        signame: 'tweedentity',
-        version: meta[0]
-      }
-    } catch (err) {
-      return {}
-    }
   }
 
   saveFile(fn, str) {

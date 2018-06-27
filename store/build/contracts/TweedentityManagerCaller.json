@@ -1,0 +1,1031 @@
+{
+  "contractName": "TweedentityManagerCaller",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "manager",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_managerAddress",
+          "type": "address"
+        }
+      ],
+      "name": "setManager",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_id",
+          "type": "uint256"
+        },
+        {
+          "name": "_addr",
+          "type": "address"
+        },
+        {
+          "name": "_uid",
+          "type": "string"
+        }
+      ],
+      "name": "getUpgradability",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6060604052341561000f57600080fd5b6102978061001e6000396000f3006060604052600436106100565763ffffffff7c0100000000000000000000000000000000000000000000000000000000600035041663481c6a75811461005b578063d0ebdbe71461008a578063d9420a86146100ab575b600080fd5b341561006657600080fd5b61006e610122565b604051600160a060020a03909116815260200160405180910390f35b341561009557600080fd5b6100a9600160a060020a0360043516610131565b005b34156100b657600080fd5b610110600480359060248035600160a060020a0316919060649060443590810190830135806020601f8201819004810201604051908101604052818152929190602084018383808284375094965061016095505050505050565b60405190815260200160405180910390f35b600054600160a060020a031681565b6000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0392909216919091179055565b60008054600160a060020a031663d9420a8685858585604051602001526040517c010000000000000000000000000000000000000000000000000000000063ffffffff861602815260048101848152600160a060020a0384166024830152606060448301908152909160640183818151815260200191508051906020019080838360005b838110156101fc5780820151838201526020016101e4565b50505050905090810190601f1680156102295780820380516001836020036101000a031916815260200191505b50945050505050602060405180830381600087803b151561024957600080fd5b6102c65a03f1151561025a57600080fd5b5050506040518051959450505050505600a165627a7a723058207047029d357a1aa0dcfbef98882bf836e1ce167da149e9aaa2b30901538c0f380029",
+  "deployedBytecode": "0x6060604052600436106100565763ffffffff7c0100000000000000000000000000000000000000000000000000000000600035041663481c6a75811461005b578063d0ebdbe71461008a578063d9420a86146100ab575b600080fd5b341561006657600080fd5b61006e610122565b604051600160a060020a03909116815260200160405180910390f35b341561009557600080fd5b6100a9600160a060020a0360043516610131565b005b34156100b657600080fd5b610110600480359060248035600160a060020a0316919060649060443590810190830135806020601f8201819004810201604051908101604052818152929190602084018383808284375094965061016095505050505050565b60405190815260200160405180910390f35b600054600160a060020a031681565b6000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0392909216919091179055565b60008054600160a060020a031663d9420a8685858585604051602001526040517c010000000000000000000000000000000000000000000000000000000063ffffffff861602815260048101848152600160a060020a0384166024830152606060448301908152909160640183818151815260200191508051906020019080838360005b838110156101fc5780820151838201526020016101e4565b50505050905090810190601f1680156102295780820380516001836020036101000a031916815260200191505b50945050505050602060405180830381600087803b151561024957600080fd5b6102c65a03f1151561025a57600080fd5b5050506040518051959450505050505600a165627a7a723058207047029d357a1aa0dcfbef98882bf836e1ce167da149e9aaa2b30901538c0f380029",
+  "sourceMap": "208:543:9:-;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "208:543:9:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;247:33;;;;;;;;;;;;;;;-1:-1:-1;;;;;247:33:9;;;;;;;;;;;;;;285:108;;;;;;;;;;-1:-1:-1;;;;;285:108:9;;;;;;;593:155;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;593:155:9;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;593:155:9;;-1:-1:-1;593:155:9;;-1:-1:-1;;;;;;593:155:9;;;;;;;;;;;;;;;;247:33;;;-1:-1:-1;;;;;247:33:9;;:::o;285:108::-;343:7;:45;;-1:-1:-1;;343:45:9;-1:-1:-1;;;;;343:45:9;;;;;;;;;;285:108::o;593:155::-;682:4;701:7;;-1:-1:-1;;;;;701:7:9;:24;726:3;731:5;738:4;682;701:42;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;701:42:9;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;23:1:-1;8:100;33:3;30:1;27:2;8:100;;;99:1;94:3;90;84:5;71:3;;;64:6;52:2;45:3;8:100;;;12:14;3:109;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;593:155:9;-1:-1:-1;;;;;593:155:9:o",
+  "source": "pragma solidity ^0.4.18;\n\n\nimport '../TweedentityStore.sol';\nimport '../TweedentityManager.sol';\n\n\n// This contract is for testing the TweedentityManager's methods\n// which are callable from other contracts\n\ncontract TweedentityManagerCaller {\n\n  TweedentityManager public manager;\n\n  function setManager(address _managerAddress) public {\n    manager = TweedentityManager(_managerAddress);\n  }\n\n  // callable methods\n  // Theoretically, there is no need to test them because the\n  // compiler with produce an error when calling any getter that\n  // tries to return not-allowed dynamic data\n\n  function getUpgradability(uint _id, address _addr, string _uid) public constant returns (uint) {\n    return manager.getUpgradability(_id, _addr, _uid);\n  }\n\n}\n",
+  "sourcePath": "/Users/sullof/Projects/tweedentity-dapp/store/contracts/helpers/TweedentityManagerCaller.sol",
+  "ast": {
+    "absolutePath": "/Users/sullof/Projects/tweedentity-dapp/store/contracts/helpers/TweedentityManagerCaller.sol",
+    "exportedSymbols": {
+      "TweedentityManagerCaller": [
+        8096
+      ]
+    },
+    "id": 8097,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 8060,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".18"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:9"
+      },
+      {
+        "absolutePath": "/Users/sullof/Projects/tweedentity-dapp/store/contracts/TweedentityStore.sol",
+        "file": "../TweedentityStore.sol",
+        "id": 8061,
+        "nodeType": "ImportDirective",
+        "scope": 8097,
+        "sourceUnit": 7983,
+        "src": "27:33:9",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/sullof/Projects/tweedentity-dapp/store/contracts/TweedentityManager.sol",
+        "file": "../TweedentityManager.sol",
+        "id": 8062,
+        "nodeType": "ImportDirective",
+        "scope": 8097,
+        "sourceUnit": 7236,
+        "src": "61:35:9",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 8096,
+        "linearizedBaseContracts": [
+          8096
+        ],
+        "name": "TweedentityManagerCaller",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 8064,
+            "name": "manager",
+            "nodeType": "VariableDeclaration",
+            "scope": 8096,
+            "src": "247:33:9",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_TweedentityManager_$7235",
+              "typeString": "contract TweedentityManager"
+            },
+            "typeName": {
+              "contractScope": null,
+              "id": 8063,
+              "name": "TweedentityManager",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 7235,
+              "src": "247:18:9",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_TweedentityManager_$7235",
+                "typeString": "contract TweedentityManager"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 8075,
+              "nodeType": "Block",
+              "src": "337:56:9",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 8073,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "id": 8069,
+                      "name": "manager",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 8064,
+                      "src": "343:7:9",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_TweedentityManager_$7235",
+                        "typeString": "contract TweedentityManager"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "arguments": [
+                        {
+                          "argumentTypes": null,
+                          "id": 8071,
+                          "name": "_managerAddress",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 8066,
+                          "src": "372:15:9",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        ],
+                        "id": 8070,
+                        "name": "TweedentityManager",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7235,
+                        "src": "353:18:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_TweedentityManager_$7235_$",
+                          "typeString": "type(contract TweedentityManager)"
+                        }
+                      },
+                      "id": 8072,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "353:35:9",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_TweedentityManager_$7235",
+                        "typeString": "contract TweedentityManager"
+                      }
+                    },
+                    "src": "343:45:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_TweedentityManager_$7235",
+                      "typeString": "contract TweedentityManager"
+                    }
+                  },
+                  "id": 8074,
+                  "nodeType": "ExpressionStatement",
+                  "src": "343:45:9"
+                }
+              ]
+            },
+            "id": 8076,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "setManager",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8067,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8066,
+                  "name": "_managerAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8076,
+                  "src": "305:23:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 8065,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "305:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "304:25:9"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 8068,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "337:0:9"
+            },
+            "scope": 8096,
+            "src": "285:108:9",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 8094,
+              "nodeType": "Block",
+              "src": "688:60:9",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 8089,
+                        "name": "_id",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 8078,
+                        "src": "726:3:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 8090,
+                        "name": "_addr",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 8080,
+                        "src": "731:5:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 8091,
+                        "name": "_uid",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 8082,
+                        "src": "738:4:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 8087,
+                        "name": "manager",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 8064,
+                        "src": "701:7:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_TweedentityManager_$7235",
+                          "typeString": "contract TweedentityManager"
+                        }
+                      },
+                      "id": 8088,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "getUpgradability",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 7086,
+                      "src": "701:24:9",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_view$_t_uint256_$_t_address_$_t_string_memory_ptr_$returns$_t_uint256_$",
+                        "typeString": "function (uint256,address,string memory) view external returns (uint256)"
+                      }
+                    },
+                    "id": 8092,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "701:42:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "functionReturnParameters": 8086,
+                  "id": 8093,
+                  "nodeType": "Return",
+                  "src": "694:49:9"
+                }
+              ]
+            },
+            "id": 8095,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "getUpgradability",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8083,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8078,
+                  "name": "_id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8095,
+                  "src": "619:8:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8077,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "619:4:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8080,
+                  "name": "_addr",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8095,
+                  "src": "629:13:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 8079,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "629:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8082,
+                  "name": "_uid",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8095,
+                  "src": "644:11:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string memory"
+                  },
+                  "typeName": {
+                    "id": 8081,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "644:6:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string storage pointer"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "618:38:9"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 8086,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8085,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8095,
+                  "src": "682:4:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8084,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "682:4:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "681:6:9"
+            },
+            "scope": 8096,
+            "src": "593:155:9",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 8097,
+        "src": "208:543:9"
+      }
+    ],
+    "src": "0:752:9"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/sullof/Projects/tweedentity-dapp/store/contracts/helpers/TweedentityManagerCaller.sol",
+    "exportedSymbols": {
+      "TweedentityManagerCaller": [
+        8096
+      ]
+    },
+    "id": 8097,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 8060,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".18"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:9"
+      },
+      {
+        "absolutePath": "/Users/sullof/Projects/tweedentity-dapp/store/contracts/TweedentityStore.sol",
+        "file": "../TweedentityStore.sol",
+        "id": 8061,
+        "nodeType": "ImportDirective",
+        "scope": 8097,
+        "sourceUnit": 7983,
+        "src": "27:33:9",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/sullof/Projects/tweedentity-dapp/store/contracts/TweedentityManager.sol",
+        "file": "../TweedentityManager.sol",
+        "id": 8062,
+        "nodeType": "ImportDirective",
+        "scope": 8097,
+        "sourceUnit": 7236,
+        "src": "61:35:9",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 8096,
+        "linearizedBaseContracts": [
+          8096
+        ],
+        "name": "TweedentityManagerCaller",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 8064,
+            "name": "manager",
+            "nodeType": "VariableDeclaration",
+            "scope": 8096,
+            "src": "247:33:9",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_TweedentityManager_$7235",
+              "typeString": "contract TweedentityManager"
+            },
+            "typeName": {
+              "contractScope": null,
+              "id": 8063,
+              "name": "TweedentityManager",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 7235,
+              "src": "247:18:9",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_TweedentityManager_$7235",
+                "typeString": "contract TweedentityManager"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 8075,
+              "nodeType": "Block",
+              "src": "337:56:9",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 8073,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "id": 8069,
+                      "name": "manager",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 8064,
+                      "src": "343:7:9",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_TweedentityManager_$7235",
+                        "typeString": "contract TweedentityManager"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "arguments": [
+                        {
+                          "argumentTypes": null,
+                          "id": 8071,
+                          "name": "_managerAddress",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 8066,
+                          "src": "372:15:9",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        ],
+                        "id": 8070,
+                        "name": "TweedentityManager",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7235,
+                        "src": "353:18:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_TweedentityManager_$7235_$",
+                          "typeString": "type(contract TweedentityManager)"
+                        }
+                      },
+                      "id": 8072,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "353:35:9",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_TweedentityManager_$7235",
+                        "typeString": "contract TweedentityManager"
+                      }
+                    },
+                    "src": "343:45:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_TweedentityManager_$7235",
+                      "typeString": "contract TweedentityManager"
+                    }
+                  },
+                  "id": 8074,
+                  "nodeType": "ExpressionStatement",
+                  "src": "343:45:9"
+                }
+              ]
+            },
+            "id": 8076,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "setManager",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8067,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8066,
+                  "name": "_managerAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8076,
+                  "src": "305:23:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 8065,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "305:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "304:25:9"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 8068,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "337:0:9"
+            },
+            "scope": 8096,
+            "src": "285:108:9",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 8094,
+              "nodeType": "Block",
+              "src": "688:60:9",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 8089,
+                        "name": "_id",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 8078,
+                        "src": "726:3:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 8090,
+                        "name": "_addr",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 8080,
+                        "src": "731:5:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 8091,
+                        "name": "_uid",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 8082,
+                        "src": "738:4:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 8087,
+                        "name": "manager",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 8064,
+                        "src": "701:7:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_TweedentityManager_$7235",
+                          "typeString": "contract TweedentityManager"
+                        }
+                      },
+                      "id": 8088,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "getUpgradability",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 7086,
+                      "src": "701:24:9",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_view$_t_uint256_$_t_address_$_t_string_memory_ptr_$returns$_t_uint256_$",
+                        "typeString": "function (uint256,address,string memory) view external returns (uint256)"
+                      }
+                    },
+                    "id": 8092,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "701:42:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "functionReturnParameters": 8086,
+                  "id": 8093,
+                  "nodeType": "Return",
+                  "src": "694:49:9"
+                }
+              ]
+            },
+            "id": 8095,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "getUpgradability",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8083,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8078,
+                  "name": "_id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8095,
+                  "src": "619:8:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8077,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "619:4:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8080,
+                  "name": "_addr",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8095,
+                  "src": "629:13:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 8079,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "629:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8082,
+                  "name": "_uid",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8095,
+                  "src": "644:11:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string memory"
+                  },
+                  "typeName": {
+                    "id": 8081,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "644:6:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string storage pointer"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "618:38:9"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 8086,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8085,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8095,
+                  "src": "682:4:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8084,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "682:4:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "681:6:9"
+            },
+            "scope": 8096,
+            "src": "593:155:9",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 8097,
+        "src": "208:543:9"
+      }
+    ],
+    "src": "0:752:9"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.19+commit.c4cbbb05.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.0",
+  "updatedAt": "2018-06-27T17:31:40.799Z"
+}

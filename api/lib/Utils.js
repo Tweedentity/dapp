@@ -42,9 +42,9 @@ class Utils {
     }), address)
   }
 
-  deconstructTweet(tweet) {
+  deconstructSignature(text) {
     try {
-      const tmp = tweet.replace(/^(|.+)tweedentity\(/, '').replace(/\)(|.+)$/, '').split(';')
+      const tmp = text.replace(/^(|.+)tweedentity\(/, '').replace(/\)(|.+)$/, '').split(';')
       const content = tmp[0].split(',')
       const meta = tmp[1].split(',')
       return {

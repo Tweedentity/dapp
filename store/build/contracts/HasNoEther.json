@@ -1,0 +1,931 @@
+{
+  "contractName": "HasNoEther",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "constructor"
+    },
+    {
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "fallback"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "reclaimEther",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x606060405260008054600160a060020a03191633600160a060020a0316179055341561002a57600080fd5b6101ed806100396000396000f3006060604052600436106100565763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416638da5cb5b81146100635780639f727c2714610092578063f2fde38b146100a5575b341561006157600080fd5b005b341561006e57600080fd5b6100766100c4565b604051600160a060020a03909116815260200160405180910390f35b341561009d57600080fd5b6100616100d3565b34156100b057600080fd5b610061600160a060020a0360043516610126565b600054600160a060020a031681565b60005433600160a060020a039081169116146100ee57600080fd5b600054600160a060020a039081169030163180156108fc0290604051600060405180830381858888f19350505050151561012457fe5b565b60005433600160a060020a0390811691161461014157600080fd5b600160a060020a038116151561015657600080fd5b600054600160a060020a0380831691167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a36000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a03929092169190911790555600a165627a7a723058209bd21f03be7b17842bf57a82bda7db8e1930f271302d7bf8ac973b1c575088490029",
+  "deployedBytecode": "0x6060604052600436106100565763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416638da5cb5b81146100635780639f727c2714610092578063f2fde38b146100a5575b341561006157600080fd5b005b341561006e57600080fd5b6100766100c4565b604051600160a060020a03909116815260200160405180910390f35b341561009d57600080fd5b6100616100d3565b34156100b057600080fd5b610061600160a060020a0360043516610126565b600054600160a060020a031681565b60005433600160a060020a039081169116146100ee57600080fd5b600054600160a060020a039081169030163180156108fc0290604051600060405180830381858888f19350505050151561012457fe5b565b60005433600160a060020a0390811691161461014157600080fd5b600160a060020a038116151561015657600080fd5b600054600160a060020a0380831691167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a36000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a03929092169190911790555600a165627a7a723058209bd21f03be7b17842bf57a82bda7db8e1930f271302d7bf8ac973b1c575088490029",
+  "sourceMap": "487:803:12:-;;;501:5:13;:18;;-1:-1:-1;;;;;;501:18:13;509:10;-1:-1:-1;;;;;501:18:13;;;;970:9:12;:14;962:23;;;;;;487:803;;;;;;",
+  "deployedSourceMap": "487:803:12:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;238:20:13;;;;;;;;;;;;;;;-1:-1:-1;;;;;238:20:13;;;;;;;;;;;;;;1202:86:12;;;;;;;;;;;;832:169:13;;;;;;;;;;-1:-1:-1;;;;;832:169:13;;;;;238:20;;;-1:-1:-1;;;;;238:20:13;;:::o;1202:86:12:-;653:5:13;;639:10;-1:-1:-1;;;;;639:19:13;;;653:5;;639:19;631:28;;;;;;1258:5:12;;-1:-1:-1;;;;;1258:5:12;;;;1269:4;:12;;1258:24;;;;;;;;;;;;;;;;;;;;;;;1251:32;;;;;;1202:86::o;832:169:13:-;653:5;;639:10;-1:-1:-1;;;;;639:19:13;;;653:5;;639:19;631:28;;;;;;-1:-1:-1;;;;;908:22:13;;;;900:31;;;;;;958:5;;-1:-1:-1;;;;;937:37:13;;;;958:5;937:37;;;;;;;;;;980:5;:16;;-1:-1:-1;;980:16:13;-1:-1:-1;;;;;980:16:13;;;;;;;;;;832:169::o",
+  "source": "pragma solidity ^0.4.18;\n\nimport \"./Ownable.sol\";\n\n\n/**\n * @title Contracts that should not own Ether\n * @author Remco Bloemen <remco@2π.com>\n * @dev This tries to block incoming ether to prevent accidental loss of Ether. Should Ether end up\n * in the contract, it will allow the owner to reclaim this ether.\n * @notice Ether can still be send to this contract by:\n * calling functions labeled `payable`\n * `selfdestruct(contract_address)`\n * mining directly to the contract address\n*/\ncontract HasNoEther is Ownable {\n\n  /**\n  * @dev Constructor that rejects incoming Ether\n  * @dev The `payable` flag is added so we can access `msg.value` without compiler warning. If we\n  * leave out payable, then Solidity will allow inheriting contracts to implement a payable\n  * constructor. By doing it this way we prevent a payable constructor from working. Alternatively\n  * we could use assembly to access msg.value.\n  */\n  function HasNoEther() public payable {\n    require(msg.value == 0);\n  }\n\n  /**\n   * @dev Disallows direct send by settings a default function without the `payable` flag.\n   */\n  function() external {\n  }\n\n  /**\n   * @dev Transfer all Ether held by the contract to the owner.\n   */\n  function reclaimEther() external onlyOwner {\n    assert(owner.send(this.balance));\n  }\n}\n",
+  "sourcePath": "openzeppelin-solidity/contracts/ownership/HasNoEther.sol",
+  "ast": {
+    "absolutePath": "openzeppelin-solidity/contracts/ownership/HasNoEther.sol",
+    "exportedSymbols": {
+      "HasNoEther": [
+        8264
+      ]
+    },
+    "id": 8265,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 8231,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".18"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:12"
+      },
+      {
+        "absolutePath": "openzeppelin-solidity/contracts/ownership/Ownable.sol",
+        "file": "./Ownable.sol",
+        "id": 8232,
+        "nodeType": "ImportDirective",
+        "scope": 8265,
+        "sourceUnit": 8321,
+        "src": "26:23:12",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [
+          {
+            "arguments": [],
+            "baseName": {
+              "contractScope": null,
+              "id": 8233,
+              "name": "Ownable",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 8320,
+              "src": "510:7:12",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Ownable_$8320",
+                "typeString": "contract Ownable"
+              }
+            },
+            "id": 8234,
+            "nodeType": "InheritanceSpecifier",
+            "src": "510:7:12"
+          }
+        ],
+        "contractDependencies": [
+          8320
+        ],
+        "contractKind": "contract",
+        "documentation": "@title Contracts that should not own Ether\n@author Remco Bloemen <remco@2π.com>\n@dev This tries to block incoming ether to prevent accidental loss of Ether. Should Ether end up\nin the contract, it will allow the owner to reclaim this ether.\n@notice Ether can still be send to this contract by:\ncalling functions labeled `payable`\n`selfdestruct(contract_address)`\nmining directly to the contract address",
+        "fullyImplemented": true,
+        "id": 8264,
+        "linearizedBaseContracts": [
+          8264,
+          8320
+        ],
+        "name": "HasNoEther",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 8244,
+              "nodeType": "Block",
+              "src": "956:34:12",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "commonType": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "id": 8241,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 8238,
+                            "name": "msg",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 8332,
+                            "src": "970:3:12",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_message",
+                              "typeString": "msg"
+                            }
+                          },
+                          "id": 8239,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "value",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": null,
+                          "src": "970:9:12",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "==",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "hexValue": "30",
+                          "id": 8240,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "983:1:12",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_0_by_1",
+                            "typeString": "int_const 0"
+                          },
+                          "value": "0"
+                        },
+                        "src": "970:14:12",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      ],
+                      "id": 8237,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 8335,
+                      "src": "962:7:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
+                        "typeString": "function (bool) pure"
+                      }
+                    },
+                    "id": 8242,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "962:23:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 8243,
+                  "nodeType": "ExpressionStatement",
+                  "src": "962:23:12"
+                }
+              ]
+            },
+            "id": 8245,
+            "implemented": true,
+            "isConstructor": true,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "HasNoEther",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8235,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "938:2:12"
+            },
+            "payable": true,
+            "returnParameters": {
+              "id": 8236,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "956:0:12"
+            },
+            "scope": 8264,
+            "src": "919:71:12",
+            "stateMutability": "payable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 8248,
+              "nodeType": "Block",
+              "src": "1117:5:12",
+              "statements": []
+            },
+            "id": 8249,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8246,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1105:2:12"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 8247,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1117:0:12"
+            },
+            "scope": 8264,
+            "src": "1097:25:12",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": {
+              "id": 8262,
+              "nodeType": "Block",
+              "src": "1245:43:12",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "expression": {
+                              "argumentTypes": null,
+                              "id": 8257,
+                              "name": "this",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 8359,
+                              "src": "1269:4:12",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_contract$_HasNoEther_$8264",
+                                "typeString": "contract HasNoEther"
+                              }
+                            },
+                            "id": 8258,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "balance",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": null,
+                            "src": "1269:12:12",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 8255,
+                            "name": "owner",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 8268,
+                            "src": "1258:5:12",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          },
+                          "id": 8256,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "send",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": null,
+                          "src": "1258:10:12",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_send_nonpayable$_t_uint256_$returns$_t_bool_$",
+                            "typeString": "function (uint256) returns (bool)"
+                          }
+                        },
+                        "id": 8259,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1258:24:12",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      ],
+                      "id": 8254,
+                      "name": "assert",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 8323,
+                      "src": "1251:6:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
+                        "typeString": "function (bool) pure"
+                      }
+                    },
+                    "id": 8260,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1251:32:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 8261,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1251:32:12"
+                }
+              ]
+            },
+            "id": 8263,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [
+              {
+                "arguments": [],
+                "id": 8252,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 8251,
+                  "name": "onlyOwner",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 8294,
+                  "src": "1235:9:12",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_modifier$__$",
+                    "typeString": "modifier ()"
+                  }
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "1235:9:12"
+              }
+            ],
+            "name": "reclaimEther",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8250,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1223:2:12"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 8253,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1245:0:12"
+            },
+            "scope": 8264,
+            "src": "1202:86:12",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 8265,
+        "src": "487:803:12"
+      }
+    ],
+    "src": "0:1291:12"
+  },
+  "legacyAST": {
+    "absolutePath": "openzeppelin-solidity/contracts/ownership/HasNoEther.sol",
+    "exportedSymbols": {
+      "HasNoEther": [
+        8264
+      ]
+    },
+    "id": 8265,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 8231,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".18"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:12"
+      },
+      {
+        "absolutePath": "openzeppelin-solidity/contracts/ownership/Ownable.sol",
+        "file": "./Ownable.sol",
+        "id": 8232,
+        "nodeType": "ImportDirective",
+        "scope": 8265,
+        "sourceUnit": 8321,
+        "src": "26:23:12",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [
+          {
+            "arguments": [],
+            "baseName": {
+              "contractScope": null,
+              "id": 8233,
+              "name": "Ownable",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 8320,
+              "src": "510:7:12",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Ownable_$8320",
+                "typeString": "contract Ownable"
+              }
+            },
+            "id": 8234,
+            "nodeType": "InheritanceSpecifier",
+            "src": "510:7:12"
+          }
+        ],
+        "contractDependencies": [
+          8320
+        ],
+        "contractKind": "contract",
+        "documentation": "@title Contracts that should not own Ether\n@author Remco Bloemen <remco@2π.com>\n@dev This tries to block incoming ether to prevent accidental loss of Ether. Should Ether end up\nin the contract, it will allow the owner to reclaim this ether.\n@notice Ether can still be send to this contract by:\ncalling functions labeled `payable`\n`selfdestruct(contract_address)`\nmining directly to the contract address",
+        "fullyImplemented": true,
+        "id": 8264,
+        "linearizedBaseContracts": [
+          8264,
+          8320
+        ],
+        "name": "HasNoEther",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 8244,
+              "nodeType": "Block",
+              "src": "956:34:12",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "commonType": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "id": 8241,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 8238,
+                            "name": "msg",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 8332,
+                            "src": "970:3:12",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_message",
+                              "typeString": "msg"
+                            }
+                          },
+                          "id": 8239,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "value",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": null,
+                          "src": "970:9:12",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "==",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "hexValue": "30",
+                          "id": 8240,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "983:1:12",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_0_by_1",
+                            "typeString": "int_const 0"
+                          },
+                          "value": "0"
+                        },
+                        "src": "970:14:12",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      ],
+                      "id": 8237,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 8335,
+                      "src": "962:7:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
+                        "typeString": "function (bool) pure"
+                      }
+                    },
+                    "id": 8242,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "962:23:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 8243,
+                  "nodeType": "ExpressionStatement",
+                  "src": "962:23:12"
+                }
+              ]
+            },
+            "id": 8245,
+            "implemented": true,
+            "isConstructor": true,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "HasNoEther",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8235,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "938:2:12"
+            },
+            "payable": true,
+            "returnParameters": {
+              "id": 8236,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "956:0:12"
+            },
+            "scope": 8264,
+            "src": "919:71:12",
+            "stateMutability": "payable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 8248,
+              "nodeType": "Block",
+              "src": "1117:5:12",
+              "statements": []
+            },
+            "id": 8249,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8246,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1105:2:12"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 8247,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1117:0:12"
+            },
+            "scope": 8264,
+            "src": "1097:25:12",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": {
+              "id": 8262,
+              "nodeType": "Block",
+              "src": "1245:43:12",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "expression": {
+                              "argumentTypes": null,
+                              "id": 8257,
+                              "name": "this",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 8359,
+                              "src": "1269:4:12",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_contract$_HasNoEther_$8264",
+                                "typeString": "contract HasNoEther"
+                              }
+                            },
+                            "id": 8258,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "balance",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": null,
+                            "src": "1269:12:12",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 8255,
+                            "name": "owner",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 8268,
+                            "src": "1258:5:12",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          },
+                          "id": 8256,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "send",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": null,
+                          "src": "1258:10:12",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_send_nonpayable$_t_uint256_$returns$_t_bool_$",
+                            "typeString": "function (uint256) returns (bool)"
+                          }
+                        },
+                        "id": 8259,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1258:24:12",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      ],
+                      "id": 8254,
+                      "name": "assert",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 8323,
+                      "src": "1251:6:12",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
+                        "typeString": "function (bool) pure"
+                      }
+                    },
+                    "id": 8260,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1251:32:12",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 8261,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1251:32:12"
+                }
+              ]
+            },
+            "id": 8263,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [
+              {
+                "arguments": [],
+                "id": 8252,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 8251,
+                  "name": "onlyOwner",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 8294,
+                  "src": "1235:9:12",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_modifier$__$",
+                    "typeString": "modifier ()"
+                  }
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "1235:9:12"
+              }
+            ],
+            "name": "reclaimEther",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8250,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1223:2:12"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 8253,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1245:0:12"
+            },
+            "scope": 8264,
+            "src": "1202:86:12",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 8265,
+        "src": "487:803:12"
+      }
+    ],
+    "src": "0:1291:12"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.19+commit.c4cbbb05.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.0",
+  "updatedAt": "2018-06-27T17:31:40.800Z"
+}

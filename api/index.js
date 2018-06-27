@@ -53,7 +53,7 @@ app.get('/twitter/:tweetId/:address', (req, res) => {
         const screenName = dataTweet.attr('data-screen-name')
         const name = dataTweet.attr('data-name')
 
-        const data = utils.deconstructTweet($('meta[property="og:description"]').attr('content'))
+        const data = utils.deconstructSignature($('meta[property="og:description"]').attr('content'))
 
         const {shortAddr, message, sig, signer, signame, version} = data
 

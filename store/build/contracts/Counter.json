@@ -1,0 +1,311 @@
+{
+  "contractName": "Counter",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "counter",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "incCounter",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6060604052341561000f57600080fd5b60be8061001d6000396000f30060606040526004361060485763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166322aacad58114604d57806361bc221a14605f575b600080fd5b3415605757600080fd5b605d6081565b005b3415606957600080fd5b606f608c565b60405190815260200160405180910390f35b600080546001019055565b600054815600a165627a7a72305820ca0edbe68fa352a79984325bc814cf0abbd859d8b3cd5f81bab3cb401fb9dd6e0029",
+  "deployedBytecode": "0x60606040526004361060485763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166322aacad58114604d57806361bc221a14605f575b600080fd5b3415605757600080fd5b605d6081565b005b3415606957600080fd5b606f608c565b60405190815260200160405180910390f35b600080546001019055565b600054815600a165627a7a72305820ca0edbe68fa352a79984325bc814cf0abbd859d8b3cd5f81bab3cb401fb9dd6e0029",
+  "sourceMap": "27:154:8:-;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "27:154:8:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;73:105;;;;;;;;;;;;;;49:19;;;;;;;;;;;;;;;;;;;;;;;;;;;73:105;164:7;:9;;;;;;73:105::o;49:19::-;;;;:::o",
+  "source": "pragma solidity ^0.4.18;\n\n\ncontract Counter {\n\n  uint public counter;\n\n  function incCounter()\n  public\n  {\n    // we use this to mine a new block during tests\n    counter++;\n  }\n\n}\n",
+  "sourcePath": "/Users/sullof/Projects/tweedentity-dapp/store/contracts/helpers/Counter.sol",
+  "ast": {
+    "absolutePath": "/Users/sullof/Projects/tweedentity-dapp/store/contracts/helpers/Counter.sol",
+    "exportedSymbols": {
+      "Counter": [
+        8058
+      ]
+    },
+    "id": 8059,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 8048,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".18"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:8"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 8058,
+        "linearizedBaseContracts": [
+          8058
+        ],
+        "name": "Counter",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 8050,
+            "name": "counter",
+            "nodeType": "VariableDeclaration",
+            "scope": 8058,
+            "src": "49:19:8",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 8049,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "49:4:8",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 8056,
+              "nodeType": "Block",
+              "src": "106:72:8",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 8054,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "UnaryOperation",
+                    "operator": "++",
+                    "prefix": false,
+                    "src": "164:9:8",
+                    "subExpression": {
+                      "argumentTypes": null,
+                      "id": 8053,
+                      "name": "counter",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 8050,
+                      "src": "164:7:8",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 8055,
+                  "nodeType": "ExpressionStatement",
+                  "src": "164:9:8"
+                }
+              ]
+            },
+            "id": 8057,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "incCounter",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8051,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "92:2:8"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 8052,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "106:0:8"
+            },
+            "scope": 8058,
+            "src": "73:105:8",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 8059,
+        "src": "27:154:8"
+      }
+    ],
+    "src": "0:182:8"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/sullof/Projects/tweedentity-dapp/store/contracts/helpers/Counter.sol",
+    "exportedSymbols": {
+      "Counter": [
+        8058
+      ]
+    },
+    "id": 8059,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 8048,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".18"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:8"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 8058,
+        "linearizedBaseContracts": [
+          8058
+        ],
+        "name": "Counter",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 8050,
+            "name": "counter",
+            "nodeType": "VariableDeclaration",
+            "scope": 8058,
+            "src": "49:19:8",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 8049,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "49:4:8",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 8056,
+              "nodeType": "Block",
+              "src": "106:72:8",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 8054,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "UnaryOperation",
+                    "operator": "++",
+                    "prefix": false,
+                    "src": "164:9:8",
+                    "subExpression": {
+                      "argumentTypes": null,
+                      "id": 8053,
+                      "name": "counter",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 8050,
+                      "src": "164:7:8",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 8055,
+                  "nodeType": "ExpressionStatement",
+                  "src": "164:9:8"
+                }
+              ]
+            },
+            "id": 8057,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "incCounter",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8051,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "92:2:8"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 8052,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "106:0:8"
+            },
+            "scope": 8058,
+            "src": "73:105:8",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 8059,
+        "src": "27:154:8"
+      }
+    ],
+    "src": "0:182:8"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.19+commit.c4cbbb05.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.0",
+  "updatedAt": "2018-06-27T17:31:40.799Z"
+}

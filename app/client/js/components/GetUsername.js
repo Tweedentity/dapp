@@ -80,8 +80,6 @@ class GetUsername extends Basic {
 
     const webApp = as.currentWebApp === 'twitter' ? 'Twitter' : 'Reddit'
 
-    console.log(this.getGlobalState('currentWebApp'), as.config.decoration[this.getGlobalState('currentWebApp')])
-
     return (
       <Grid>
         <Row>

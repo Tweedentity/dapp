@@ -3,6 +3,13 @@ import createHistory from "history/createBrowserHistory"
 const history = window.History = createHistory()
 const config = require('../config')
 
+const registryAbi = require(`../../../contracts/TweedentityRegistry`).abi
+const storeAbi = require(`../../../contracts/TweedentityStore`).abi
+
+const managerAbi = require(`../../../contracts/TweedentityManager`).abi
+
+const claimerAbi = require(`../../../contracts/TweedentityClaimer`).abi
+
 const {Modal, Button} = ReactBootstrap
 
 const Db = require('../utils/Db')
@@ -119,19 +126,18 @@ class App extends React.Component {
             env
           })
 
+          const registry = this.web3js.eth.contract(registryAbi).at(config.registry.address[env])
+          registry.getStore('twitter', (err, store) => {
 
-          const registry = this.web3js.eth.contract(config.registry.abi).at(config.registry.address[env])
-          const twitterStore = this.web3js.eth.contract(config.stores.abi).at(config.stores.addresses.twitter[env])
-
-          this.contracts = {
-            registry,
-            twitterStore
-          }
-          this.watchAccounts0()
-          setInterval(this.watchAccounts0, 1000)
-          this.getEthInfo()
-          this.getContracts()
-
+            this.contracts = {
+              registry,
+              twitterStore: this.web3js.eth.contract(storeAbi).at(store)
+            }
+            this.getEthInfo()
+            this.watchAccounts0()
+            setInterval(this.watchAccounts0, 1000)
+            this.getContracts()
+          })
         }
 
       })
@@ -146,62 +152,25 @@ class App extends React.Component {
 
     const registry = this.contracts.registry
 
-    let manager
-    let claimer
-
     this.setState({
       ready: false
     })
 
     registry.isReady((err, ready) => {
-
       if (ready) {
+        this.setState({
+          ready: true
+        })
         registry.manager((err, result) => {
-          manager = result
+          this.contracts.manager = this.web3js.eth.contract(managerAbi).at(result)
           registry.claimer((err, result) => {
-            claimer = result
-
-            return fetch(window.location.origin + '/api/contract-abi?r=' + Math.random(), {
-              method: 'POST',
-              headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                network: this.state.netId,
-                addresses: [
-                  manager,
-                  claimer
-                ]
-              })
-            })
-              .then((response) => response.json())
-              .then((responseJson) => {
-                for (let j of responseJson) {
-                  let key = j[0] == manager ? 'manager' : 'claimer'
-                  this.contracts[key] = this.web3js.eth.contract(j[1]).at(j[0])
-                }
-                this.setState({
-                  ready: true,
-                  manager,
-                  claimer
-                })
-
-              })
-              .catch(err => {
-                console.log(err)
-              })
+            this.contracts.claimer = this.web3js.eth.contract(claimerAbi).at(result)
           })
         })
 
-      } else {
-        this.setState({
-          ready: false
-        })
       }
 
     })
-
   }
 
   getEthInfo() {

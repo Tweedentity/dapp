@@ -30,8 +30,6 @@ class ManageAccount extends Basic {
     this.props.app.contracts.manager.getUpgradability(1, wallet, userId, (err, result) => {
       let upgradability = parseInt(result.valueOf(), 10)
 
-      console.log('upgradability', upgradability)
-
       if (upgradability === 2) {
 
         this.props.app.contracts.twitterStore.getAddressLastUpdate(wallet, (err, result) => {

@@ -17,8 +17,6 @@ class Terms extends Basic {
 
   handleTerms(e) {
 
-      console.log(`>>${e.target.checked}<<`)
-
     this.props.app.db.put('profile', {
       termsAccepted: e.target.checked
     })
