@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-(cd api && scripts/pre-commit.sh)
-(cd store && scripts/pre-commit.sh)
+(cd api && export $SKIP_TESTS && scripts/pre-commit.sh)
+(cd store && export $SKIP_TESTS && scripts/pre-commit.sh)
 git add -A
