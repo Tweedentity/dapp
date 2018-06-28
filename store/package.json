@@ -1,6 +1,6 @@
 {
   "name": "tweestore",
-  "version": "1.5.0",
+  "version": "1.0.0",
   "description": "tweedentity",
   "dependencies": {},
   "devDependencies": {
@@ -19,6 +19,6 @@
     "clear": "rm -rf build/contracts",
     "deployToRopsten": "rm -rf build && source ../testnet.env && source ../infura.env && truffle migrate --network ropsten",
     "deployToMainnet": "rm -rf build && source ../infura.env && truffle migrate --network mainnet",
-    "flatten": "scripts/flatten.sh"
+    "compile": "rm -rf build && truffle compile"
   }
 }

@@ -60,7 +60,7 @@ class WalletStats extends Basic {
     const score = mainStats.txs + mainStats.deployes + mainStats.execs
     const cls = score < 3 ? 'primary' : score < 5 ? 'warning' : 'danger'
 
-    const minimum = '0.' + (1 / parseFloat(as.price, 10)).toString().split('.')[1].substring(0, 4)
+    const minimum = '0.' + (1 / parseFloat(as.price.value, 10)).toString().split('.')[1].substring(0, 4)
 
     const lowBalance = <Alert bsStyle="danger">Balance too low. You need {minimum} ether to activate your
       tweedentity.</Alert>

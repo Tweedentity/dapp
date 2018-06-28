@@ -54,7 +54,7 @@ class Unset extends Basic {
     this.watcher.stop()
 
     const as = this.appState()
-    const ethPrice = as.price
+    const ethPrice = as.price.value
     const gasInfo = as.gasInfo
 
     if (ethPrice && gasInfo) {
@@ -151,7 +151,7 @@ class Unset extends Basic {
       return null
     }
 
-    const price = parseFloat(as.price, 10)
+    const price = parseFloat(as.price.value, 10)
     const gasPrice = as.gasInfo.safeLow * 1e8
     const gasLimit = 185e3
 
@@ -160,7 +160,7 @@ class Unset extends Basic {
 
     if (!state.started) {
 
-      const price = parseFloat(as.price, 10)
+      const price = parseFloat(as.price.value, 10)
       const gasPrice = as.gasInfo.safeLow * 1e8
       const gasLimit = 185e3
 

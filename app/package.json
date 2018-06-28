@@ -18,6 +18,7 @@
     "body-parser": "^1.18.3",
     "cheerio": "^1.0.0-rc.2",
     "cookie-parser": "~1.4.3",
+    "credits": "^2.1.0",
     "cron": "^1.2.1",
     "cross-env": "^1.0.8",
     "debug": "~2.6.3",

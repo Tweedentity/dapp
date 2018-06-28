@@ -11,7 +11,7 @@ class Signed extends Basic {
 
     for (let m of [
       'handleFocus',
-      'findTweet'
+      'findPost'
     ]) {
       this[m] = this[m].bind(this)
     }
@@ -28,7 +28,7 @@ class Signed extends Basic {
     event.target.select()
   }
 
-  findTweet() {
+  findPost() {
     this.setGlobalState({}, {
       loading: true,
       err: null
@@ -52,10 +52,9 @@ class Signed extends Basic {
         }
         const r = responseJson.result
 
-        if (r.tweetId) {
+        if (r.postId) {
           this.setGlobalState({
-            tweetId: r.tweetId,
-            gasInfo: responseJson.gasInfo
+            postId: r.postId
           }, {
             loading: false
           })
@@ -167,7 +166,7 @@ class Signed extends Basic {
                             text="I posted it, continue"
                             loadingText="Finding the post"
                             loading={as.loading}
-                            cmd={this.findTweet}
+                            cmd={this.findPost}
                           />
                         </p>
 

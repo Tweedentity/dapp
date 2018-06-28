@@ -1,0 +1,1009 @@
+{
+  "contractName": "StoreManagerCaller",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "manager",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_managerAddress",
+          "type": "address"
+        }
+      ],
+      "name": "setManager",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_id",
+          "type": "uint256"
+        },
+        {
+          "name": "_addr",
+          "type": "address"
+        },
+        {
+          "name": "_uid",
+          "type": "string"
+        }
+      ],
+      "name": "getUpgradability",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6060604052341561000f57600080fd5b6102978061001e6000396000f3006060604052600436106100565763ffffffff7c0100000000000000000000000000000000000000000000000000000000600035041663481c6a75811461005b578063d0ebdbe71461008a578063d9420a86146100ab575b600080fd5b341561006657600080fd5b61006e610122565b604051600160a060020a03909116815260200160405180910390f35b341561009557600080fd5b6100a9600160a060020a0360043516610131565b005b34156100b657600080fd5b610110600480359060248035600160a060020a0316919060649060443590810190830135806020601f8201819004810201604051908101604052818152929190602084018383808284375094965061016095505050505050565b60405190815260200160405180910390f35b600054600160a060020a031681565b6000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0392909216919091179055565b60008054600160a060020a031663d9420a8685858585604051602001526040517c010000000000000000000000000000000000000000000000000000000063ffffffff861602815260048101848152600160a060020a0384166024830152606060448301908152909160640183818151815260200191508051906020019080838360005b838110156101fc5780820151838201526020016101e4565b50505050905090810190601f1680156102295780820380516001836020036101000a031916815260200191505b50945050505050602060405180830381600087803b151561024957600080fd5b6102c65a03f1151561025a57600080fd5b5050506040518051959450505050505600a165627a7a723058203fc2f29e91a71a42991466f9a29687d3fc88fc9725a92157488e507955a663700029",
+  "deployedBytecode": "0x6060604052600436106100565763ffffffff7c0100000000000000000000000000000000000000000000000000000000600035041663481c6a75811461005b578063d0ebdbe71461008a578063d9420a86146100ab575b600080fd5b341561006657600080fd5b61006e610122565b604051600160a060020a03909116815260200160405180910390f35b341561009557600080fd5b6100a9600160a060020a0360043516610131565b005b34156100b657600080fd5b610110600480359060248035600160a060020a0316919060649060443590810190830135806020601f8201819004810201604051908101604052818152929190602084018383808284375094965061016095505050505050565b60405190815260200160405180910390f35b600054600160a060020a031681565b6000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0392909216919091179055565b60008054600160a060020a031663d9420a8685858585604051602001526040517c010000000000000000000000000000000000000000000000000000000063ffffffff861602815260048101848152600160a060020a0384166024830152606060448301908152909160640183818151815260200191508051906020019080838360005b838110156101fc5780820151838201526020016101e4565b50505050905090810190601f1680156102295780820380516001836020036101000a031916815260200191505b50945050505050602060405180830381600087803b151561024957600080fd5b6102c65a03f1151561025a57600080fd5b5050506040518051959450505050505600a165627a7a723058203fc2f29e91a71a42991466f9a29687d3fc88fc9725a92157488e507955a663700029",
+  "sourceMap": "162:525:11:-;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "162:525:11:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;195:27;;;;;;;;;;;;;;;-1:-1:-1;;;;;195:27:11;;;;;;;;;;;;;;227:102;;;;;;;;;;-1:-1:-1;;;;;227:102:11;;;;;;;529:155;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;529:155:11;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;529:155:11;;-1:-1:-1;529:155:11;;-1:-1:-1;;;;;;529:155:11;;;;;;;;;;;;;;;;195:27;;;-1:-1:-1;;;;;195:27:11;;:::o;227:102::-;285:7;:39;;-1:-1:-1;;285:39:11;-1:-1:-1;;;;;285:39:11;;;;;;;;;;227:102::o;529:155::-;618:4;637:7;;-1:-1:-1;;;;;637:7:11;:24;662:3;667:5;674:4;618;637:42;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;637:42:11;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;23:1:-1;8:100;33:3;30:1;27:2;8:100;;;99:1;94:3;90;84:5;71:3;;;64:6;52:2;45:3;8:100;;;12:14;3:109;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;529:155:11;-1:-1:-1;;;;;529:155:11:o",
+  "source": "pragma solidity ^0.4.18;\n\n\nimport '../StoreManager.sol';\n\n\n// This contract is for testing the StoreManager's methods\n// which are callable from other contracts\n\ncontract StoreManagerCaller {\n\n  StoreManager public manager;\n\n  function setManager(address _managerAddress) public {\n    manager = StoreManager(_managerAddress);\n  }\n\n  // callable methods\n  // Theoretically, there is no need to test them because the\n  // compiler with produce an error when calling any getter that\n  // tries to return not-allowed dynamic data\n\n  function getUpgradability(uint _id, address _addr, string _uid) public constant returns (uint) {\n    return manager.getUpgradability(_id, _addr, _uid);\n  }\n\n}\n",
+  "sourcePath": "/Users/sullof/Projects/tweedentity-dapp/store/contracts/helpers/StoreManagerCaller.sol",
+  "ast": {
+    "absolutePath": "/Users/sullof/Projects/tweedentity-dapp/store/contracts/helpers/StoreManagerCaller.sol",
+    "exportedSymbols": {
+      "StoreManagerCaller": [
+        8554
+      ]
+    },
+    "id": 8555,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 8519,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".18"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:11"
+      },
+      {
+        "absolutePath": "/Users/sullof/Projects/tweedentity-dapp/store/contracts/StoreManager.sol",
+        "file": "../StoreManager.sol",
+        "id": 8520,
+        "nodeType": "ImportDirective",
+        "scope": 8555,
+        "sourceUnit": 7930,
+        "src": "27:29:11",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 8554,
+        "linearizedBaseContracts": [
+          8554
+        ],
+        "name": "StoreManagerCaller",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 8522,
+            "name": "manager",
+            "nodeType": "VariableDeclaration",
+            "scope": 8554,
+            "src": "195:27:11",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_StoreManager_$7929",
+              "typeString": "contract StoreManager"
+            },
+            "typeName": {
+              "contractScope": null,
+              "id": 8521,
+              "name": "StoreManager",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 7929,
+              "src": "195:12:11",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_StoreManager_$7929",
+                "typeString": "contract StoreManager"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 8533,
+              "nodeType": "Block",
+              "src": "279:50:11",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 8531,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "id": 8527,
+                      "name": "manager",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 8522,
+                      "src": "285:7:11",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_StoreManager_$7929",
+                        "typeString": "contract StoreManager"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "arguments": [
+                        {
+                          "argumentTypes": null,
+                          "id": 8529,
+                          "name": "_managerAddress",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 8524,
+                          "src": "308:15:11",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        ],
+                        "id": 8528,
+                        "name": "StoreManager",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7929,
+                        "src": "295:12:11",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_StoreManager_$7929_$",
+                          "typeString": "type(contract StoreManager)"
+                        }
+                      },
+                      "id": 8530,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "295:29:11",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_StoreManager_$7929",
+                        "typeString": "contract StoreManager"
+                      }
+                    },
+                    "src": "285:39:11",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_StoreManager_$7929",
+                      "typeString": "contract StoreManager"
+                    }
+                  },
+                  "id": 8532,
+                  "nodeType": "ExpressionStatement",
+                  "src": "285:39:11"
+                }
+              ]
+            },
+            "id": 8534,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "setManager",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8525,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8524,
+                  "name": "_managerAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8534,
+                  "src": "247:23:11",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 8523,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "247:7:11",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "246:25:11"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 8526,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "279:0:11"
+            },
+            "scope": 8554,
+            "src": "227:102:11",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 8552,
+              "nodeType": "Block",
+              "src": "624:60:11",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 8547,
+                        "name": "_id",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 8536,
+                        "src": "662:3:11",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 8548,
+                        "name": "_addr",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 8538,
+                        "src": "667:5:11",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 8549,
+                        "name": "_uid",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 8540,
+                        "src": "674:4:11",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 8545,
+                        "name": "manager",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 8522,
+                        "src": "637:7:11",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_StoreManager_$7929",
+                          "typeString": "contract StoreManager"
+                        }
+                      },
+                      "id": 8546,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "getUpgradability",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 7763,
+                      "src": "637:24:11",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_view$_t_uint256_$_t_address_$_t_string_memory_ptr_$returns$_t_uint256_$",
+                        "typeString": "function (uint256,address,string memory) view external returns (uint256)"
+                      }
+                    },
+                    "id": 8550,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "637:42:11",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "functionReturnParameters": 8544,
+                  "id": 8551,
+                  "nodeType": "Return",
+                  "src": "630:49:11"
+                }
+              ]
+            },
+            "id": 8553,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "getUpgradability",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8541,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8536,
+                  "name": "_id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8553,
+                  "src": "555:8:11",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8535,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "555:4:11",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8538,
+                  "name": "_addr",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8553,
+                  "src": "565:13:11",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 8537,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "565:7:11",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8540,
+                  "name": "_uid",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8553,
+                  "src": "580:11:11",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string memory"
+                  },
+                  "typeName": {
+                    "id": 8539,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "580:6:11",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string storage pointer"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "554:38:11"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 8544,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8543,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8553,
+                  "src": "618:4:11",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8542,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "618:4:11",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "617:6:11"
+            },
+            "scope": 8554,
+            "src": "529:155:11",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 8555,
+        "src": "162:525:11"
+      }
+    ],
+    "src": "0:688:11"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/sullof/Projects/tweedentity-dapp/store/contracts/helpers/StoreManagerCaller.sol",
+    "exportedSymbols": {
+      "StoreManagerCaller": [
+        8554
+      ]
+    },
+    "id": 8555,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 8519,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".18"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:11"
+      },
+      {
+        "absolutePath": "/Users/sullof/Projects/tweedentity-dapp/store/contracts/StoreManager.sol",
+        "file": "../StoreManager.sol",
+        "id": 8520,
+        "nodeType": "ImportDirective",
+        "scope": 8555,
+        "sourceUnit": 7930,
+        "src": "27:29:11",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 8554,
+        "linearizedBaseContracts": [
+          8554
+        ],
+        "name": "StoreManagerCaller",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 8522,
+            "name": "manager",
+            "nodeType": "VariableDeclaration",
+            "scope": 8554,
+            "src": "195:27:11",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_StoreManager_$7929",
+              "typeString": "contract StoreManager"
+            },
+            "typeName": {
+              "contractScope": null,
+              "id": 8521,
+              "name": "StoreManager",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 7929,
+              "src": "195:12:11",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_StoreManager_$7929",
+                "typeString": "contract StoreManager"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 8533,
+              "nodeType": "Block",
+              "src": "279:50:11",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 8531,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "id": 8527,
+                      "name": "manager",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 8522,
+                      "src": "285:7:11",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_StoreManager_$7929",
+                        "typeString": "contract StoreManager"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "arguments": [
+                        {
+                          "argumentTypes": null,
+                          "id": 8529,
+                          "name": "_managerAddress",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 8524,
+                          "src": "308:15:11",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        ],
+                        "id": 8528,
+                        "name": "StoreManager",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7929,
+                        "src": "295:12:11",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_StoreManager_$7929_$",
+                          "typeString": "type(contract StoreManager)"
+                        }
+                      },
+                      "id": 8530,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "295:29:11",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_StoreManager_$7929",
+                        "typeString": "contract StoreManager"
+                      }
+                    },
+                    "src": "285:39:11",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_StoreManager_$7929",
+                      "typeString": "contract StoreManager"
+                    }
+                  },
+                  "id": 8532,
+                  "nodeType": "ExpressionStatement",
+                  "src": "285:39:11"
+                }
+              ]
+            },
+            "id": 8534,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "setManager",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8525,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8524,
+                  "name": "_managerAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8534,
+                  "src": "247:23:11",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 8523,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "247:7:11",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "246:25:11"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 8526,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "279:0:11"
+            },
+            "scope": 8554,
+            "src": "227:102:11",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 8552,
+              "nodeType": "Block",
+              "src": "624:60:11",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 8547,
+                        "name": "_id",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 8536,
+                        "src": "662:3:11",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 8548,
+                        "name": "_addr",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 8538,
+                        "src": "667:5:11",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 8549,
+                        "name": "_uid",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 8540,
+                        "src": "674:4:11",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 8545,
+                        "name": "manager",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 8522,
+                        "src": "637:7:11",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_StoreManager_$7929",
+                          "typeString": "contract StoreManager"
+                        }
+                      },
+                      "id": 8546,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "getUpgradability",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 7763,
+                      "src": "637:24:11",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_view$_t_uint256_$_t_address_$_t_string_memory_ptr_$returns$_t_uint256_$",
+                        "typeString": "function (uint256,address,string memory) view external returns (uint256)"
+                      }
+                    },
+                    "id": 8550,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "637:42:11",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "functionReturnParameters": 8544,
+                  "id": 8551,
+                  "nodeType": "Return",
+                  "src": "630:49:11"
+                }
+              ]
+            },
+            "id": 8553,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "getUpgradability",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 8541,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8536,
+                  "name": "_id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8553,
+                  "src": "555:8:11",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8535,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "555:4:11",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8538,
+                  "name": "_addr",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8553,
+                  "src": "565:13:11",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 8537,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "565:7:11",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8540,
+                  "name": "_uid",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8553,
+                  "src": "580:11:11",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string memory"
+                  },
+                  "typeName": {
+                    "id": 8539,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "580:6:11",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string storage pointer"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "554:38:11"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 8544,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8543,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8553,
+                  "src": "618:4:11",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8542,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "618:4:11",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "617:6:11"
+            },
+            "scope": 8554,
+            "src": "529:155:11",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 8555,
+        "src": "162:525:11"
+      }
+    ],
+    "src": "0:688:11"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.19+commit.c4cbbb05.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.0",
+  "updatedAt": "2018-06-28T05:08:54.912Z"
+}

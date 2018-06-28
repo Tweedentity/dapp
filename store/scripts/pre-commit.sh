@@ -19,4 +19,4 @@ else
 
 fi
 
-npm run flatten
+scripts/flatten.sh

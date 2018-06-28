@@ -4,11 +4,11 @@ const history = window.History = createHistory()
 const config = require('../config')
 
 const registryAbi = require(`../../../contracts/TweedentityRegistry`).abi
-const storeAbi = require(`../../../contracts/TweedentityStore`).abi
+const storeAbi = require(`../../../contracts/Store`).abi
 
-const managerAbi = require(`../../../contracts/TweedentityManager`).abi
+const managerAbi = require(`../../../contracts/StoreManager`).abi
 
-const claimerAbi = require(`../../../contracts/TweedentityClaimer`).abi
+const claimerAbi = require(`../../../contracts/OwnershipClaimer`).abi
 
 const {Modal, Button} = ReactBootstrap
 

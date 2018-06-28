@@ -55,8 +55,12 @@ class Account extends Basic {
           <LoadingButton
             text="Yes, please"
             loadingText="Analyzing wallet"
-            loading={as.loading}
-            cmd={this.props.getStats}
+            loading={as.loading && this.loading}
+            disabled={as.loading && !this.loading}
+            cmd={() => {
+              this.loading = true
+              this.props.getStats()
+            }}
           />
         </p>
       </span>

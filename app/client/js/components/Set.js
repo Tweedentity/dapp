@@ -135,7 +135,7 @@ class Set extends Basic {
     this.watcher.stop()
 
     const as = this.appState()
-    const ethPrice = as.price
+    const ethPrice = as.price.value
     const gasInfo = as.gasInfo
 
     if (ethPrice && gasInfo) {
@@ -223,8 +223,8 @@ class Set extends Basic {
         ]
 
         contracts.claimer.claimAccountOwnership(
-          'twitter',
-          this.getGlobalState('tweetId'),
+          this.getGlobalState('currentWebApp'),
+          this.getGlobalState('postId'),
           gasPrice,
           gasLimit,
           {
@@ -281,9 +281,9 @@ class Set extends Basic {
 
   setCost(price) {
     const as = this.appState()
-    if (as.price) {
+    if (as.price.value) {
       const gasPrice = price * 1e8
-      const ethPrice = parseFloat(as.price, 10)
+      const ethPrice = parseFloat(as.price.value, 10)
       const oraclizeCost = Math.round(1e7 / ethPrice)
       const gasLimitTx = 290e3
       const gasLimitOraclize = oraclizeCost + 170e3
@@ -314,6 +314,7 @@ class Set extends Basic {
     const as = this.appState()
 
     const state = as.data[this.shortWallet()]
+    const webApp = as.currentWebApp
 
     if (!state.started) {
 
@@ -321,6 +322,19 @@ class Set extends Basic {
       const sl = parseFloat(safeLow, 10)
       const average = this.formatFloat(as.gasInfo.average / 10, 1)
       const a = parseFloat(average, 10)
+
+      let userIdBlock =
+        webApp === 'twitter'
+          ? <span><span className="code">Uid:</span> <span
+            className="code success">{state.userId}</span></span>
+          : <span><span className="code">Uid:</span> <span
+            className="code success">{state.username}</span></span>
+
+      let note = webApp === 'twitter'
+        ? null
+        : <p>
+          <span style={{fontSize: '80%'}}>NOTE: For Reddit we are going to save the username in the blockchain instead of the user-id. This is fine because in Reddit the username is immutable.</span>
+        </p>
 
       return (
         <Grid>
@@ -336,11 +350,12 @@ class Set extends Basic {
                     adviced, after than you have created it, your Twitter user-id and your wallet will be publicly
                     associated.
                   </p>
-                  <p><span className="code">TwitterUserId:</span> <span
-                    className="code success">{state.userId}</span><br/>
+                  <p>
+                    {userIdBlock}<br/>
                     <span className="code">Wallet:</span> <span
-                      className="code success">{as.wallet}</span>
+                    className="code success">{as.wallet}</span>
                   </p>
+                  {note}
                 </Panel.Body>
               </Panel>
             </Col>
@@ -352,19 +367,23 @@ class Set extends Basic {
               <div style={{paddingTop: 24}}>
                 <Row>
                   <Col md={12}>
-                        <p><strong>Choose how much you like to spend</strong></p>
-                        <p>Based on <a href="https://ethgasstation.info" target="_blank">ETH Gas Station</a>, currently {
-                          sl != a
-                            ? <span>the safe low price is <strong>{safeLow} Gwei</strong> while the
+                    <p><strong>Choose how much you like to spend</strong></p>
+                    <p>Based on <a href="https://ethgasstation.info" target="_blank">ETH Gas Station</a>, currently {
+                      sl != a
+                        ? <span>the safe low price is <strong>{safeLow} Gwei</strong> while the
                       average price is <strong>{average} Gwei</strong></span>
-                            : <span>safe low and average price are <strong>{safeLow} Gwei</strong></span>
-                        }.
-                        </p>
-                    <p>Usually the average price is the best choice. Going lower than the safe low price can require hours to complete the set up. Prices higher than the average should complete the set up in a couple of minutes. Going too higher than the average is not very useful.</p>
+                        : <span>safe low and average price are <strong>{safeLow} Gwei</strong></span>
+                    }.
+                    </p>
+                    <p>Usually the average price is the best choice. Going lower than the safe low price can require
+                      hours to complete the set up. Prices higher than the average should complete the set up in a
+                      couple of minutes. Going too higher than the average is not very useful.</p>
                     {
                       a > 4
-                        ? <p>If you aren't in a rush and can wait a better moment to set up your tweedentity, you can save money because often the gas price is around 1 or 2 Gwei.</p>
-                      : null
+                        ?
+                        <p>If you aren't in a rush and can wait a better moment to set up your tweedentity, you can save
+                          money because often the gas price is around 1 or 2 Gwei.</p>
+                        : null
                     }
                   </Col>
                 </Row>
@@ -384,7 +403,7 @@ class Set extends Basic {
                   <Col md={12}>
                     {
                       as.err
-                        ? <p style={{ paddingTop: 12}}><BigAlert
+                        ? <p style={{paddingTop: 12}}><BigAlert
                           title={as.err}
                           message={as.errMessage}
                         /></p>
