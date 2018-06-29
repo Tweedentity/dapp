@@ -2,15 +2,11 @@
 
 cd api
 
-if [[ -n "$SKIP_TESTS" ]]
+if [[ -n "$SKIP" ]]
 then
-
-   echo "Skipping tests"
-
+   echo "Skipping api tests"
 else
-
   npm run test
-
   if [ $? -ne 0 ]; then
    echo "Tests must pass before commit!"
    exit 1
@@ -22,20 +18,15 @@ cd ../store
 rm -rf build
 truffle compile
 
-if [[ -n "$SKIP_TESTS" ]]
+if [[ -n "$SKIP" ]]
 then
-
-   echo "Skipping tests"
-
+   echo "Skipping store tests"
 else
-
     truffle test
-
     if [ $? -ne 0 ]; then
         echo "Tests must pass before commit!"
         exit 1
     fi
-
 fi
 
 scripts/flatten.sh
@@ -44,4 +35,4 @@ cd ..
 
 git add -A
 
-export SKIP_TESTS=
+export SKIP=
