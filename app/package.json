@@ -9,8 +9,7 @@
     "build": "webpack && bin/post-build.sh",
     "dev": "npm run build && export NODE_ENV=development && source ../.default.env && node . --redis-local",
     "local": "npm run build && docker/dev.sh",
-    "go": "git pull && npm run build && docker/node.sh",
-    "first": "ln -s ../store/build/contracts contracts && "
+    "go": "git pull && npm run build && docker/node.sh"
   },
   "dependencies": {
     "append-stream": "^1.2.2",

@@ -10,7 +10,7 @@ class LandingPage extends Basic {
   // }
 
   goToApp() {
-    location.href = `${location.protocol}//app.${location.host}/#/connecting`
+    location.href = `${location.protocol}//dapp.${location.host}/#/connecting`
   }
 
   render() {
@@ -164,7 +164,7 @@ class LandingPage extends Basic {
             <p><b><a target="_blank" href="https://github.com/tweedentity/store">Tweedentity
               Store</a></b><br/>A set of smart contract to verify and save the <i>tweedentity</i>.<br/>
               <em>Done.</em></p>
-            <p><b><a target="_blank" href="https://app.tweedentity.com">Tweedentity ÐApp</a></b><br/>A
+            <p><b><a target="_blank" href="https://dapp.tweedentity.com">Tweedentity ÐApp</a></b><br/>A
               decentralized app to set a tweedentity and remove an existent
               one. <br/><em>Done.</em></p>
             <p><b>Tweedentity.js</b><br/>A Javascript library for ÐApp developers. <br/>

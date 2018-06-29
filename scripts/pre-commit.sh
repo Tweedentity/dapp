@@ -43,3 +43,5 @@ scripts/flatten.sh
 cd ..
 
 git add -A
+
+export SKIP_TESTS=
