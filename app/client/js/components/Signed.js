@@ -33,7 +33,7 @@ class Signed extends Basic {
       loading: true,
       err: null
     })
-    return fetch(window.location.origin + `/api/scan-${this.getGlobalState('currentWebApp')}?r=` + Math.random(), {
+    return fetch(window.location.origin + `/api/scan/${this.appNickname()}?r=` + Math.random(), {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -74,19 +74,19 @@ class Signed extends Basic {
   render() {
 
     const as = this.appState()
-    const currentWebApp = this.getGlobalState('currentWebApp')
-    const webApp = currentWebApp === 'twitter' ? 'Twitter' : 'Reddit'
+    const appNickname = this.appNickname()
+    const appName = this.appName()
 
     const state = as.data[this.shortWallet()]
 
-    const webAppUrl = as.config.forPost[currentWebApp](state.post)
+    const appNicknameUrl = as.config.forPost[appNickname](state.post)
 
-    const sentence = webApp === 'Twitter'
+    const sentence = appName === 'Twitter'
     ? <p>Please, click the button to open Twitter in a new
-        tab. Tweedentity does not use the Twitter api, but you will be ready to post the signature using the Twitter intent.</p>
+        tab. Tweedentity does not use the Twitter api, but you will be ready to post the signature via the standard Twitter intent.<br/><span className="red smaller2">To avoid errors later in the process, don't add anything to the comment and don't post it to start a new thread.</span></p>
 
       : <p>Please, copy the signature and click the button to open Reddit in a new
-        tab. It will redirect you to a special post by Tweedentity. You can comment with the signature. Though, if you don't find the post or prefer to do otherwise, just post the signature on Reddit wherever you like.</p>
+        tab. It will redirect you to a special post by Tweedentity. You can comment with the signature. Though, if you don't find the post or prefer to do otherwise, just comment the signature on any Reddit thread.<br/><span className="red smaller2">To avoid errors later in the process, don't add anything to the comment and don't post it to start a new thread.</span></p>
 
     return (
       <Grid>
@@ -97,8 +97,8 @@ class Signed extends Basic {
               <Panel.Body>
                 <p><strong>Your signature is ready</strong></p>
                 {sentence}
-                <p>When you have done, come back here and continue.</p>
-                <p><i>Notice that after the verification is completed, you can cancel the post, if you like.</i></p>
+                <p>When you have done, come back and continue.</p>
+                <p><span style={{fontSize:'80%'}}>NOTE: after that the tweedentity has been set, you can cancel the post, if you like.</span></p>
                 <div style={{padding: 24}}>
                   <form>
                     <FormGroup
@@ -125,7 +125,7 @@ class Signed extends Basic {
                       }}
                       linkMessage="Input the username again"
                     />
-                    : as.err === 'Wrong post'
+                    : as.err === 'Post not found'
                     ? <BigAlert
                       title="Whoops"
                       message="No post with a valid signature was found."
@@ -155,11 +155,21 @@ class Signed extends Basic {
                           }}
                           linkMessage="Input the username again"
                         />
+                        : as.err !== null
+                          ? <BigAlert
+                            title="Whoops"
+                            message="There has been an error finding the post."
+                            link={() => {
+                              this.setGlobalState({}, {err: null})
+                              this.historyPush('get-username')
+                            }}
+                            linkMessage="Input the username again"
+                          />
                         : <p><a
-                          href={webAppUrl}
+                          href={appNicknameUrl}
                           target="_blank">
                           <Button bsStyle="primary">
-                            Open {webApp} now
+                            Open {appName} now
                           </Button></a>
                           <span className="spacer"></span>
                           <LoadingButton

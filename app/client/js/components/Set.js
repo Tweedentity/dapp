@@ -29,12 +29,13 @@ class Set extends Basic {
   }
 
   investigateNotUpgradability() {
+    const store = this.appNickname()+'Store'
     const upgradability = this.state.upgradability
     const wallet = this.appState().wallet
     const userId = this.getGlobalState('userId')
 
     if (upgradability === 1) {
-      this.props.app.contracts.twitterStore.getAddress(this.getGlobalState('userId'), (err, result) => {
+      this.props.app.contracts[store].getAddress(this.getGlobalState('userId'), (err, result) => {
         const address = result.valueOf()
         if (address.toLowerCase() != wallet.toLowerCase()) {
           this.setState({
@@ -44,9 +45,9 @@ class Set extends Basic {
       })
     } else {
 
-      this.props.app.contracts.twitterStore.getAddressLastUpdate(wallet, (err, result) => {
+      this.props.app.contracts[store].getAddressLastUpdate(wallet, (err, result) => {
         const addressLastUpdate = parseInt(result.valueOf(), 10)
-        this.props.app.contracts.twitterStore.getUidLastUpdate(this.getGlobalState('userId'), (err, result) => {
+        this.props.app.contracts[store].getUidLastUpdate(this.getGlobalState('userId'), (err, result) => {
           const uidLastUpdate = parseInt(result.valueOf(), 10)
           this.props.app.contracts.manager.minimumTimeBeforeUpdate((err, result) => {
             const minimumTimeBeforeUpdate = parseInt(result.valueOf(), 10)
@@ -67,7 +68,7 @@ class Set extends Basic {
   checkUpgradability() {
     const as = this.appState()
     const wallet = as.wallet
-    this.props.app.contracts.manager.getUpgradability(1, wallet, this.getGlobalState('userId'), (err, result) => {
+    this.props.app.contracts.manager.getUpgradability(this.appId(), wallet, this.getGlobalState('userId'), (err, result) => {
       const upgradability = parseInt(result.valueOf(), 10)
       this.setState({
         upgradability
@@ -176,7 +177,7 @@ class Set extends Basic {
 
         let callbackEvents = [
           {
-            event: contracts.twitterStore.IdentitySet,
+            event: contracts[this.appNickname()+'Store'].IdentitySet,
             filter: {addr: appState.wallet},
             callback: () => {
               this.setGlobalState({step: 3}, {warn: null})
@@ -223,7 +224,7 @@ class Set extends Basic {
         ]
 
         contracts.claimer.claimAccountOwnership(
-          this.getGlobalState('currentWebApp'),
+          this.appNickname(),
           this.getGlobalState('postId'),
           gasPrice,
           gasLimit,
@@ -314,7 +315,7 @@ class Set extends Basic {
     const as = this.appState()
 
     const state = as.data[this.shortWallet()]
-    const webApp = as.currentWebApp
+    const appNickname = this.appNickname()
 
     if (!state.started) {
 
@@ -324,13 +325,13 @@ class Set extends Basic {
       const a = parseFloat(average, 10)
 
       let userIdBlock =
-        webApp === 'twitter'
+        appNickname === 'twitter'
           ? <span><span className="code">Uid:</span> <span
             className="code success">{state.userId}</span></span>
           : <span><span className="code">Uid:</span> <span
             className="code success">{state.username}</span></span>
 
-      let note = webApp === 'twitter'
+      let note = appNickname === 'twitter'
         ? null
         : <p>
           <span style={{fontSize: '80%'}}>NOTE: For Reddit we are going to save the username in the blockchain instead of the user-id. This is fine because in Reddit the username is immutable.</span>
@@ -428,6 +429,13 @@ class Set extends Basic {
                       bsStyle="warning"
                       message={`The tweedentity is not upgradable because ${this.state.upgradabilityMessage}`}
                     /></p>
+                    <p>
+                      <Button
+                        onClick={() => {
+                          this.historyPush('welcome')
+                        }}
+                      >Go back to the dashboard</Button>
+                    </p>
                   </Col>
                 </Row>
                 : <Row>
@@ -438,6 +446,10 @@ class Set extends Basic {
                       message="The tweedentity looks not upgradable"
                       link={this.investigateNotUpgradability}
                       linkMessage="Find why"
+                      link2={() => {
+                        this.historyPush('welcome')
+                      }}
+                      link2Message="Go back to the dashboard"
                     /></p>
                   </Col>
                 </Row>
@@ -497,7 +509,9 @@ class Set extends Basic {
               {
                 state.step === 3
                   ?
-                  <p><Button style={{marginTop: 6}} bsStyle="success" onClick={this.goToProfile}>Go to your
+                  <p><Button style={{marginTop: 6}} bsStyle="success" onClick={() => {
+                    this.goToProfile()
+                  }}>Go to your
                     profile</Button>
                   </p>
                   : ''

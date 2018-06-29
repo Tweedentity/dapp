@@ -18,6 +18,14 @@ class Provider {
     fs.writeFileSync(path.resolve(__dirname, '../../log/log' + Math.random() + ".html"), src)
   }
 
+  scan(webApp, username, sig) {
+    if (webApp === 'twitter') {
+      return this.scanTweets(username, sig)
+    } else {
+      return this.scanRedditPosts(username, sig)
+    }
+  }
+
   scanTweets(username, sig) {
     sig = sig.split(' ')[0]
     let errorMessage
@@ -61,7 +69,7 @@ class Provider {
             } else if (someSigFound) {
               throw(errorMessage = 'Wrong signature')
             } else {
-              throw(errorMessage = 'Wrong tweet')
+              throw(errorMessage = 'Post not found')
             }
           }
         } else {
@@ -82,6 +90,14 @@ class Provider {
 
   saveFile(fn, str) {
     fs.writeFileSync(path.resolve(__dirname, '../../log', fn), str)
+  }
+
+  getUserId(webApp, username) {
+    if (webApp === 'twitter') {
+      return this.getTwitterUserId(username)
+    } else {
+      return this.getRedditUserId(username)
+    }
   }
 
   getTwitterUserId(username) {
@@ -201,6 +217,7 @@ class Provider {
                 throw(errorMessage = 'Wrong signature')
               }
             }
+            throw(errorMessage = 'Post not found')
           })
       })
       .catch((err) => {
@@ -231,14 +248,28 @@ class Provider {
           })
       })
       .catch((err) => {
-        console.log(err.statusCode)
-        console.log(err.message)
-        console.log(err)
         return Promise.resolve({
           error: errorMessage || 'User not found'
         })
       })
 
+  }
+
+  getDataFromRedditUsername(username) {
+    return this.getRedditUserId(username)
+      .then(data => {
+        data.result.username = data.result.sn
+        delete data.result.sn
+        return Promise.resolve(data)
+      })
+  }
+
+  getDataFromUserId(webApp, userId) {
+    if (webApp === 'twitter') {
+      return this.getDataFromTwitterUserId(userId)
+    } else {
+      return this.getDataFromRedditUsername(userId)
+    }
   }
 
   getDataFromTwitterUserId(userId) {
@@ -255,12 +286,14 @@ class Provider {
           let username = title[1].split(')')[0]
           let avatar = $('img.photo').attr('src')
 
+          const result = {
+            userId,
+            name,
+            username,
+            avatar
+          }
           return Promise.resolve({
-            result: {
-              name,
-              username,
-              avatar
-            }
+            result
           })
         } else {
           throw(errorMessage = 'User not found')

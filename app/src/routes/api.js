@@ -63,31 +63,12 @@ router.post('/get-txs', jsonParser, function (req, res, next) {
 })
 
 
-router.post('/scan-twitter', jsonParser, function (req, res, next) {
+router.post('/scan/:webApp', jsonParser, function (req, res, next) {
 
+  const webApp = req.params.webApp
   const provider = new Provider()
 
-  provider.scanTweets(req.body.username, req.body.sig)
-    .then(results => {
-      if (results.error) {
-        throw(new Error(results.error))
-      }
-      res.status(200).json(results)
-    })
-    .catch(err => {
-      console.log({error: err.message})
-
-      res.status(200).json({error: err.message})
-    })
-
-})
-
-
-router.post('/scan-reddit', jsonParser, function (req, res, next) {
-
-  const provider = new Provider()
-
-  provider.scanRedditPosts(req.body.username, req.body.sig)
+  provider.scan(webApp, req.body.username, req.body.sig)
     .then(results => {
       if (results.error) {
         throw(new Error(results.error))
@@ -135,11 +116,13 @@ router.post('/contract-abi', jsonParser, function (req, res, next) {
 
 })
 
-router.post('/twitter-user-id', jsonParser, function (req, res, next) {
 
+router.post('/user-id/:webApp', jsonParser, function (req, res, next) {
+
+  const webApp = req.params.webApp
   const provider = new Provider()
 
-  provider.getTwitterUserId(req.body.username)
+  provider.getUserId(webApp, req.body.username)
     .then(result => {
       res.status(200).json(result)
     })
@@ -149,25 +132,13 @@ router.post('/twitter-user-id', jsonParser, function (req, res, next) {
 
 })
 
-router.post('/reddit-user-id', jsonParser, function (req, res, next) {
 
+router.post('/data/:webApp', jsonParser, function (req, res, next) {
+
+  const webApp = req.params.webApp
   const provider = new Provider()
 
-  provider.getRedditUserId(req.body.username)
-    .then(result => {
-      res.status(200).json(result)
-    })
-    .catch(err => {
-      res.status(200).json({error: err.message})
-    })
-
-})
-
-router.post('/twitter-data', jsonParser, function (req, res, next) {
-
-  const provider = new Provider()
-
-  provider.getDataFromTwitterUserId(req.body.userId)
+  provider.getDataFromUserId(webApp, req.body.userId)
     .then(result => {
       res.status(200).json(result)
     })

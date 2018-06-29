@@ -4,7 +4,7 @@ const history = window.History = createHistory()
 const config = require('../config')
 
 const registryAbi = require(`../../../contracts/TweedentityRegistry`).abi
-const storeAbi = require(`../../../contracts/Store`).abi
+const storeAbi = require(`../../../contracts/Datastore`).abi
 
 const managerAbi = require(`../../../contracts/StoreManager`).abi
 
@@ -46,6 +46,7 @@ class App extends React.Component {
 
     this.state = {
       connected: -1,
+      connectionChecked: false,
       netId: null,
       err: null,
       loading: false,
@@ -91,6 +92,10 @@ class App extends React.Component {
 
   getNetwork() {
 
+    this.setState({
+      connectionChecked: false
+    })
+
     if (typeof web3 !== 'undefined') {
       console.log('Using web3 detected from external source like MetaMask')
 
@@ -102,14 +107,11 @@ class App extends React.Component {
         let env
 
         switch (netId) {
-          case '1':
-            env = 'main'
-            break
+          // case '1':
+          //   env = 'main'
+          //   break
           case '3':
             env = 'ropsten'
-            break
-          case '908077':
-            env = 'private'
             break
           default:
             this.setState({
@@ -127,23 +129,33 @@ class App extends React.Component {
           })
 
           const registry = this.web3js.eth.contract(registryAbi).at(config.registry.address[env])
-          registry.getStore('twitter', (err, store) => {
+          registry.getStore('twitter', (err, twitterStore) => {
 
-            this.contracts = {
-              registry,
-              twitterStore: this.web3js.eth.contract(storeAbi).at(store)
-            }
-            this.getEthInfo()
-            this.watchAccounts0()
-            setInterval(this.watchAccounts0, 1000)
-            this.getContracts()
+            registry.getStore('reddit', (err, redditStore) => {
+
+              this.contracts = {
+                registry,
+                twitterStore: this.web3js.eth.contract(storeAbi).at(twitterStore),
+                redditStore: this.web3js.eth.contract(storeAbi).at(redditStore)
+              }
+              this.getEthInfo()
+              this.watchAccounts0(true)
+              setInterval(this.watchAccounts0, 1000)
+              this.getContracts()
+            })
+          })
+        } else {
+          this.setState({
+            connectionChecked: true
           })
         }
-
       })
 
     } else {
       this.state.connected = 0
+      this.setState({
+        connectionChecked: true
+      })
     }
 
   }
@@ -197,7 +209,7 @@ class App extends React.Component {
       })
   }
 
-  watchAccounts0() {
+  watchAccounts0(setConnection) {
     const wallet = this.web3js.eth.accounts[0]
     if (this.state.wallet !== wallet) {
       this.setState({
@@ -214,6 +226,11 @@ class App extends React.Component {
           replace: true
         })
       }
+      if (setConnection) {
+        this.setState({
+          connectionChecked: true
+        })
+      }
     }
   }
 
@@ -222,44 +239,55 @@ class App extends React.Component {
     if (this.state.wallet) {
 
       let shortWallet = this.state.wallet.substring(0, 6)
-      this.contracts.twitterStore.getUid(this.state.wallet, (err, result) => {
 
-        if (result !== '') {
+      for (let appNickname of ['twitter', 'reddit']) {
 
-          let userId = typeof result === 'string' ? result : result.valueOf()
-          if (userId !== '') {
-            return fetch(window.location.origin + '/api/twitter-data?r=' + Math.random(), {
-              method: 'POST',
-              headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                network: this.state.netId,
-                userId
-              })
-            }).then(response => {
-              return response.json()
-            }).then(json => {
-              const {name, username, avatar} = json.result
-              this.db.set(shortWallet, {
-                twitter: {
+        const store = appNickname + 'Store'
+
+        this.contracts[store].getUid(this.state.wallet, (err, result) => {
+
+          let data = {}
+          data[appNickname] = {}
+
+          if (result !== '') {
+
+            let userId = typeof result === 'string' ? result : result.valueOf()
+            if (userId !== '') {
+              return fetch(window.location.origin + '/api/data/' + appNickname + '?r=' + Math.random(), {
+                method: 'POST',
+                headers: {
+                  Accept: 'application/json',
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  network: this.state.netId,
+                  userId
+                })
+              }).then(response => {
+                return response.json()
+              }).then(json => {
+                const {name, username, avatar, userId} = json.result
+                data[appNickname] = {
                   userId,
                   name,
                   username,
                   avatar
                 }
+
+                console.log(data)
+
+                this.db.put(shortWallet, data)
+              }).catch(function (ex) {
+                console.log('parsing failed', ex)
               })
-            }).catch(function (ex) {
-              console.log('parsing failed', ex)
-            })
+            }
+          } else {
+            this.db.put(shortWallet, data)
           }
-        } else {
-          this.db.put(shortWallet, {
-            twitter: {}
-          })
-        }
-      })
+        })
+      }
+
+
     }
   }
 

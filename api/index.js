@@ -20,7 +20,7 @@ app.get('/', (req, res) => {
 
 app.get('/twitter/:userId', (req, res) => {
 
-  db.get(`${req.params.userId}@twitter`, (error, result) => {
+  db.get(`${req.params.userId}@1`, (error, result) => {
     if (error) {
       console.log('Error:', error)
       res.status(400).json(error)
@@ -63,7 +63,7 @@ app.get('/twitter/:id/:address', (req, res) => {
                 const lastUpdate = Math.round(Date.now() / 1000)
                 db.put(`${userId}@1`, screenName, name, address, lastUpdate, (err) => {
                   if (err) {
-                    console.log('Error', err)
+                    console.log('Error')
                   }
                   respond(null, userId)
                 })
@@ -73,7 +73,7 @@ app.get('/twitter/:id/:address', (req, res) => {
           } else respond('no-tweet') // no tweet
         })
         .catch((err) => {
-          console.log('Error', err)
+          console.log('Error')
           respond('catch-error')
         })
   } else {
@@ -81,6 +81,21 @@ app.get('/twitter/:id/:address', (req, res) => {
   }
 
 })
+
+
+app.get('/reddit/:userId', (req, res) => {
+
+  console.log('${req.params.userId}@2', `${req.params.userId}@2`)
+  db.get(`${req.params.userId}@2`, (error, result) => {
+    if (error) {
+      console.log('Error:', error)
+      res.status(400).json(error)
+    } else {
+      res.jsonp(result)
+    }
+  })
+})
+
 
 
 app.get('/reddit/:id/:address', (req, res) => {
@@ -92,14 +107,14 @@ app.get('/reddit/:id/:address', (req, res) => {
 
   const {id, address} = req.params
 
-  if (id && /^\d{18,20}$/.test(id) && /^0x[0-9a-fA-F]{40}$/.test(address)) {
+  if (id && /^[a-z0-9_]{8,12}$/.test(id) && /^0x[0-9a-fA-F]{40}$/.test(address)) {
 
     superagent
         .get(`https://www.reddit.com/api/info.json?id=${id}`)
         .set('Accept', 'application/json')
-        .then(res => {
+        .then(result => {
 
-          let userData = res.body
+          let userData = result.body
 
           if (userData.error) {
             throw(respond('wrong-post'))
@@ -111,20 +126,20 @@ app.get('/reddit/:id/:address', (req, res) => {
               if (
                   elem.data
                   && elem.data.body
-                  && elem.data.author.toLowerCase() === id
               ) {
-                const data = utils.deconstructSignature(elem.data.body.split(' ')[0])
-                const {shortAddr, message, sig, signer, signame, version} = data
+                let username = elem.data.author.toLowerCase()
 
-                if (version === '1' && RegExp(`^${shortAddr}`, 'i').test(address) && /^\w+$/.test(id) && message === `reddit/${id}` && /^0x[0-9a-f]{130}/.test(sig)) {
+                let {shortAddr, message, sig, signer, signame, version} =
+                    utils.deconstructSignature(elem.data.body.split(' ')[0])
+
+                if (version === '1' && RegExp(`^${shortAddr}`, 'i').test(address) && message === `reddit/${elem.data.author}` && /^0x[0-9a-f]{130}/.test(sig)) {
 
                   if (utils.verify(address, message, sig, signer, signame)) {
                     const lastUpdate = Math.round(Date.now() / 1000)
-                    db.put(`${id}@2`, screenName, name, address, lastUpdate, (err) => {
-                      if (err) {
-                        console.log('Error', err)
-                      }
-                      respond(null, userId)
+
+                    console.log('${username}@2', `${username}@2`)
+                    db.put(`${username}@2`, elem.data.author, '', address, lastUpdate, (err) => {
+                      respond(null, username)
                     })
                   } else respond('wrong-sig') // wrong utils
                 } else respond('wrong-post') // wrong tweet
@@ -133,7 +148,7 @@ app.get('/reddit/:id/:address', (req, res) => {
           } else respond('wrong-post')
         })
         .catch((err) => {
-          console.log('Error', err)
+          console.log('Error')
           respond('catch-error')
         })
   } else {

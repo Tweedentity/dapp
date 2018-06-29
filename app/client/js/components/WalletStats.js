@@ -16,7 +16,7 @@ class WalletStats extends Basic {
       <span>
       <span className="code success">Balance: {stats.balance} ether</span><br/>
       <span className={'code ' + this.getColorClass(stats.txs)}>{stats.txs} transactions <a
-        href={this.getEtherscan(address, netId)} target="_blank"><i className="fa fa-link"></i></a></span><br/>
+        href={this.getEtherscan(address, netId)} target="_blank"><i className="fas fa-link"></i></a></span><br/>
       <span
         className={'code ' + this.getColorClass(stats.valueFrom)}>{stats.valueFrom} ether received from {stats.froms} addresses</span><br/>
       <span
