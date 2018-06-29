@@ -1,0 +1,26 @@
+{
+  "name": "tweedentity-dapp",
+  "version": "1.0.0",
+  "description": "The Tweedentity DApp",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "update-and-start": "scripts/update-and-start.sh",
+    "dapp-local": "(cd app && npm run local)"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tweedentity/dapp.git"
+  },
+  "keywords": [
+    "Ethereum",
+    "DApp",
+    "Blockchain",
+    "Identity"
+  ],
+  "author": "Francesco Sullo <francesco@sullo.co>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Tweedentity/dapp/issues"
+  },
+  "homepage": "https://tweedentity.com"
+}
