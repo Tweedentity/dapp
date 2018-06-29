@@ -34,7 +34,7 @@ class GetUsername extends Basic {
     this.setGlobalState({}, {
       loading: true
     })
-    return fetch(window.location.origin + `/api/${this.getGlobalState('currentWebApp')}-user-id?r=` + Math.random(), {
+    return fetch(window.location.origin + `/api/user-id/${this.appNickname()}?r=` + Math.random(), {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -78,15 +78,13 @@ class GetUsername extends Basic {
 
     const state = as.data[this.shortWallet()]
 
-    const webApp = as.currentWebApp === 'twitter' ? 'Twitter' : 'Reddit'
-
-    console.log(this.getGlobalState('currentWebApp'), as.config.decoration[this.getGlobalState('currentWebApp')])
+    const appName = this.appName()
 
     return (
       <Grid>
         <Row>
           <Col md={12}>
-            <h4 style={{padding: '0 15px 8px'}}>{webApp} Username</h4>
+            <h4 style={{padding: '0 15px 8px'}}>{appName} Username</h4>
             <Panel>
               <Panel.Body>
 
@@ -95,10 +93,10 @@ class GetUsername extends Basic {
                     controlId="formBasicText"
                     validationState={as.err ? 'error' : this.getValidationState()}
                   >
-                    <ControlLabel>Which is your {webApp} Username?</ControlLabel>
+                    <ControlLabel>Which is your {appName} Username?</ControlLabel>
 
                     <InputGroup>
-                      <InputGroup.Addon>{as.config.decoration[this.getGlobalState('currentWebApp')]}</InputGroup.Addon>
+                      <InputGroup.Addon>{as.config.decoration[this.appNickname()]}</InputGroup.Addon>
                       <FormControl
                         type="text"
                         value={state.value}
@@ -115,7 +113,7 @@ class GetUsername extends Basic {
                   </FormGroup>
                 </form>
                 <LoadingButton
-                  text={`Look up for ${webApp} user-id`}
+                  text={`Look up for ${appName} user-id`}
                   loadingText="Looking up"
                   loading={as.loading}
                   cmd={this.getUserId}

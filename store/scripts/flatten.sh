@@ -3,11 +3,11 @@
 rm flattened/*
 
 contracts=(
-"TwitterUidChecker"
-"RedditUidChecker"
-"TweedentityStore"
-"TweedentityManager"
-"TweedentityClaimer"
+"UidCheckerForTwitter"
+"UidCheckerForReddit"
+"Datastore"
+"StoreManager"
+"OwnershipClaimer"
 "TweedentityRegistry"
 )
 

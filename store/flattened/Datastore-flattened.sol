@@ -1,5 +1,17 @@
 pragma solidity ^0.4.18;
 
+// File: contracts/UidCheckerInterface.sol
+
+interface UidCheckerInterface {
+
+  function isUid(
+    string _uid
+  )
+  public
+  pure returns (bool);
+
+}
+
 // File: openzeppelin-solidity/contracts/ownership/Ownable.sol
 
 /**
@@ -81,26 +93,21 @@ contract HasNoEther is Ownable {
   }
 }
 
-// File: contracts/TweedentityStore.sol
-
-interface UidChecker {
-  function isUid(string _uid) public pure returns (bool);
-}
-
+// File: contracts/Datastore.sol
 
 /**
- * @title TweedentityStore
+ * @title Store
  * @author Francesco Sullo <francesco@sullo.co>
  * @dev It store the tweedentities related to the app
  */
 
 
 
-contract TweedentityStore
+contract Datastore
 is HasNoEther
 {
 
-  string public version = "1.5.0";
+  string public fromVersion = "1.0.0";
 
   uint public appId;
   string public appNickname;
@@ -110,7 +117,7 @@ is HasNoEther
   address public manager;
   address public newManager;
 
-  UidChecker public checker;
+  UidCheckerInterface public checker;
 
   struct Uid {
     string lastUid;
@@ -130,6 +137,24 @@ is HasNoEther
 
 
   // events
+
+
+  event AppSet(
+    string appNickname,
+    uint appId,
+    address checker
+  );
+
+
+  event ManagerSet(
+    address indexed manager,
+    bool isNew
+  );
+
+  event ManagerSwitch(
+    address indexed oldManager,
+    address indexed newManager
+  );
 
 
   event IdentitySet(
@@ -175,7 +200,7 @@ is HasNoEther
   onlyOwner
   {
     require(_address != address(0));
-    checker = UidChecker(_address);
+    checker = UidCheckerInterface(_address);
   }
 
 
@@ -191,6 +216,7 @@ is HasNoEther
   {
     require(_address != address(0));
     manager = _address;
+    ManagerSet(_address, false);
   }
 
 
@@ -206,6 +232,7 @@ is HasNoEther
   {
     require(_address != address(0) && manager != address(0));
     newManager = _address;
+    ManagerSet(_address, true);
   }
 
 
@@ -216,6 +243,8 @@ is HasNoEther
   external
   onlyOwner
   {
+    require(newManager != address(0));
+    ManagerSwitch(manager, newManager);
     manager = newManager;
     newManager = address(0);
   }
@@ -240,8 +269,9 @@ is HasNoEther
     require(bytes(_appNickname).length > 0);
     appId = _appId;
     appNickname = _appNickname;
-    checker = UidChecker(_checker);
+    checker = UidCheckerInterface(_checker);
     appSet = true;
+    AppSet(_appNickname, _appId, _checker);
   }
 
 

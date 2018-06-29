@@ -1,7 +1,7 @@
 
-const TwitterUidChecker = artifacts.require('./TwitterUidChecker.sol')
+const UidCheckerForTwitter = artifacts.require('./UidCheckerForTwitter.sol')
 
-contract('TwitterUidChecker', accounts => {
+contract('UidCheckerForTwitter', accounts => {
 
   let checker
 
@@ -10,7 +10,7 @@ contract('TwitterUidChecker', accounts => {
   }
 
   before(async () => {
-    checker = await TwitterUidChecker.new()
+    checker = await UidCheckerForTwitter.new()
   })
 
   it('should check the integrity of the uids', async () => {

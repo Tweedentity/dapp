@@ -4,9 +4,63 @@ pragma solidity ^0.4.18;
 import 'openzeppelin-solidity/contracts/ownership/HasNoEther.sol';
 
 
-contract Pausable {
+interface ManagerInterface {
 
-  bool public paused;
+  function paused()
+  public
+  constant returns (bool);
+
+
+  function claimer()
+  public
+  constant returns (address);
+
+  function totalStores()
+  public
+  constant returns (uint);
+
+
+  function getStoreAddress(
+    string _appNickname
+  )
+  external
+  constant returns (address);
+
+
+  function getStoreAddressById(
+    uint _appId
+  )
+  external
+  constant returns (address);
+
+
+  function isStoreActive(
+    uint _appId
+  )
+  public
+  constant returns (bool);
+
+}
+
+interface ClaimerInterface {
+
+  function manager()
+  public
+  constant returns (address);
+}
+
+
+interface StoreInterface {
+
+  function appSet()
+  public
+  constant returns (bool);
+
+
+  function manager()
+  public
+  constant returns (address);
+
 }
 
 
@@ -21,10 +75,7 @@ contract TweedentityRegistry
 is HasNoEther
 {
 
-  string public version = "1.4.0";
-
-  uint public totalStores;
-  mapping (bytes32 => address) private stores;
+  string public fromVersion = "1.0.0";
 
   address public manager;
   address public claimer;
@@ -39,7 +90,7 @@ is HasNoEther
   function setManager(
     address _manager
   )
-  external
+  public
   onlyOwner
   {
     require(_manager != address(0));
@@ -51,7 +102,7 @@ is HasNoEther
   function setClaimer(
     address _claimer
   )
-  external
+  public
   onlyOwner
   {
     require(_claimer != address(0));
@@ -67,28 +118,8 @@ is HasNoEther
   external
   onlyOwner
   {
-    require(_manager != address(0));
-    require(_claimer != address(0));
-    manager = _manager;
-    claimer = _claimer;
-    ContractRegistered(keccak256("manager"), "", _manager);
-    ContractRegistered(keccak256("claimer"), "", _claimer);
-  }
-
-
-  function setAStore(
-    string _appNickname,
-    address _store
-  )
-  external
-  onlyOwner
-  {
-    require(_store != address(0));
-    if (getStore(_appNickname) == address(0)) {
-      totalStores++;
-    }
-    stores[keccak256(_appNickname)] = _store;
-    ContractRegistered(keccak256("store"), _appNickname, _store);
+    setManager(_manager);
+    setClaimer(_claimer);
   }
 
 
@@ -100,21 +131,69 @@ is HasNoEther
     string _appNickname
   )
   public
-  constant returns(address)
+  constant returns (address)
   {
-    return stores[keccak256(_appNickname)];
+    ManagerInterface theManager = ManagerInterface(manager);
+    return theManager.getStoreAddress(_appNickname);
   }
 
+
+  // error codes
+
+  uint public allSet = 0;
+  uint public managerUnset = 10;
+  uint public claimerUnset = 20;
+  uint public wrongClaimerOrUnsetInManager = 30;
+  uint public wrongManagerOrUnsetInClaimer = 40;
+  uint public noStoresSet = 50;
+  uint public noStoreIsActive = 60;
+  uint public managerIsPaused = 70;
+  uint public managerNotSetInApp = 1000;
 
   /**
    * @dev Returns true if the registry looks ready
    */
   function isReady()
   external
-  constant returns(bool)
+  constant returns (uint)
   {
-    Pausable pausable = Pausable(manager);
-    return totalStores > 0 && manager != address(0) && claimer != address(0) && pausable.paused() == false;
+    if (manager == address(0)) {
+      return managerUnset;
+    }
+    if (claimer == address(0)) {
+      return claimerUnset;
+    }
+    ManagerInterface theManager = ManagerInterface(manager);
+    ClaimerInterface theClaimer = ClaimerInterface(claimer);
+    if (theManager.claimer() != claimer) {
+      return wrongClaimerOrUnsetInManager;
+    }
+    if (theClaimer.manager() != manager) {
+      return wrongManagerOrUnsetInClaimer;
+    }
+    uint totalStores = theManager.totalStores();
+    if (totalStores == 0) {
+      return noStoresSet;
+    }
+    bool atLeastOneIsActive;
+    for (uint i = 1; i <= totalStores; i++) {
+      StoreInterface theStore = StoreInterface(theManager.getStoreAddressById(i));
+      if (theManager.isStoreActive(i)) {
+        atLeastOneIsActive = true;
+      }
+      if (theManager.isStoreActive(i)) {
+        if (theStore.manager() != manager) {
+          return managerNotSetInApp + i;
+        }
+      }
+    }
+    if (atLeastOneIsActive == false) {
+      return noStoreIsActive;
+    }
+    if (theManager.paused() == true) {
+      return managerIsPaused;
+    }
+    return allSet;
   }
 
 }

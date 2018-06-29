@@ -9,11 +9,11 @@ describe('Utils', function () {
   let tweet2
 
 
-  describe('deconstructTweet', function () {
+  describe('deconstructSignature', function () {
 
     it('should deconstruct the tweets', () => {
 
-      tweet1 = utils.deconstructTweet(fixtures.web3.tweet)
+      tweet1 = utils.deconstructSignature(fixtures.web3.tweet)
 
       assert(tweet1.shortAddr === fixtures.web3.shortAddr)
       assert(tweet1.message === fixtures.web3.message)
@@ -23,7 +23,7 @@ describe('Utils', function () {
       assert(tweet1.signame === fixtures.web3.signame)
       assert(tweet1.version === fixtures.web3.version)
 
-      tweet2 = utils.deconstructTweet(fixtures.MEW.tweet)
+      tweet2 = utils.deconstructSignature(fixtures.MEW.tweet)
 
       assert(tweet2.shortAddr === fixtures.MEW.shortAddr)
       assert(tweet2.message === fixtures.MEW.message)

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+rm -rf build
+truffle compile
+
 if [[ -n "$SKIP_TESTS" ]]
 then
 
@@ -16,5 +19,4 @@ else
 
 fi
 
-npm run flatten
-git add flattened/*
+scripts/flatten.sh

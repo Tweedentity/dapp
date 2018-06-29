@@ -9,12 +9,42 @@ class Basic extends React.Component {
       'getGlobalState',
       'shortWallet',
       'historyPush',
-      'appState'
+      'appState',
+      'appNickname',
+      'appName',
+      'appId',
+      'appUid'
     ]) {
       this[m] = this[m].bind(this)
     }
     this.db = this.props.app.db
     this.web3js = this.props.app.web3js
+  }
+
+  appNickname() {
+    return this.getGlobalState('appNickname')
+  }
+
+  appId(webApp) {
+    if (!webApp) {
+      webApp = this.appNickname()
+    }
+    return this.appState().config.appId[webApp]
+  }
+
+  appName() {
+    return this.getGlobalState('appNickname') === 'twitter' ? 'Twitter' : 'Reddit'
+  }
+
+  appUid(data, webApp) {
+    if (!webApp) {
+      webApp = this.appNickname()
+    }
+    if (webApp === 'twitter') {
+      return data.userId
+    } else {
+      return data.username.toLowerCase()
+    }
   }
 
   appState() {
@@ -23,9 +53,9 @@ class Basic extends React.Component {
 
   getGlobalState(prop) {
     const as = this.appState()
-    const shortWallet = this.shortWallet()
     if (as.wallet) {
-      return as.data[shortWallet][prop]
+      const shortWallet = this.shortWallet()
+      return (as.data[shortWallet]||{})[prop]
     }
   }
 

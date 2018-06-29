@@ -24,19 +24,18 @@ class ManageAccount extends Basic {
   }
 
   checkUpgradability() {
+    const store = this.appNickname()+'Store'
     const wallet = this.appState().wallet
-    const userId = this.getGlobalState('twitter').userId
+    const userId = this.getGlobalState(this.appNickname()).userId
 
-    this.props.app.contracts.manager.getUpgradability(1, wallet, userId, (err, result) => {
+    this.props.app.contracts.manager.getUpgradability(this.appId(), wallet, userId, (err, result) => {
       let upgradability = parseInt(result.valueOf(), 10)
-
-      console.log('upgradability', upgradability)
 
       if (upgradability === 2) {
 
-        this.props.app.contracts.twitterStore.getAddressLastUpdate(wallet, (err, result) => {
+        this.props.app.contracts[store].getAddressLastUpdate(wallet, (err, result) => {
           const addressLastUpdate = parseInt(result.valueOf(), 10)
-          this.props.app.contracts.twitterStore.getUidLastUpdate(userId, (err, result) => {
+          this.props.app.contracts[store].getUidLastUpdate(userId, (err, result) => {
             const uidLastUpdate = parseInt(result.valueOf(), 10)
             this.props.app.contracts.manager.minimumTimeBeforeUpdate((err, result) => {
               const minimumTimeBeforeUpdate = parseInt(result.valueOf(), 10)
@@ -79,7 +78,7 @@ class ManageAccount extends Basic {
 
     const as = this.appState()
 
-    const twitter = as.data[this.shortWallet()].twitter
+    const data = as.data[this.shortWallet()][this.appNickname()]
 
     return (
       <Grid>
@@ -92,8 +91,9 @@ class ManageAccount extends Basic {
           <Col md={4}>
             <Account
               app={this.props.app}
-              icon="twitter"
-              data={twitter}
+              icon={this.appNickname()}
+              webApp={this.appNickname()}
+              data={data}
               active={true}
               noSettings={true}
               getStats={() => {
@@ -104,7 +104,7 @@ class ManageAccount extends Basic {
           <Col md={8}>
             <Panel>
               <Panel.Body>
-                <p><strong>Manage your  tweedentity</strong></p>
+                <p><strong>Manage your tweedentity</strong></p>
 
                 <p>Either if you want to delete your tweedentity or if you like to associate your wallet to another account, you must unset the current tweedentity.</p>
                   { this.state.timeNeed && this.state.timeNeed > 10

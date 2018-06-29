@@ -29,12 +29,13 @@ class Set extends Basic {
   }
 
   investigateNotUpgradability() {
+    const store = this.appNickname()+'Store'
     const upgradability = this.state.upgradability
     const wallet = this.appState().wallet
     const userId = this.getGlobalState('userId')
 
     if (upgradability === 1) {
-      this.props.app.contracts.twitterStore.getAddress(this.getGlobalState('userId'), (err, result) => {
+      this.props.app.contracts[store].getAddress(this.getGlobalState('userId'), (err, result) => {
         const address = result.valueOf()
         if (address.toLowerCase() != wallet.toLowerCase()) {
           this.setState({
@@ -44,9 +45,9 @@ class Set extends Basic {
       })
     } else {
 
-      this.props.app.contracts.twitterStore.getAddressLastUpdate(wallet, (err, result) => {
+      this.props.app.contracts[store].getAddressLastUpdate(wallet, (err, result) => {
         const addressLastUpdate = parseInt(result.valueOf(), 10)
-        this.props.app.contracts.twitterStore.getUidLastUpdate(this.getGlobalState('userId'), (err, result) => {
+        this.props.app.contracts[store].getUidLastUpdate(this.getGlobalState('userId'), (err, result) => {
           const uidLastUpdate = parseInt(result.valueOf(), 10)
           this.props.app.contracts.manager.minimumTimeBeforeUpdate((err, result) => {
             const minimumTimeBeforeUpdate = parseInt(result.valueOf(), 10)
@@ -67,7 +68,7 @@ class Set extends Basic {
   checkUpgradability() {
     const as = this.appState()
     const wallet = as.wallet
-    this.props.app.contracts.manager.getUpgradability(1, wallet, this.getGlobalState('userId'), (err, result) => {
+    this.props.app.contracts.manager.getUpgradability(this.appId(), wallet, this.getGlobalState('userId'), (err, result) => {
       const upgradability = parseInt(result.valueOf(), 10)
       this.setState({
         upgradability
@@ -135,7 +136,7 @@ class Set extends Basic {
     this.watcher.stop()
 
     const as = this.appState()
-    const ethPrice = as.price
+    const ethPrice = as.price.value
     const gasInfo = as.gasInfo
 
     if (ethPrice && gasInfo) {
@@ -176,7 +177,7 @@ class Set extends Basic {
 
         let callbackEvents = [
           {
-            event: contracts.twitterStore.IdentitySet,
+            event: contracts[this.appNickname()+'Store'].IdentitySet,
             filter: {addr: appState.wallet},
             callback: () => {
               this.setGlobalState({step: 3}, {warn: null})
@@ -223,8 +224,8 @@ class Set extends Basic {
         ]
 
         contracts.claimer.claimAccountOwnership(
-          'twitter',
-          this.getGlobalState('tweetId'),
+          this.appNickname(),
+          this.getGlobalState('postId'),
           gasPrice,
           gasLimit,
           {
@@ -281,9 +282,9 @@ class Set extends Basic {
 
   setCost(price) {
     const as = this.appState()
-    if (as.price) {
+    if (as.price.value) {
       const gasPrice = price * 1e8
-      const ethPrice = parseFloat(as.price, 10)
+      const ethPrice = parseFloat(as.price.value, 10)
       const oraclizeCost = Math.round(1e7 / ethPrice)
       const gasLimitTx = 290e3
       const gasLimitOraclize = oraclizeCost + 170e3
@@ -314,6 +315,7 @@ class Set extends Basic {
     const as = this.appState()
 
     const state = as.data[this.shortWallet()]
+    const appNickname = this.appNickname()
 
     if (!state.started) {
 
@@ -321,6 +323,19 @@ class Set extends Basic {
       const sl = parseFloat(safeLow, 10)
       const average = this.formatFloat(as.gasInfo.average / 10, 1)
       const a = parseFloat(average, 10)
+
+      let userIdBlock =
+        appNickname === 'twitter'
+          ? <span><span className="code">Uid:</span> <span
+            className="code success">{state.userId}</span></span>
+          : <span><span className="code">Uid:</span> <span
+            className="code success">{state.username}</span></span>
+
+      let note = appNickname === 'twitter'
+        ? null
+        : <p>
+          <span style={{fontSize: '80%'}}>NOTE: For Reddit we are going to save the username in the blockchain instead of the user-id. This is fine because in Reddit the username is immutable.</span>
+        </p>
 
       return (
         <Grid>
@@ -336,11 +351,12 @@ class Set extends Basic {
                     adviced, after than you have created it, your Twitter user-id and your wallet will be publicly
                     associated.
                   </p>
-                  <p><span className="code">TwitterUserId:</span> <span
-                    className="code success">{state.userId}</span><br/>
+                  <p>
+                    {userIdBlock}<br/>
                     <span className="code">Wallet:</span> <span
-                      className="code success">{as.wallet}</span>
+                    className="code success">{as.wallet}</span>
                   </p>
+                  {note}
                 </Panel.Body>
               </Panel>
             </Col>
@@ -352,19 +368,23 @@ class Set extends Basic {
               <div style={{paddingTop: 24}}>
                 <Row>
                   <Col md={12}>
-                        <p><strong>Choose how much you like to spend</strong></p>
-                        <p>Based on <a href="https://ethgasstation.info" target="_blank">ETH Gas Station</a>, currently {
-                          sl != a
-                            ? <span>the safe low price is <strong>{safeLow} Gwei</strong> while the
+                    <p><strong>Choose how much you like to spend</strong></p>
+                    <p>Based on <a href="https://ethgasstation.info" target="_blank">ETH Gas Station</a>, currently {
+                      sl != a
+                        ? <span>the safe low price is <strong>{safeLow} Gwei</strong> while the
                       average price is <strong>{average} Gwei</strong></span>
-                            : <span>safe low and average price are <strong>{safeLow} Gwei</strong></span>
-                        }.
-                        </p>
-                    <p>Usually the average price is the best choice. Going lower than the safe low price can require hours to complete the set up. Prices higher than the average should complete the set up in a couple of minutes. Going too higher than the average is not very useful.</p>
+                        : <span>safe low and average price are <strong>{safeLow} Gwei</strong></span>
+                    }.
+                    </p>
+                    <p>Usually the average price is the best choice. Going lower than the safe low price can require
+                      hours to complete the set up. Prices higher than the average should complete the set up in a
+                      couple of minutes. Going too higher than the average is not very useful.</p>
                     {
                       a > 4
-                        ? <p>If you aren't in a rush and can wait a better moment to set up your tweedentity, you can save money because often the gas price is around 1 or 2 Gwei.</p>
-                      : null
+                        ?
+                        <p>If you aren't in a rush and can wait a better moment to set up your tweedentity, you can save
+                          money because often the gas price is around 1 or 2 Gwei.</p>
+                        : null
                     }
                   </Col>
                 </Row>
@@ -384,7 +404,7 @@ class Set extends Basic {
                   <Col md={12}>
                     {
                       as.err
-                        ? <p style={{ paddingTop: 12}}><BigAlert
+                        ? <p style={{paddingTop: 12}}><BigAlert
                           title={as.err}
                           message={as.errMessage}
                         /></p>
@@ -409,6 +429,13 @@ class Set extends Basic {
                       bsStyle="warning"
                       message={`The tweedentity is not upgradable because ${this.state.upgradabilityMessage}`}
                     /></p>
+                    <p>
+                      <Button
+                        onClick={() => {
+                          this.historyPush('welcome')
+                        }}
+                      >Go back to the dashboard</Button>
+                    </p>
                   </Col>
                 </Row>
                 : <Row>
@@ -419,6 +446,10 @@ class Set extends Basic {
                       message="The tweedentity looks not upgradable"
                       link={this.investigateNotUpgradability}
                       linkMessage="Find why"
+                      link2={() => {
+                        this.historyPush('welcome')
+                      }}
+                      link2Message="Go back to the dashboard"
                     /></p>
                   </Col>
                 </Row>
@@ -478,7 +509,9 @@ class Set extends Basic {
               {
                 state.step === 3
                   ?
-                  <p><Button style={{marginTop: 6}} bsStyle="success" onClick={this.goToProfile}>Go to your
+                  <p><Button style={{marginTop: 6}} bsStyle="success" onClick={() => {
+                    this.goToProfile()
+                  }}>Go to your
                     profile</Button>
                   </p>
                   : ''

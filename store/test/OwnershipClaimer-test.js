@@ -1,10 +1,10 @@
 const assertRevert = require('./helpers/assertRevert')
 const eventWatcher = require('./helpers/EventWatcher')
 
-const TwitterUidChecker = artifacts.require('./TwitterUidChecker.sol')
-const TweedentityStore = artifacts.require('./TweedentityStore.sol')
-const TweedentityManager = artifacts.require('./TweedentityManager.sol')
-const TweedentityClaimer = artifacts.require('./TweedentityClaimer.sol')
+const UidCheckerForTwitter = artifacts.require('./UidCheckerForTwitter.sol')
+const Datastore = artifacts.require('./Datastore.sol')
+const StoreManager = artifacts.require('./StoreManager.sol')
+const OwnershipClaimer = artifacts.require('./OwnershipClaimer.sol')
 
 const Wait = require('./helpers/wait')
 const Counter = artifacts.require('./helpers/Counter')
@@ -14,14 +14,8 @@ const tweet = fixtures.tweets[0]
 
 const log = require('./helpers/log')
 
-function logValue(...x) {
-  for (let i = 0; i < x.length; i++) {
-    console.log(x[i].valueOf())
-  }
-}
 
-
-contract('TweedentityClaimer', accounts => {
+contract('OwnershipClaimer', accounts => {
 
   let twitterChecker
   let manager
@@ -34,10 +28,10 @@ contract('TweedentityClaimer', accounts => {
   let appId = 1
 
   before(async () => {
-    twitterChecker = await TwitterUidChecker.new()
-    store = await TweedentityStore.new()
-    manager = await TweedentityManager.new()
-    claimer = await TweedentityClaimer.new()
+    twitterChecker = await UidCheckerForTwitter.new()
+    store = await Datastore.new()
+    manager = await StoreManager.new()
+    claimer = await OwnershipClaimer.new()
 
     await store.setManager(manager.address)
     await store.setApp(appNickname, appId, twitterChecker.address)
@@ -48,7 +42,16 @@ contract('TweedentityClaimer', accounts => {
 
   it('should authorize the manager to handle the store', async () => {
     assert.equal(await claimer.owner(), accounts[0])
+    const fromBlock = web3.eth.blockNumber
     await manager.setClaimer(claimer.address)
+    await eventWatcher.watch(manager, {
+      event: 'ClaimerSet',
+      args: {
+        claimer: claimer.address
+      },
+      fromBlock,
+      toBlock: 'latest'
+    })
     assert.equal(await manager.claimer(), claimer.address)
   })
 
@@ -72,7 +75,16 @@ contract('TweedentityClaimer', accounts => {
   })
 
   it('should set the manager in the claimer', async () => {
+    const fromBlock = web3.eth.blockNumber
     await claimer.setManager(manager.address)
+    await eventWatcher.watch(claimer, {
+      event: 'ManagerSet',
+      args: {
+        manager: manager.address
+      },
+      fromBlock,
+      toBlock: 'latest'
+    })
     assert.equal(await claimer.managerAddress(), manager.address)
   })
 

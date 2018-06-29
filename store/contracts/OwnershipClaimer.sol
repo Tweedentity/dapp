@@ -4,23 +4,38 @@ pragma solidity ^0.4.18;
 import '../../ethereum-api/oraclizeAPI_0.5.sol';
 import 'openzeppelin-solidity/contracts/ownership/HasNoEther.sol';
 
-import './TweedentityManager.sol';
+interface ManagerInterface {
 
+  function getAppId(
+    string _appNickname
+  )
+  external
+  constant returns (uint);
+
+
+  function setIdentity(
+    uint _appId,
+    address _address,
+    string _uid
+  )
+  external;
+
+}
 
 
 /**
- * @title TweedentityClaimer
+ * @title OwnershipClaimer
  * @author Francesco Sullo <francesco@sullo.co>
  * @dev It allow user to self claim ownership of a supported web app account
  */
 
 
 
-contract TweedentityClaimer
+contract OwnershipClaimer
 is usingOraclize, HasNoEther
 {
 
-  string public version = "1.3.0";
+  string public fromVersion = "1.0.0";
 
   string public apiUrl = "https://api.tweedentity.net/";
 
@@ -31,12 +46,17 @@ is usingOraclize, HasNoEther
 
   mapping(bytes32 => TempData) internal __tempData;
 
-  TweedentityManager public manager;
+  ManagerInterface public manager;
   address public managerAddress;
 
 
 
   //events
+
+
+  event ManagerSet(
+    address indexed manager
+  );
 
 
   event VerificationStarted(
@@ -45,6 +65,7 @@ is usingOraclize, HasNoEther
     string appNickname,
     string postId
   );
+
 
   event VerificatioFailed(
     bytes32 indexed oraclizeId
@@ -75,7 +96,8 @@ is usingOraclize, HasNoEther
   {
     require(_address != address(0));
     managerAddress = _address;
-    manager = TweedentityManager(_address);
+    manager = ManagerInterface(_address);
+    ManagerSet(_address);
   }
 
 

@@ -3,10 +3,10 @@ const assertRevert = require('./helpers/assertRevert')
 
 const eventWatcher = require('./helpers/EventWatcher')
 
-const TwitterUidChecker = artifacts.require('./TwitterUidChecker.sol')
-const RedditUidChecker = artifacts.require('./RedditUidChecker.sol')
-const TweedentityStore = artifacts.require('./TweedentityStore.sol')
-const TweedentityStoreCaller = artifacts.require('./helpers/TweedentityStoreCaller')
+const UidCheckerForTwitter = artifacts.require('./UidCheckerForTwitter.sol')
+const UidCheckerForReddit = artifacts.require('./UidCheckerForReddit.sol')
+const Datastore = artifacts.require('./Datastore.sol')
+const StoreCaller = artifacts.require('./helpers/DatastoreCaller')
 
 const Wait = require('./helpers/wait')
 const Counter = artifacts.require('./helpers/Counter')
@@ -15,7 +15,7 @@ function now() {
   console.log(parseInt('' + Date.now() / 1000, 10), 'now')
 }
 
-contract('TweedentityStore', accounts => {
+contract('Datastore', accounts => {
 
   let twitterStore
   let storeCaller
@@ -39,11 +39,11 @@ contract('TweedentityStore', accounts => {
   }
 
   before(async () => {
-    twitterChecker = await TwitterUidChecker.new()
-    redditChecker = await RedditUidChecker.new()
-    twitterStore = await TweedentityStore.new()
-    redditStore = await TweedentityStore.new()
-    storeCaller = await TweedentityStoreCaller.new()
+    twitterChecker = await UidCheckerForTwitter.new()
+    redditChecker = await UidCheckerForReddit.new()
+    twitterStore = await Datastore.new()
+    redditStore = await Datastore.new()
+    storeCaller = await StoreCaller.new()
     await storeCaller.setStore(twitterStore.address)
     wait = (new Wait(await Counter.new())).wait
   })
@@ -57,7 +57,15 @@ contract('TweedentityStore', accounts => {
   })
 
   it('should authorize manager to handle the data', async () => {
-    await twitterStore.setManager(manager)
+    twitterStore.setManager(manager)
+    await eventWatcher.watch(twitterStore, {
+      event: 'ManagerSet',
+      args: {
+        manager
+      },
+      fromBlock: web3.eth.blockNumber,
+      toBlock: 'latest'
+    })
     assert.equal((await twitterStore.manager()), manager)
   })
 
@@ -66,7 +74,14 @@ contract('TweedentityStore', accounts => {
   })
 
   it('should declare the store', async () => {
-    await twitterStore.setApp('twitter', 1, twitterChecker.address)
+    twitterStore.setApp('twitter', 1, twitterChecker.address)
+    await eventWatcher.watch(twitterStore, {
+      event: 'AppSet',
+      args: {
+      },
+      fromBlock: web3.eth.blockNumber,
+      toBlock: 'latest'
+    })
     assert.equal(await twitterStore.getAppNickname(), web3.sha3('twitter'))
     assert.equal(await twitterStore.getAppId(), 1)
   })
@@ -74,7 +89,15 @@ contract('TweedentityStore', accounts => {
   it('should add a new identity with uid id1 for rita', async () => {
     assert.equal(await twitterStore.getAddress(id1), 0)
 
-    await twitterStore.setIdentity(rita, id1, {from: manager})
+    twitterStore.setIdentity(rita, id1, {from: manager})
+    await eventWatcher.watch(twitterStore, {
+      event: 'IdentitySet',
+      args: {
+        addr: rita
+      },
+      fromBlock: web3.eth.blockNumber,
+      toBlock: 'latest'
+    })
     assert.equal(await twitterStore.getAddress(id1), rita)
     assert.equal(await twitterStore.getUid(rita), id1)
     assert.equal(await twitterStore.identities(), 1)
@@ -96,17 +119,41 @@ contract('TweedentityStore', accounts => {
   })
 
   it('should associate now rita with the uid id2 and reverse after 1 second', async () => {
-    await twitterStore.setIdentity(rita, id2, {from: manager})
+    twitterStore.setIdentity(rita, id2, {from: manager})
+    await eventWatcher.watch(twitterStore, {
+      event: 'IdentitySet',
+      args: {
+        addr: rita
+      },
+      fromBlock: web3.eth.blockNumber,
+      toBlock: 'latest'
+    })
     assert.equal(await twitterStore.identities(), 1)
     assert.equal(await twitterStore.getUid(rita), id2)
 
-    await twitterStore.setIdentity(rita, id1, {from: manager})
+    twitterStore.setIdentity(rita, id1, {from: manager})
+    await eventWatcher.watch(twitterStore, {
+      event: 'IdentitySet',
+      args: {
+        addr: rita
+      },
+      fromBlock: web3.eth.blockNumber,
+      toBlock: 'latest'
+    })
     assert.equal(await twitterStore.identities(), 1)
     assert.equal(await twitterStore.getUid(rita), id1)
   })
 
   it('should associate id2 to alice', async () => {
-    await twitterStore.setIdentity(alice, id2, {from: manager})
+    twitterStore.setIdentity(alice, id2, {from: manager})
+    await eventWatcher.watch(twitterStore, {
+      event: 'IdentitySet',
+      args: {
+        addr: alice
+      },
+      fromBlock: web3.eth.blockNumber,
+      toBlock: 'latest'
+    })
     assert.equal(await twitterStore.identities(), 2)
   })
 
@@ -118,15 +165,30 @@ contract('TweedentityStore', accounts => {
   it('should allow manager to remove the identity for rita', async () => {
 
     assert.notEqual(await twitterStore.getUid(rita), 0)
-    await twitterStore.unsetIdentity(rita, {from: manager})
+    twitterStore.unsetIdentity(rita, {from: manager})
+    await eventWatcher.watch(twitterStore, {
+      event: 'IdentityUnset',
+      args: {
+        addr: rita
+      },
+      fromBlock: web3.eth.blockNumber,
+      toBlock: 'latest'
+    })
     assert.equal(await twitterStore.getUid(rita), '')
 
   })
 
   it('should allow bob to be associated to id1', async () => {
 
-    await twitterStore.setIdentity(bob, id1, {from: manager})
-
+    twitterStore.setIdentity(bob, id1, {from: manager})
+    await eventWatcher.watch(twitterStore, {
+      event: 'IdentitySet',
+      args: {
+        addr: bob
+      },
+      fromBlock: web3.eth.blockNumber,
+      toBlock: 'latest'
+    })
     assert.equal(await twitterStore.getUid(rita), 0)
     assert.equal(await twitterStore.getUid(bob), id1)
     assert.equal(await twitterStore.getAddress(id1), bob)
@@ -141,12 +203,26 @@ contract('TweedentityStore', accounts => {
   })
 
   it('should authorize manager to handle the reddit store', async () => {
-    await redditStore.setManager(manager)
+    redditStore.setManager(manager)
+    await eventWatcher.watch(redditStore, {
+      event: 'ManagerSet',
+      args: {
+        manager
+      },
+      fromBlock: web3.eth.blockNumber,
+      toBlock: 'latest'
+    })
     assert.equal((await redditStore.manager()), manager)
   })
 
   it('should declare the reddit store', async () => {
-    await redditStore.setApp('reddit', 2, redditChecker.address)
+    redditStore.setApp('reddit', 2, redditChecker.address)
+    await eventWatcher.watch(redditStore, {
+      event: 'AppSet',
+      args: {},
+      fromBlock: web3.eth.blockNumber,
+      toBlock: 'latest'
+    })
     assert.equal(await redditStore.getAppNickname(), web3.sha3('reddit'))
     assert.equal(await redditStore.getAppId(), 2)
   })
@@ -154,7 +230,15 @@ contract('TweedentityStore', accounts => {
   it('should add a new identity with uid id1 for rita', async () => {
     assert.equal(await redditStore.getAddress(id1), 0)
 
-    await redditStore.setIdentity(rita, id1, {from: manager})
+    redditStore.setIdentity(rita, id1, {from: manager})
+    await eventWatcher.watch(redditStore, {
+      event: 'IdentitySet',
+      args: {
+        addr: rita
+      },
+      fromBlock: web3.eth.blockNumber,
+      toBlock: 'latest'
+    })
     assert.equal(await redditStore.getAddress(id1), rita)
     assert.equal(await redditStore.getUid(rita), id1)
     assert.equal(await redditStore.identities(), 1)

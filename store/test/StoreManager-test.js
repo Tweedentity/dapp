@@ -2,17 +2,17 @@ const assertRevert = require('./helpers/assertRevert')
 const log = require('./helpers/log')
 const eventWatcher = require('./helpers/EventWatcher')
 
-const TwitterUidChecker = artifacts.require('./TwitterUidChecker.sol')
-const RedditUidChecker = artifacts.require('./RedditUidChecker.sol')
-const TweedentityStore = artifacts.require('./TweedentityStore.sol')
-const TweedentityManager = artifacts.require('./TweedentityManager.sol')
+const UidCheckerForTwitter = artifacts.require('./UidCheckerForTwitter.sol')
+const UidCheckerForReddit = artifacts.require('./UidCheckerForReddit.sol')
+const Datastore = artifacts.require('./Datastore.sol')
+const StoreManager = artifacts.require('./StoreManager.sol')
 
 const Wait = require('./helpers/wait')
 const Counter = artifacts.require('./helpers/Counter')
 
-const TweedentityManagerCaller = artifacts.require('./helpers/TweedentityManagerCaller')
+const StoreManagerCaller = artifacts.require('./helpers/StoreManagerCaller')
 
-contract('TweedentityManager', accounts => {
+contract('StoreManager', accounts => {
 
   let twitterChecker
   let redditChecker
@@ -54,15 +54,15 @@ contract('TweedentityManager', accounts => {
   }
 
   before(async () => {
-    twitterChecker = await TwitterUidChecker.new()
-    twitterStore = await TweedentityStore.new()
+    twitterChecker = await UidCheckerForTwitter.new()
+    twitterStore = await Datastore.new()
 
-    redditChecker = await RedditUidChecker.new()
-    redditStore = await TweedentityStore.new()
+    redditChecker = await UidCheckerForReddit.new()
+    redditStore = await Datastore.new()
 
-    manager = await TweedentityManager.new()
+    manager = await StoreManager.new()
 
-    managerCaller = await TweedentityManagerCaller.new()
+    managerCaller = await StoreManagerCaller.new()
 
     await twitterStore.setManager(manager.address)
     await twitterStore.setApp(twitterNickname, twitterId, twitterChecker.address)
@@ -81,9 +81,25 @@ contract('TweedentityManager', accounts => {
 
   it('should configure the manager', async () => {
 
-    await manager.setClaimer(claimer)
+    manager.setClaimer(claimer)
+    await eventWatcher.watch(manager, {
+      event: 'ClaimerSet',
+      args: {
+        claimer
+      },
+      fromBlock: web3.eth.blockNumber,
+      toBlock: 'latest'
+    })
     assert.equal(await manager.claimer(), claimer)
-    await manager.setCustomerService(customerService, true)
+    manager.setCustomerService(customerService, true)
+    await eventWatcher.watch(manager, {
+      event: 'CustomerServiceSet',
+      args: {
+        customerService
+      },
+      fromBlock: web3.eth.blockNumber,
+      toBlock: 'latest'
+    })
     const customerServiceAddress = (await manager.getCustomerServiceAddress()).valueOf()
     assert.isTrue(customerServiceAddress[0] == customerService)
 
@@ -96,7 +112,15 @@ contract('TweedentityManager', accounts => {
   it('should set the twitterStore', async () => {
     assert.equal(await manager.getAppId(twitterNickname), 0)
     assert.isFalse(await manager.isStoreSet(twitterNickname))
-    await manager.setAStore(twitterNickname, twitterStore.address)
+    manager.setAStore(twitterNickname, twitterStore.address)
+    await eventWatcher.watch(manager, {
+      event: 'StoreSet',
+      args: {
+        address: twitterStore.address
+      },
+      fromBlock: web3.eth.blockNumber,
+      toBlock: 'latest'
+    })
     assert.isTrue(await manager.isStoreSet(twitterNickname))
     assert.equal(await twitterStore.manager(), manager.address)
     assert.equal(await manager.getStoreAddress(twitterNickname), twitterStore.address)
@@ -146,7 +170,14 @@ contract('TweedentityManager', accounts => {
   })
 
   it('should change minimumTimeBeforeUpdate to 2 seconds', async () => {
-    await manager.changeMinimumTimeBeforeUpdate(2)
+    manager.changeMinimumTimeBeforeUpdate(2)
+    await eventWatcher.watch(manager, {
+      event: 'MinimumTimeBeforeUpdateChanged',
+      args: {
+      },
+      fromBlock: web3.eth.blockNumber,
+      toBlock: 'latest'
+    })
     assert.equal(await manager.minimumTimeBeforeUpdate(), 2)
   })
 
@@ -283,7 +314,7 @@ contract('TweedentityManager', accounts => {
   })
 
   it('should update the system using newManager instead of the current manager', async () => {
-    newManager = await TweedentityManager.new()
+    newManager = await StoreManager.new()
     assert.isFalse(await newManager.isStoreSet(twitterNickname))
 
     await newManager.setAStore(twitterNickname, twitterStore.address)

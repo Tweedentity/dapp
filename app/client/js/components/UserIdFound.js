@@ -22,7 +22,7 @@ class UserIdFound extends Basic {
       this[m] = this[m].bind(this)
     }
 
-    this.signKey = `${this.appState().wallet}:twitter:${this.getGlobalState('userId')}`
+    this.signKey = `${this.appState().wallet}:${this.appNickname()}:${this.getGlobalState('userId')}`
     this.validSig = this.appState().data[this.signKey]
   }
 
@@ -38,9 +38,9 @@ class UserIdFound extends Basic {
   useSig() {
     const as = this.appState()
     const sig = this.validSig
-    const webApp = this.getGlobalState('currentWebApp')
+    const appNickname = this.appNickname()
 
-    let post = `tweedentity(${as.wallet.substring(0, 6).toLowerCase()},${this.getGlobalState('currentWebApp')}/${this.getGlobalState('userId')},${sig},3,web3;1) ${as.config.account[webApp]}`
+    let post = `tweedentity(${as.wallet.substring(0, 6).toLowerCase()},${appNickname}/${appNickname === 'twitter' ? this.getGlobalState('userId') : this.getGlobalState('username').toLowerCase()},${sig},3,web3;1) ${as.config.account[appNickname]}`
     this.setGlobalState({
       post,
       sig: sig
@@ -98,24 +98,24 @@ class UserIdFound extends Basic {
     const wallet = as.wallet
 
     const data = as.data[this.shortWallet()]
-    const userUrl = `https://www.reddit.com/user/${data.sn}`
-    const decorator = data.currentWebApp === 'twitter' ? '@' : 'u/'
-    const webApp = data.currentWebApp === 'twitter' ? 'Twitter' : 'Reddit'
+    const appNickname = this.appNickname()
+    const appName = this.appName()
 
-    const sigStr = `${data.currentWebApp}/${data.userId}`
+    const sigStr = `${data.appNickname}/${appNickname === 'twitter' ? data.userId : data.username.toLowerCase()}`
 
     return (
       <Grid>
         <Row>
           <Col md={12}>
-            <h4 style={{padding: '0 15px 8px'}}>Your {webApp} data</h4>
+            <h4 style={{padding: '0 15px 8px'}}>Your {appName} data</h4>
           </Col>
         </Row>
         <Row>
           <Col md={4}>
             <Account
               app={this.props.app}
-              icon={data.currentWebApp}
+              icon={data.appNickname}
+              webApp={data.appNickname}
               data={data}
               active={true}
               noSettings={true}
@@ -125,7 +125,7 @@ class UserIdFound extends Basic {
             <Panel>
               <Panel.Body>
                 <p><strong>Post your signature</strong></p>
-                <p>To verify that you own this {webApp} account, you must publish a special post containing
+                <p>To verify that you own this {appName} account, you must publish a special post containing
                   the
                   cryptographic signature of the following string, using your current Ethereum address:</p>
                 <p><code>{sigStr}</code></p>

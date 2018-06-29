@@ -30,23 +30,26 @@ class Account extends Basic {
 
       if (data.userId) {
 
+        const idData = <p style={{paddingTop: 8}}>
+          <span className="code">{this.appName()} ID: {data.userId}<br/>
+          TID: {this.appId(this.props.webApp)}/{this.appUid(data, this.props.webApp)} </span>
+        </p>
+
         content = <span>
             <p>
               <img style={{borderRadius: 100}} src={data.avatar} width="120" height="120"/>
             </p>
             <p className="user-data">
               {data.name}<br/>
-              <a href={'https://twitter.com/' + data.username}
-                 target="_blank">{as.config.decoration[this.getGlobalState('currentWebApp')]}{data.username}</a>
+              <a href={this.appState().config.profileOnApp[this.props.webApp](data.username)}
+                 target="_blank">{as.config.decoration[this.appNickname()]}{data.username}</a>
             </p>
-            <p style={{paddingTop: 8}}>
-              <span className="code">ID: {data.userId}</span>
-            </p>
+          {idData}
           </span>
       } else {
         content = <span>
           <p>
-              <img style={{borderRadius: 100}} src={as.config.defaultAvatar[this.props.icon]} width="120" height="120"/>
+              <img style={{borderRadius: 100}} src="img/anonymous-avatar.png" width="120" height="120"/>
             </p>
         <p className="user-data">
         Ready to claim your tweedentity?
@@ -55,8 +58,12 @@ class Account extends Basic {
           <LoadingButton
             text="Yes, please"
             loadingText="Analyzing wallet"
-            loading={as.loading}
-            cmd={this.props.getStats}
+            loading={as.loading && this.loading}
+            disabled={as.loading && !this.loading}
+            cmd={() => {
+              this.loading = true
+              this.props.getStats()
+            }}
           />
         </p>
       </span>
@@ -66,9 +73,10 @@ class Account extends Basic {
       <Panel>
         <Panel.Body>
           <div className="account">
-            <i className={`fa fa-${this.props.icon} appIcon`}></i>
+            <i className={`fab fa-${this.props.icon} appIcon`}></i>
             {this.props.active && data.userId && !this.props.noSettings
               ? <i className="fa fa-cog settingsIcon command" onClick={() => {
+                this.setGlobalState({appNickname: this.props.webApp})
                 this.historyPush('manage-account')
               }}></i>
               : null}

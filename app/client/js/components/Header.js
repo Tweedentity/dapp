@@ -12,7 +12,7 @@ class Header extends Basic {
   }
 
   goHome() {
-    location.href = `${location.protocol}//${location.host.replace(/(d|)app\./,'')}/#/home`
+    location.href = `${location.protocol}//${location.host.replace(/(d|)app\./, '')}/#/home`
   }
 
 
@@ -24,36 +24,64 @@ class Header extends Basic {
 
   render() {
 
-    let dropDown
-
-    const ps = this.appState()
-    const wallet = ps.wallet
-    let twitter
-    try {
-      twitter = ps.data[wallet.substring(0,6)].twitter
-    } catch (e) {
+    let dropDown = {
+      anonymous: null,
+      twitter: null,
+      reddit: null
     }
+
+    const as = this.appState()
+    const wallet = as.wallet
 
     if (wallet) {
 
-      if (twitter && twitter.name) {
-        dropDown = <NavDropdown eventKey={3} title={<img src={twitter.avatar} className="tavatar circled"/>}
-                                id="basic-nav-dropdown" onSelect={this.execCommand}>
-          <li role="presentation">
-            <span><b className="tname">{twitter.name}</b><br/>
-              @{twitter.username}</span>
-          </li>
-          {/*<MenuItem divider/>*/}
-          {/*<MenuItem eventKey={2}>Profile</MenuItem>*/}
-        </NavDropdown>
-      } else {
-        dropDown = <Nav>
+      let exists = false
+      for (let webApp in dropDown) {
+        let data = this.getGlobalState(webApp)
+        if (data && data.username) {
+
+          let avatar = <i className={`fab fa-${webApp}`} style={{
+            fontSize: '180%',
+            color: '#ddd'
+          }}>
+            <img src={data.avatar} className="tavatar circled" style={{
+              marginLeft: 5
+            }}/>
+          </i>
+
+          dropDown[webApp] = <NavDropdown eventKey={3} title={avatar}
+                                          id="basic-nav-dropdown" onSelect={this.execCommand}>
+            <li role="presentation">
+            <span><b className="tname">{data.name || data.username}</b><br/>
+              <a href={this.appState().config.profileOnApp[webApp](data.username)}
+                 target="_blank">{this.appState().config.decoration[webApp]}{data.username}</a></span>
+            </li>
+            {/*<MenuItem divider/>*/}
+            {/*<MenuItem eventKey={2}>Profile</MenuItem>*/}
+          </NavDropdown>
+          exists = true
+        }
+      }
+      if (!exists) {
+        dropDown.anonymous = <Nav>
           <NavItem eventKey={1} href="#">
-            {'Wallet ' + this.appState().wallet.substring(0, 6) + ' (anonymous)'}
+            <span style={{color: '#888'}}>{'Wallet ' + this.appState().wallet.substring(0, 6) + ' (anonymous)'}</span>
           </NavItem>
         </Nav>
       }
     }
+
+    const section = as.hash ? as.hash.split('/')[1] : null
+    const dashboard =
+      section && section !== 'unconnected' && section !== 'welcome'
+      ? <Nav onSelect={() => {
+      this.historyPush('welcome')
+    }}>
+      <NavItem eventKey={1}>
+        <i className="fas fa-th"></i> Dashboard
+      </NavItem>
+    </Nav>
+      : null
 
     return (
       <div>
@@ -71,10 +99,14 @@ class Header extends Basic {
               />
             </Navbar.Brand>
             <Navbar.Toggle/>
+            {dashboard}
           </Navbar.Header>
           <Navbar.Collapse>
             <Nav pullRight>
-              {dropDown}
+
+              {dropDown.twitter}
+              {dropDown.reddit}
+              {dropDown.anonymous}
             </Nav>
           </Navbar.Collapse>
         </Navbar>

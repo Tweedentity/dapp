@@ -54,7 +54,7 @@ class Unset extends Basic {
     this.watcher.stop()
 
     const as = this.appState()
-    const ethPrice = as.price
+    const ethPrice = as.price.value
     const gasInfo = as.gasInfo
 
     if (ethPrice && gasInfo) {
@@ -66,9 +66,9 @@ class Unset extends Basic {
 
       this.web3js.eth.getBlockNumber((err, blockNumber) => {
 
-        let event = contracts.twitterStore.IdentityUnset
+        let event = contracts[this.appNickname()+'Store'].IdentityUnset
         if (typeof event === 'undefined') {
-          event = contracts.twitterStore.IdentityRemoved
+          event = contracts[this.appNickname()+'Store'].IdentityRemoved
         }
 
         let startEvents = [
@@ -84,7 +84,7 @@ class Unset extends Basic {
         ]
 
         contracts.manager.unsetMyIdentity(
-          1,
+          this.appId(),
           {
             value: 0,
             gas,
@@ -147,11 +147,11 @@ class Unset extends Basic {
 
     const state = as.data[this.shortWallet()]
 
-    if (!state.twitter || !state.twitter.userId) {
+    if (!state[this.appNickname()] || !state[this.appNickname()].username) {
       return null
     }
 
-    const price = parseFloat(as.price, 10)
+    const price = parseFloat(as.price.value, 10)
     const gasPrice = as.gasInfo.safeLow * 1e8
     const gasLimit = 185e3
 
@@ -160,7 +160,7 @@ class Unset extends Basic {
 
     if (!state.started) {
 
-      const price = parseFloat(as.price, 10)
+      const price = parseFloat(as.price.value, 10)
       const gasPrice = as.gasInfo.safeLow * 1e8
       const gasLimit = 185e3
 
@@ -172,6 +172,8 @@ class Unset extends Basic {
         gas: 255e3,
       }
 
+      const data = state[this.appNickname()]
+
       return (
         <Grid>
           <Row>
@@ -181,19 +183,19 @@ class Unset extends Basic {
                 <Panel.Body>
                   <p><strong>All is ready</strong></p>
                   <p>Your are going to unset the following tweedentity:</p>
-                  <p><span className="code">TwitterUserId:</span> <span
-                    className="code success">{state.twitter.userId}</span><br/>
+                  <p><span className="code">TID ({this.appName()}):</span> <span
+                    className="code success">{this.appId()}/{this.appUid(data)}</span><br/>
                     <span className="code">Wallet:</span> <span
                       className="code success">{as.wallet}</span>
                   </p>
-                  {
-                    as.err
-                      ? <p><BigAlert
-                        title={as.err}
-                        message={as.errMessage}
-                      /></p>
-                      : ''
-                  }
+                  {/*{*/}
+                    {/*as.err*/}
+                      {/*? <p><BigAlert*/}
+                        {/*title={as.err}*/}
+                        {/*message={as.errMessage}*/}
+                      {/*/></p>*/}
+                      {/*: ''*/}
+                  {/*}*/}
                   <p><LoadingButton
                     text={as.err ? 'Try again' : 'Unset it now!'}
                     loadingText="Starting transaction"

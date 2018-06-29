@@ -1,32 +1,206 @@
 pragma solidity ^0.4.18;
 
+// File: openzeppelin-solidity/contracts/ownership/Ownable.sol
 
-import 'openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
-import 'openzeppelin-solidity/contracts/ownership/HasNoEther.sol';
+/**
+ * @title Ownable
+ * @dev The Ownable contract has an owner address, and provides basic authorization control
+ * functions, this simplifies the implementation of "user permissions".
+ */
+contract Ownable {
+  address public owner;
 
-import './TweedentityStore.sol';
+
+  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+
+  /**
+   * @dev The Ownable constructor sets the original `owner` of the contract to the sender
+   * account.
+   */
+  function Ownable() public {
+    owner = msg.sender;
+  }
+
+  /**
+   * @dev Throws if called by any account other than the owner.
+   */
+  modifier onlyOwner() {
+    require(msg.sender == owner);
+    _;
+  }
+
+  /**
+   * @dev Allows the current owner to transfer control of the contract to a newOwner.
+   * @param newOwner The address to transfer ownership to.
+   */
+  function transferOwnership(address newOwner) public onlyOwner {
+    require(newOwner != address(0));
+    OwnershipTransferred(owner, newOwner);
+    owner = newOwner;
+  }
+
+}
+
+// File: openzeppelin-solidity/contracts/lifecycle/Pausable.sol
+
+/**
+ * @title Pausable
+ * @dev Base contract which allows children to implement an emergency stop mechanism.
+ */
+contract Pausable is Ownable {
+  event Pause();
+  event Unpause();
+
+  bool public paused = false;
+
+
+  /**
+   * @dev Modifier to make a function callable only when the contract is not paused.
+   */
+  modifier whenNotPaused() {
+    require(!paused);
+    _;
+  }
+
+  /**
+   * @dev Modifier to make a function callable only when the contract is paused.
+   */
+  modifier whenPaused() {
+    require(paused);
+    _;
+  }
+
+  /**
+   * @dev called by the owner to pause, triggers stopped state
+   */
+  function pause() onlyOwner whenNotPaused public {
+    paused = true;
+    Pause();
+  }
+
+  /**
+   * @dev called by the owner to unpause, returns to normal state
+   */
+  function unpause() onlyOwner whenPaused public {
+    paused = false;
+    Unpause();
+  }
+}
+
+// File: openzeppelin-solidity/contracts/ownership/HasNoEther.sol
+
+/**
+ * @title Contracts that should not own Ether
+ * @author Remco Bloemen <remco@2π.com>
+ * @dev This tries to block incoming ether to prevent accidental loss of Ether. Should Ether end up
+ * in the contract, it will allow the owner to reclaim this ether.
+ * @notice Ether can still be send to this contract by:
+ * calling functions labeled `payable`
+ * `selfdestruct(contract_address)`
+ * mining directly to the contract address
+*/
+contract HasNoEther is Ownable {
+
+  /**
+  * @dev Constructor that rejects incoming Ether
+  * @dev The `payable` flag is added so we can access `msg.value` without compiler warning. If we
+  * leave out payable, then Solidity will allow inheriting contracts to implement a payable
+  * constructor. By doing it this way we prevent a payable constructor from working. Alternatively
+  * we could use assembly to access msg.value.
+  */
+  function HasNoEther() public payable {
+    require(msg.value == 0);
+  }
+
+  /**
+   * @dev Disallows direct send by settings a default function without the `payable` flag.
+   */
+  function() external {
+  }
+
+  /**
+   * @dev Transfer all Ether held by the contract to the owner.
+   */
+  function reclaimEther() external onlyOwner {
+    assert(owner.send(this.balance));
+  }
+}
+
+// File: contracts/StoreManager.sol
+
+interface StoreInterface {
+
+  function getAppNickname()
+  external
+  constant returns (bytes32);
+
+
+  function getAppId()
+  external
+  constant returns (uint);
+
+
+  function getAddressLastUpdate(
+    address _address
+  )
+  external
+  constant returns (uint);
+
+
+  function isUpgradable(
+    address _address,
+    string _uid
+  )
+  public
+  constant returns (bool);
+
+
+  function isUid(
+    string _uid
+  )
+  public
+  view
+  returns (bool);
+
+
+  function setIdentity(
+    address _address,
+    string _uid
+  )
+  external;
+
+
+  function unsetIdentity(
+    address _address
+  )
+  external;
+
+}
 
 
 /**
- * @title TweedentityManager
+ * @title StoreManager
  * @author Francesco Sullo <francesco@sullo.co>
  * @dev Sets and removes tweedentities in the store,
  * adding more logic to the simple logic of the store
  */
 
 
-contract TweedentityManager
+contract StoreManager
 is Pausable, HasNoEther
 {
 
-  string public version = "1.5.0";
+  string public fromVersion = "1.0.0";
 
   struct Store {
-    TweedentityStore store;
+    StoreInterface store;
     address addr;
+    bool active;
   }
 
   mapping(uint => Store) private __stores;
+  uint public totalStores;
 
   mapping(uint => bytes32) public appNicknames32;
   mapping(uint => string) public appNicknames;
@@ -48,6 +222,36 @@ is Pausable, HasNoEther
   // events
 
 
+  event StoreSet(
+    string appNickname,
+    address indexed addr
+  );
+
+
+  event ClaimerSet(
+    address indexed claimer,
+    bool isNew
+  );
+
+
+  event StoreActive(
+    string appNickname,
+    address indexed store,
+    bool active
+  );
+
+
+  event ClaimerSwitch(
+    address indexed oldClaimer,
+    address indexed newClaimer
+  );
+
+
+  event CustomerServiceSet(
+    address indexed addr
+  );
+
+
   event IdentityNotUpgradable(
     string appNickname,
     address indexed addr,
@@ -55,6 +259,9 @@ is Pausable, HasNoEther
   );
 
 
+  event MinimumTimeBeforeUpdateChanged(
+    uint _newMinimumTime
+  );
 
   // config
 
@@ -74,7 +281,7 @@ is Pausable, HasNoEther
     require(bytes(_appNickname).length > 0);
     bytes32 _appNickname32 = keccak256(_appNickname);
     require(_address != address(0));
-    TweedentityStore _store = TweedentityStore(_address);
+    StoreInterface _store = StoreInterface(_address);
     require(_store.getAppNickname() == _appNickname32);
     uint _appId = _store.getAppId();
     require(appNicknames32[_appId] == 0x0);
@@ -83,9 +290,13 @@ is Pausable, HasNoEther
     __appIds[_appNickname] = _appId;
 
     __stores[_appId] = Store(
-      TweedentityStore(_address),
-      _address
+      _store,
+      _address,
+      true
     );
+    totalStores++;
+    StoreSet(_appNickname, _address);
+    StoreActive(_appNickname, _address, true);
   }
 
 
@@ -101,6 +312,7 @@ is Pausable, HasNoEther
   {
     require(_address != address(0));
     claimer = _address;
+    ClaimerSet(_address, false);
   }
 
 
@@ -116,6 +328,7 @@ is Pausable, HasNoEther
   {
     require(_address != address(0) && claimer != address(0));
     newClaimer = _address;
+    ClaimerSet(_address, true);
   }
 
 
@@ -126,6 +339,8 @@ is Pausable, HasNoEther
   external
   onlyOwner
   {
+    require(newClaimer != address(0));
+    ClaimerSwitch(claimer, newClaimer);
     claimer = newClaimer;
     newClaimer = address(0);
   }
@@ -155,6 +370,31 @@ is Pausable, HasNoEther
     if (!found) {
       __customerServiceAddress.push(_address);
     }
+    CustomerServiceSet(_address);
+  }
+
+
+
+  /**
+   * @dev Unable/disable a store
+   * @param _appNickname The store to be enabled/disabled
+   * @param _active A bool to unable (true) or disable (false)
+   */
+  function activateStore(
+    string _appNickname,
+    bool _active
+  )
+  public
+  onlyOwner
+  {
+    uint _appId = __appIds[_appNickname];
+    require(__stores[_appId].active != _active);
+    __stores[_appId] = Store(
+      __stores[_appId].store,
+      __stores[_appId].addr,
+      _active
+    );
+    StoreActive(_appNickname, __stores[_appId].addr, _active);
   }
 
 
@@ -190,7 +430,7 @@ is Pausable, HasNoEther
     uint _appId
   )
   internal
-  constant returns (TweedentityStore)
+  constant returns (StoreInterface)
   {
     return __stores[_appId].store;
   }
@@ -201,7 +441,7 @@ is Pausable, HasNoEther
 
 
   function isAddressUpgradable(
-    TweedentityStore _store,
+    StoreInterface _store,
     address _address
   )
   internal
@@ -213,7 +453,7 @@ is Pausable, HasNoEther
 
 
   function isUpgradable(
-    TweedentityStore _store,
+    StoreInterface _store,
     address _address,
     string _uid
   )
@@ -258,6 +498,19 @@ is Pausable, HasNoEther
 
 
   /**
+   * @dev Allows other contracts to check if a store is active
+   * @param _appId The id of a configured app
+   */
+  function isStoreActive(
+    uint _appId
+  )
+  public
+  constant returns (bool){
+    return __stores[_appId].active;
+  }
+
+
+  /**
    * @dev Return a numeric code about the upgradability of a couple wallet-uid in a certain app
    * @param _appId The id of the app
    * @param _address The address of the wallet
@@ -271,7 +524,7 @@ is Pausable, HasNoEther
   external
   constant returns (uint)
   {
-    TweedentityStore _store = __getStore(_appId);
+    StoreInterface _store = __getStore(_appId);
     if (!_store.isUpgradable(_address, _uid)) {
       return notUpgradableInStore;
     } else if (!isAddressUpgradable(_store, _address)) {
@@ -292,6 +545,19 @@ is Pausable, HasNoEther
   external
   constant returns (address) {
     return __stores[__appIds[_appNickname]].addr;
+  }
+
+
+  /**
+   * @dev Returns the address of a store
+   * @param _appId The app id
+   */
+  function getStoreAddressById(
+    uint _appId
+  )
+  external
+  constant returns (address) {
+    return __stores[_appId].addr;
   }
 
 
@@ -327,7 +593,7 @@ is Pausable, HasNoEther
   {
     require(_address != address(0));
 
-    TweedentityStore _store = __getStore(_appId);
+    StoreInterface _store = __getStore(_appId);
     require(_store.isUid(_uid));
 
     if (isUpgradable(_store, _address, _uid)) {
@@ -352,7 +618,7 @@ is Pausable, HasNoEther
   whenStoreSet(_appId)
   whenNotPaused
   {
-    TweedentityStore _store = __getStore(_appId);
+    StoreInterface _store = __getStore(_appId);
     _store.unsetIdentity(_address);
   }
 
@@ -368,7 +634,7 @@ is Pausable, HasNoEther
   whenStoreSet(_appId)
   whenNotPaused
   {
-    TweedentityStore _store = __getStore(_appId);
+    StoreInterface _store = __getStore(_appId);
     _store.unsetIdentity(msg.sender);
   }
 
@@ -384,6 +650,7 @@ is Pausable, HasNoEther
   onlyOwner
   {
     minimumTimeBeforeUpdate = _newMinimumTime;
+    MinimumTimeBeforeUpdateChanged(_newMinimumTime);
   }
 
 }

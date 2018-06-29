@@ -1,19 +1,32 @@
 pragma solidity ^0.4.18;
 
-// File: contracts/RedditUidChecker.sol
+// File: contracts/UidCheckerInterface.sol
+
+interface UidCheckerInterface {
+
+  function isUid(
+    string _uid
+  )
+  public
+  pure returns (bool);
+
+}
+
+// File: contracts/UidCheckerForReddit.sol
 
 /**
- * @title RedditUidChecker
+ * @title UidCheckerForReddit
  * @author Francesco Sullo <francesco@sullo.co>
  * @dev Checks if a uid is a Reddit uid
  */
 
 
 
-contract RedditUidChecker
+contract UidCheckerForReddit
+is UidCheckerInterface
 {
 
-  string public version = "1.5.0";
+  string public fromVersion = "1.0.0";
 
   function isUid(
     string _uid
@@ -30,7 +43,7 @@ contract RedditUidChecker
         if (!(
         uid[i] == 45 || uid[i] == 95
         || (uid[i] >= 48 && uid[i] <= 57)
-        // it requires lowercases, to avoid conflicts
+        // it requires lowercases, to not risk conflicts
         // even if Reddit allows lower and upper cases
         || (uid[i] >= 97 && uid[i] <= 122)
         )) {

@@ -1,11 +1,11 @@
-const TweedentityStore = artifacts.require("./TweedentityStore")
-const TweedentityManager = artifacts.require("./TweedentityManager")
-const TweedentityClaimer = artifacts.require("./TweedentityClaimer")
+const Datastore = artifacts.require("./Datastore")
+const StoreManager = artifacts.require("./StoreManager")
+const OwnershipClaimer = artifacts.require("./OwnershipClaimer")
 const TweedentityRegistry = artifacts.require("./TweedentityRegistry")
 
 module.exports = function(deployer) {
-  deployer.deploy(TweedentityStore)
-  deployer.deploy(TweedentityManager)
-  deployer.deploy(TweedentityClaimer)
+  deployer.deploy(Datastore)
+  deployer.deploy(StoreManager)
+  deployer.deploy(OwnershipClaimer)
   deployer.deploy(TweedentityRegistry)
 }

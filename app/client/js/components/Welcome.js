@@ -143,11 +143,12 @@ class Welcome extends Basic {
               <Account
                 app={this.props.app}
                 icon="twitter"
+                webApp="twitter"
                 data={twitter}
                 active={true}
                 getStats={() => {
                   this.setGlobalState({
-                    currentWebApp: 'twitter'
+                    appNickname: 'twitter'
                   })
                   this.getStats(as, walletAlreadyUsed)
                 }}
@@ -157,11 +158,12 @@ class Welcome extends Basic {
               <Account
                 app={this.props.app}
                 icon="reddit"
+                webApp="reddit"
                 data={reddit}
                 active={true}
                 getStats={() => {
                   this.setGlobalState({
-                    currentWebApp: 'reddit'
+                    appNickname: 'reddit'
                   })
                   this.getStats(as, walletAlreadyUsed)
                 }}
@@ -171,26 +173,29 @@ class Welcome extends Basic {
               <Account
                 app={this.props.app}
                 icon="github"
+                webApp="github"
                 active={false}
               />
             </Col>
           </Row>
-          <Row>
-            <Col md={4}>
-              <Account
-                app={this.props.app}
-                icon="facebook"
-                active={false}
-              />
-            </Col>
-            <Col md={4}>
-              <Account
-                app={this.props.app}
-                icon="google"
-                active={false}
-              />
-            </Col>
-          </Row>
+          {/*<Row>*/}
+            {/*<Col md={4}>*/}
+              {/*<Account*/}
+                {/*app={this.props.app}*/}
+                {/*webApp="facebook"*/}
+                {/*icon="facebook"*/}
+                {/*active={false}*/}
+              {/*/>*/}
+            {/*</Col>*/}
+            {/*<Col md={4}>*/}
+              {/*<Account*/}
+                {/*app={this.props.app}*/}
+                {/*icon="google"*/}
+                {/*webApp="google"*/}
+                {/*active={false}*/}
+              {/*/>*/}
+            {/*</Col>*/}
+          {/*</Row>*/}
         </Grid>
       )
 

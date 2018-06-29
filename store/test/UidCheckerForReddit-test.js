@@ -1,7 +1,7 @@
 
-const RedditUidChecker = artifacts.require('./RedditUidChecker.sol')
+const UidCheckerForReddit = artifacts.require('./UidCheckerForReddit.sol')
 
-contract('RedditUidChecker', accounts => {
+contract('UidCheckerForReddit', accounts => {
 
   let checker
 
@@ -10,7 +10,7 @@ contract('RedditUidChecker', accounts => {
   }
 
   before(async () => {
-    checker = await RedditUidChecker.new()
+    checker = await UidCheckerForReddit.new()
   })
 
   it('should check the integrity of the uids', async () => {

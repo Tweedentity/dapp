@@ -16,7 +16,7 @@ class WalletStats extends Basic {
       <span>
       <span className="code success">Balance: {stats.balance} ether</span><br/>
       <span className={'code ' + this.getColorClass(stats.txs)}>{stats.txs} transactions <a
-        href={this.getEtherscan(address, netId)} target="_blank"><i className="fa fa-link"></i></a></span><br/>
+        href={this.getEtherscan(address, netId)} target="_blank"><i className="fas fa-link"></i></a></span><br/>
       <span
         className={'code ' + this.getColorClass(stats.valueFrom)}>{stats.valueFrom} ether received from {stats.froms} addresses</span><br/>
       <span
@@ -60,7 +60,7 @@ class WalletStats extends Basic {
     const score = mainStats.txs + mainStats.deployes + mainStats.execs
     const cls = score < 3 ? 'primary' : score < 5 ? 'warning' : 'danger'
 
-    const minimum = '0.' + (1 / parseFloat(as.price, 10)).toString().split('.')[1].substring(0, 4)
+    const minimum = '0.' + (1 / parseFloat(as.price.value, 10)).toString().split('.')[1].substring(0, 4)
 
     const lowBalance = <Alert bsStyle="danger">Balance too low. You need {minimum} ether to activate your
       tweedentity.</Alert>
