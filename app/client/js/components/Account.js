@@ -59,7 +59,7 @@ class Account extends Basic {
             text="Yes, please"
             loadingText="Analyzing wallet"
             loading={as.loading && this.loading}
-            disabled={as.loading && !this.loading}
+            disabled={as.ready === 0 || (as.loading && !this.loading)}
             cmd={() => {
               this.loading = true
               this.props.getStats()
@@ -74,7 +74,7 @@ class Account extends Basic {
         <Panel.Body>
           <div className="account">
             <i className={`fab fa-${this.props.icon} appIcon`}></i>
-            {this.props.active && data.userId && !this.props.noSettings
+            {as.ready === 1 && this.props.active && data.userId && !this.props.noSettings
               ? <i className="fa fa-cog settingsIcon command" onClick={() => {
                 this.setGlobalState({appNickname: this.props.webApp})
                 this.historyPush('manage-account')

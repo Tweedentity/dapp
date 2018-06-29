@@ -4,7 +4,7 @@ import Basic from './Basic'
 import EventWatcher from '../utils/EventWatcher'
 import BigAlert from './extras/BigAlert'
 
-const {Panel, Grid, Row, Col, Button} = ReactBootstrap
+const {Panel, Grid, Row, Col, Button, Badge} = ReactBootstrap
 
 
 class Unset extends Basic {
@@ -66,9 +66,9 @@ class Unset extends Basic {
 
       this.web3js.eth.getBlockNumber((err, blockNumber) => {
 
-        let event = contracts[this.appNickname()+'Store'].IdentityUnset
+        let event = contracts[this.appNickname() + 'Store'].IdentityUnset
         if (typeof event === 'undefined') {
-          event = contracts[this.appNickname()+'Store'].IdentityRemoved
+          event = contracts[this.appNickname() + 'Store'].IdentityRemoved
         }
 
         let startEvents = [
@@ -189,12 +189,12 @@ class Unset extends Basic {
                       className="code success">{as.wallet}</span>
                   </p>
                   {/*{*/}
-                    {/*as.err*/}
-                      {/*? <p><BigAlert*/}
-                        {/*title={as.err}*/}
-                        {/*message={as.errMessage}*/}
-                      {/*/></p>*/}
-                      {/*: ''*/}
+                  {/*as.err*/}
+                  {/*? <p><BigAlert*/}
+                  {/*title={as.err}*/}
+                  {/*message={as.errMessage}*/}
+                  {/*/></p>*/}
+                  {/*: ''*/}
                   {/*}*/}
                   <p><LoadingButton
                     text={as.err ? 'Try again' : 'Unset it now!'}
@@ -263,8 +263,19 @@ class Unset extends Basic {
               {
                 state.step === 3
                   ?
-                  <p><Button style={{marginTop: 6}} bsStyle="success" onClick={this.goHome}>Go home</Button>
-                  </p>
+                  <span>
+                    <p>
+                      <span className="mr12">
+                        <Badge>4</Badge>
+                      </span>
+                      <span>Done!</span>
+                    </p>
+                    <p>
+                      <Button style={{marginTop: 6}} bsStyle="success"
+                        onClick={this.goHome}
+                >Go back to the dashboard</Button>
+                    </p>
+                  </span>
                   : ''
               }
               {
