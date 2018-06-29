@@ -34,7 +34,7 @@ class App extends React.Component {
   constructor(props) {
     super(props)
 
-    const www = /^(www\.|)tweedentity\.com(\.localhost|)$/.test(location.host)
+    const www = /^(www\.|)(tweedentity|qabra)\.com(\.localhost|)$/.test(location.host)
 
     this.db = new Db(data => {
       this.setState({
