@@ -5,7 +5,7 @@ import EventWatcher from '../utils/EventWatcher'
 import BigAlert from './extras/BigAlert'
 import GasPrice from './GasPrice'
 
-const {Panel, Grid, Row, Col, Button, Alert} = ReactBootstrap
+const {Panel, Grid, Row, Col, Button, Alert, Badge} = ReactBootstrap
 
 class Set extends Basic {
   constructor(props) {
@@ -14,7 +14,7 @@ class Set extends Basic {
     for (let m of [
       'watchOracleTransactions',
       'startTransaction',
-      'goToProfile',
+      'goHome',
       'checkUpgradability',
       'investigateNotUpgradability',
       'setCost',
@@ -29,7 +29,7 @@ class Set extends Basic {
   }
 
   investigateNotUpgradability() {
-    const store = this.appNickname()+'Store'
+    const store = this.appNickname() + 'Store'
     const upgradability = this.state.upgradability
     const wallet = this.appState().wallet
     const userId = this.getGlobalState('userId')
@@ -81,7 +81,7 @@ class Set extends Basic {
     })
   }
 
-  goToProfile() {
+  goHome() {
     this.db.set(this.shortWallet(), {})
     this.props.app.callMethod('getAccounts')
     this.historyPush('welcome')
@@ -177,7 +177,7 @@ class Set extends Basic {
 
         let callbackEvents = [
           {
-            event: contracts[this.appNickname()+'Store'].IdentitySet,
+            event: contracts[this.appNickname() + 'Store'].IdentitySet,
             filter: {addr: appState.wallet},
             callback: () => {
               this.setGlobalState({step: 3}, {warn: null})
@@ -509,11 +509,21 @@ class Set extends Basic {
               {
                 state.step === 3
                   ?
-                  <p><Button style={{marginTop: 6}} bsStyle="success" onClick={() => {
-                    this.goToProfile()
-                  }}>Go to your
-                    profile</Button>
-                  </p>
+                  <span>
+                    <p>
+                      <span className="mr12">
+                        <Badge>4</Badge>
+                        </span>
+                      <span>Done!</span>
+                    </p>
+                    <p>
+                      <Button style={{marginTop: 6}} bsStyle="success"
+                              onClick={() => {
+                                this.goHome()
+                              }}
+                      >Go back to the dashboard</Button>
+                    </p>
+                  </span>
                   : ''
               }
               {

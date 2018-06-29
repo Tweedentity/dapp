@@ -136,6 +136,16 @@ class Welcome extends Basic {
                                                          className="command fa fa-plus-circle"></i>
                   </span>
               }</h4>
+              {
+                as.ready === 0
+                  ? <p className="centered" style={{
+                    paddingBottom: 16,
+                    marginTop: -30
+                  }}>
+                    <span className="danger"><i className="fas fa-exclamation-circle"></i> The Tweedentity smart contracts are under maintainance and right now it is not possible to set or unset a tweedentity.</span>
+                </p>
+                  : null
+              }
             </Col>
           </Row>
           <Row>

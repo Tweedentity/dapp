@@ -53,7 +53,8 @@ class App extends React.Component {
       data: this.db.data,
       sections: {},
       www,
-      config
+      config,
+      ready: -1
     }
 
     for (let m of [
@@ -107,11 +108,15 @@ class App extends React.Component {
         let env
 
         switch (netId) {
-          // case '1':
-          //   env = 'main'
-          //   break
+          case '1':
+            if (config.registry.address.main) {
+              env = 'main'
+            }
+            break
           case '3':
-            env = 'ropsten'
+            if (config.registry.address.ropsten) {
+              env = 'ropsten'
+            }
             break
           default:
             this.setState({
@@ -164,14 +169,10 @@ class App extends React.Component {
 
     const registry = this.contracts.registry
 
-    this.setState({
-      ready: false
-    })
-
     registry.isReady((err, ready) => {
-      if (ready) {
+      if (ready.valueOf() === '0') {
         this.setState({
-          ready: true
+          ready: 1
         })
         registry.manager((err, result) => {
           this.contracts.manager = this.web3js.eth.contract(managerAbi).at(result)
@@ -179,9 +180,11 @@ class App extends React.Component {
             this.contracts.claimer = this.web3js.eth.contract(claimerAbi).at(result)
           })
         })
-
+      } else {
+        this.setState({
+          ready: 0
+        })
       }
-
     })
   }
 

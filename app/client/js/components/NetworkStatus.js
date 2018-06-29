@@ -7,21 +7,21 @@ class NetworkStatus extends React.Component {
     const netId = this.props.appState.netId
     let connectedTo = '...'
 
-    if (netId == null) {
-
-      connectedTo = 'You are not connected to the Ethereum network'
-
-    } else if (netId == '0') {
+    if (netId == '0') {
 
       connectedTo = <span><i className="fa fa-plug" style={{color: '#f66'}}></i> You are connected to an unsupported Ethereum network</span>
 
     } else if (netId == '1') {
 
-      connectedTo = <span><i className="fa fa-plug" style={{color: '#f66'}}></i> You are connected to the main Ethereum network</span>
+      connectedTo = <span><i className="fa fa-plug" style={{color: '#8f6'}}></i> You are connected to the main Ethereum network</span>
+
+    } else if (netId == '3') {
+
+      connectedTo = <span><i className="fa fa-plug" style={{color: '#8f6'}}></i> You are connected to the Ropsten Testnet</span>
 
     } else {
 
-      connectedTo = <span><i className="fa fa-plug" style={{color: '#8f6'}}></i> You are connected to the {netId === 1 ? 'main Ethereum' : 'Ropsten test'} network</span>
+      connectedTo = 'You are not connected to the Ethereum network'
     }
 
     return (
