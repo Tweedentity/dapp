@@ -15,7 +15,6 @@ fi
 
 cd ../store
 
-rm build/contracts/*
 truffle compile
 
 if [[ -n "$SKIP" ]]
@@ -32,6 +31,8 @@ fi
 scripts/flatten.sh
 
 cd ..
+
+node scripts/copyAbiForApp.js
 
 git add -A
 
