@@ -17,16 +17,4 @@ log
 installed_contracts
 *.env
 ignoreMe
-
-build/contracts/B*
-build/contracts/C*
-build/contracts/DatastoreC*
-build/contracts/H*
-build/contracts/M*
-build/contracts/Oraclize*
-build/contracts/Owna*
-build/contracts/P*
-build/contracts/StoreI*
-build/contracts/StoreManagerC*
-build/contracts/UidCheckerI*
-build/contracts/u*
+build

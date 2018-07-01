@@ -9,12 +9,10 @@ class Signed extends Basic {
   constructor(props) {
     super(props)
 
-    for (let m of [
+    this.bindAll([
       'handleFocus',
       'findPost'
-    ]) {
-      this[m] = this[m].bind(this)
-    }
+    ])
   }
 
   componentDidMount() {

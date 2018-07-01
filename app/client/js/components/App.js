@@ -3,12 +3,10 @@ import createHistory from "history/createBrowserHistory"
 const history = window.History = createHistory()
 const config = require('../config')
 
-const registryAbi = require(`../../../contracts/TweedentityRegistry`).abi
-const storeAbi = require(`../../../contracts/Datastore`).abi
-
-const managerAbi = require(`../../../contracts/StoreManager`).abi
-
-const claimerAbi = require(`../../../contracts/OwnershipClaimer`).abi
+const registryAbi = require(`../abi/TweedentityRegistry`)
+const storeAbi = require(`../abi/Datastore`)
+const managerAbi = require(`../abi/StoreManager`)
+const claimerAbi = require(`../abi/OwnershipClaimer`)
 
 const {Modal, Button} = ReactBootstrap
 
@@ -28,6 +26,7 @@ import ManageAccount from './ManageAccount'
 import Unset from './Unset'
 import LandingPage from './LandingPage'
 import Terms from './Terms'
+import Profile from './Profile'
 
 class App extends React.Component {
 
@@ -42,7 +41,10 @@ class App extends React.Component {
       })
     })
 
-    // this.db.reset()
+    let hash0
+    if (/profile/.test(location.hash)) {
+      hash0 = location.hash.substring(2)
+    }
 
     this.state = {
       connected: -1,
@@ -54,7 +56,9 @@ class App extends React.Component {
       sections: {},
       www,
       config,
-      ready: -1
+      ready: -1,
+      hash0,
+      profiles: {}
     }
 
     for (let m of [
@@ -66,7 +70,8 @@ class App extends React.Component {
       'getContracts',
       'callMethod',
       'handleClose',
-      'handleShow'
+      'handleShow',
+      'isProfile'
     ]) {
       this[m] = this[m].bind(this)
     }
@@ -79,6 +84,7 @@ class App extends React.Component {
 
   componentDidMount() {
     history.listen(location => {
+      this.isProfile(location.hash)
       this.setState({
         hash: location.hash
       })
@@ -225,7 +231,7 @@ class App extends React.Component {
       this.getAccounts()
       if (this.state.hash === '#/connecting') {
         this.historyPush({
-          section: 'welcome',
+          section: this.state.hash0 || 'welcome',
           replace: true
         })
       }
@@ -237,17 +243,57 @@ class App extends React.Component {
     }
   }
 
-  getAccounts() {
+  isValidAddress(address) {
+    return /^0x[0-9a-fA-F]{40}$/.test(address)
+  }
 
-    if (this.state.wallet) {
+  isProfile(hash) {
+    if (/profile/.test(hash)) {
+      let address = hash.split('/')[2]
+      if (this.isValidAddress(address)) {
+        this.setState({
+          profileAddress: address
+        })
+        this.getAccounts({address})
+      } else {
+        this.setState({
+          profileAddress: address,
+          invalidProfileAddress: true
+        })
+      }
+    }
+  }
 
-      let shortWallet = this.state.wallet.substring(0, 6)
+  getAccounts(params = {}) {
+
+    let isProfile = false
+
+    let address = params.address
+    if (address) {
+      isProfile = true
+      const profiles = {}
+      profiles[address] = {
+        twitter: {},
+        reddit: {},
+        loaded: false
+      }
+      this.setState({
+        profiles
+      })
+    } else {
+      address = this.state.wallet
+    }
+
+    if (address) {
+
+      let shortWallet = address.substring(0, 6)
+
+      let count = 0
 
       for (let appNickname of ['twitter', 'reddit']) {
-
         const store = appNickname + 'Store'
 
-        this.contracts[store].getUid(this.state.wallet, (err, result) => {
+        this.contracts[store].getUid(address, (err, result) => {
 
           let data = {}
           data[appNickname] = {}
@@ -255,6 +301,7 @@ class App extends React.Component {
           if (result !== '') {
 
             let userId = typeof result === 'string' ? result : result.valueOf()
+
             if (userId !== '') {
               return fetch(window.location.origin + '/api/data/' + appNickname + '?r=' + Math.random(), {
                 method: 'POST',
@@ -269,28 +316,46 @@ class App extends React.Component {
               }).then(response => {
                 return response.json()
               }).then(json => {
+                count++
                 const {name, username, avatar, userId} = json.result
-                data[appNickname] = {
+                const profile = {
                   userId,
                   name,
                   username,
                   avatar
                 }
-
-                console.log(data)
-
-                this.db.put(shortWallet, data)
+                if (isProfile) {
+                  const profiles = this.state.profiles
+                  profiles[address][appNickname] = profile
+                  if (count === 2) {
+                    profiles[address].loaded = true
+                  }
+                  this.setState({
+                    profiles
+                  })
+                } else {
+                  data[appNickname] = profile
+                  this.db.put(shortWallet, data)
+                }
               }).catch(function (ex) {
                 console.log('parsing failed', ex)
               })
             }
+          } else if (isProfile) {
+            count++
+            const profiles = this.state.profiles
+            if (count === 2) {
+              profiles[address].loaded = true
+            }
+            this.setState({
+              profiles
+            })
           } else {
             this.db.put(shortWallet, data)
           }
+
         })
       }
-
-
     }
   }
 
@@ -349,7 +414,6 @@ class App extends React.Component {
     }
 
     let section = this.state.hash ? this.state.hash.split('/')[1] : null
-    let spec = section ? this.state.hash.split('/')[2] : null
 
     let header
     let component
@@ -368,7 +432,7 @@ class App extends React.Component {
         component = <Unconnected app={app}/>
       } else if (this.state.wallet) {
         const sections = this.state.sections[this.state.wallet.substring(0, 6)] || {}
-        if (section === 'welcome' || sections[section]) {
+        if (section === 'welcome' || section === 'profile' || sections[section]) {
           if (section === 'welcome') {
             component = <Welcome app={app}/>
           } else if (section === 'wallet-stats') {
@@ -388,7 +452,7 @@ class App extends React.Component {
           } else if (section === 'terms') {
             component = <Terms app={app}/>
           } else if (section === 'profile') {
-            component = <Profile app={app} address={spec}/>
+            component = <Profile app={app}/>
           }
         }
       }

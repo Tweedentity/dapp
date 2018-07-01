@@ -231,26 +231,37 @@ class Provider {
   }
 
   getRedditUserId(username) {
-    let errorMessage
-    return this.getRedditUserAbout(username)
-      .then(data => {
-
-        return request
-          .get(`https://www.reddit.com/user/${username}`)
-          .then(redditor => {
-            if (redditor.text) {
-              const $ = cheerio.load(redditor.text)
-              data.name = $('h4').text()
-            }
-            return Promise.resolve({
-              result: data
-            })
+    return db.getAsync('2/'+username)
+      .then(user => {
+        if (user) {
+          return Promise.resolve({
+            result: JSON.parse(user)
           })
-      })
-      .catch((err) => {
-        return Promise.resolve({
-          error: errorMessage || 'User not found'
-        })
+        } else {
+
+          let errorMessage
+          return this.getRedditUserAbout(username)
+            .then(data => {
+
+              return request
+                .get(`https://www.reddit.com/user/${username}`)
+                .then(redditor => {
+                  if (redditor.text) {
+                    const $ = cheerio.load(redditor.text)
+                    data.name = $('h4').text()
+                  }
+                  db.set('2/'+username, JSON.stringify(data), 'EX', 3600)
+                  return Promise.resolve({
+                    result: data
+                  })
+                })
+            })
+            .catch((err) => {
+              return Promise.resolve({
+                error: errorMessage || 'User not found'
+              })
+            })
+        }
       })
 
   }
@@ -273,37 +284,48 @@ class Provider {
   }
 
   getDataFromTwitterUserId(userId) {
-    let errorMessage
-    return request
-      .get(`https://twitter.com/intent/user?user_id=${userId}`)
-      .then(tweet => {
-        if (tweet.text) {
 
-          const $ = cheerio.load(tweet.text)
-
-          let title = $('title').text().split(' (@')
-          let name = title[0]
-          let username = title[1].split(')')[0]
-          let avatar = $('img.photo').attr('src')
-
-          const result = {
-            userId,
-            name,
-            username,
-            avatar
-          }
+    return db.getAsync('1/'+userId)
+      .then(user => {
+        if (user) {
           return Promise.resolve({
-            result
+            result: JSON.parse(user)
           })
         } else {
-          throw(errorMessage = 'User not found')
+          let errorMessage
+          return request
+            .get(`https://twitter.com/intent/user?user_id=${userId}`)
+            .then(tweet => {
+              if (tweet.text) {
+
+                const $ = cheerio.load(tweet.text)
+
+                let title = $('title').text().split(' (@')
+                let name = title[0]
+                let username = title[1].split(')')[0]
+                let avatar = $('img.photo').attr('src')
+
+                const result = {
+                  userId,
+                  name,
+                  username,
+                  avatar
+                }
+                db.set('1/'+userId, JSON.stringify(result), 'EX', 3600)
+                return Promise.resolve({
+                  result
+                })
+              } else {
+                throw(errorMessage = 'User not found')
+              }
+            })
+            .catch((err) => {
+              console.log(err)
+              return Promise.resolve({
+                error: 'User not found'
+              })
+            })
         }
-      })
-      .catch((err) => {
-        console.log(err)
-        return Promise.resolve({
-          error: 'User not found'
-        })
       })
   }
 

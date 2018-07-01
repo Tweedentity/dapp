@@ -13,11 +13,9 @@ class ManageAccount extends Basic {
   constructor(props) {
     super(props)
 
-    for (let m of [
+    this.bindAll([
       'checkUpgradability'
-    ]) {
-      this[m] = this[m].bind(this)
-    }
+    ])
 
     this.state = {}
     this.checkUpgradability()
@@ -96,9 +94,6 @@ class ManageAccount extends Basic {
               data={data}
               active={true}
               noSettings={true}
-              getStats={() => {
-                this.getStats(as)
-              }}
             />
           </Col>
           <Col md={8}>

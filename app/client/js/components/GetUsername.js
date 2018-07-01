@@ -8,13 +8,11 @@ class GetUsername extends Basic {
   constructor(props) {
     super(props)
 
-    for (let m of [
+    this.bindAll([
       'getValidationState',
       'handleChange',
       'getUserId'
-    ]) {
-      this[m] = this[m].bind(this)
-    }
+    ])
   }
 
   getValidationState() {

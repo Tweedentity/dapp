@@ -8,11 +8,9 @@ class Terms extends Basic {
   constructor(props) {
     super(props)
 
-    for (let m of [
+    this.bindAll([
       'handleTerms'
-    ]) {
-      this[m] = this[m].bind(this)
-    }
+    ])
   }
 
   handleTerms(e) {

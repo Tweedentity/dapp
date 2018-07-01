@@ -14,13 +14,11 @@ class UserIdFound extends Basic {
   constructor(props) {
     super(props)
 
-    for (let m of [
+    this.bindAll([
       'signString',
       'getValidationState',
       'useSig'
-    ]) {
-      this[m] = this[m].bind(this)
-    }
+    ])
 
     this.signKey = `${this.appState().wallet}:${this.appNickname()}:${this.getGlobalState('userId')}`
     this.validSig = this.appState().data[this.signKey]

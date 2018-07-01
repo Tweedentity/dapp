@@ -11,7 +11,7 @@ class Set extends Basic {
   constructor(props) {
     super(props)
 
-    for (let m of [
+    this.bindAll([
       'watchOracleTransactions',
       'startTransaction',
       'goHome',
@@ -19,9 +19,7 @@ class Set extends Basic {
       'investigateNotUpgradability',
       'setCost',
       'handlePrice'
-    ]) {
-      this[m] = this[m].bind(this)
-    }
+    ])
     this.state = {
       upgradability: 0
     }
