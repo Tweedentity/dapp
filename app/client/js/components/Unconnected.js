@@ -1,5 +1,6 @@
 import BigAlert from './extras/BigAlert'
 import Basic from './Basic'
+import LoadingApp from './LoadingApp'
 
 const {Grid, Row, Col} = ReactBootstrap
 
@@ -54,17 +55,11 @@ class Unconnected extends Basic {
       )
     } else {
 
-      return (
-        <Grid>
-          <Row>
-            <Col md={12}>
-              <p className="centered" style={{paddingTop: 160}}><img src="img/spinner.svg"/></p>
-              <p className="centered" style={{paddingBottom: 160}}>Preparing the app...</p>
-            </Col>
-          </Row>
-        </Grid>
+      return <LoadingApp
+        app={this.props.app}
+        message="Preparing the app..."
+      />
 
-      )
     }
 
   }

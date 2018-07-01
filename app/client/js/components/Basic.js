@@ -4,7 +4,8 @@ class Basic extends React.Component {
   constructor(props) {
     super(props)
 
-    for (let m of [
+    this.bindAll = this.bindAll.bind(this)
+    this.bindAll([
       'setGlobalState',
       'getGlobalState',
       'shortWallet',
@@ -13,12 +14,17 @@ class Basic extends React.Component {
       'appNickname',
       'appName',
       'appId',
-      'appUid'
-    ]) {
-      this[m] = this[m].bind(this)
-    }
+      'appUid',
+      'getEtherscan'
+    ])
     this.db = this.props.app.db
     this.web3js = this.props.app.web3js
+  }
+
+  bindAll(methods) {
+    for (let m of methods) {
+      this[m] = this[m].bind(this)
+    }
   }
 
   appNickname() {
@@ -32,8 +38,21 @@ class Basic extends React.Component {
     return this.appState().config.appId[webApp]
   }
 
+  capitalize(x) {
+    return x.substring(0,1).toUpperCase() + x.substring(1)
+  }
+
+  getEtherscan(address, netId) {
+    if (!netId) {
+      netId = this.appState().netId
+    }
+    return `https://${netId === '3' ? 'ropsten.' : ''}etherscan.io/address/${address}`
+  }
+
   appName() {
-    return this.getGlobalState('appNickname') === 'twitter' ? 'Twitter' : 'Reddit'
+    return this.props.webApp
+      ? this.capitalize(this.props.webApp)
+      : this.capitalize(this.getGlobalState('appNickname'))
   }
 
   appUid(data, webApp) {

@@ -9,12 +9,10 @@ class Welcome extends Basic {
   constructor(props) {
     super(props)
 
-    for (let m of [
+    this.bindAll([
       'getStats',
       'expandWallet'
-    ]) {
-      this[m] = this[m].bind(this)
-    }
+    ])
 
     this.state = {
       expandWallet: false

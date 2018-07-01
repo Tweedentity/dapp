@@ -26,6 +26,8 @@ class Account extends Basic {
 
     let content = <p>Coming soon...</p>
 
+    console.log(data)
+
     if (this.props.active) {
 
       if (data.userId) {
@@ -46,6 +48,15 @@ class Account extends Basic {
             </p>
           {idData}
           </span>
+      } else if (this.props.profile) {
+        content = <span>
+          <p>
+              <img style={{borderRadius: 100}} src="img/anonymous-avatar.png" width="120" height="120"/>
+            </p>
+        <p className="user-data">
+        Tweedentity not set, yet
+        </p>
+      </span>
       } else {
         content = <span>
           <p>

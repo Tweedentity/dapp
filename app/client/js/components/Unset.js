@@ -11,12 +11,10 @@ class Unset extends Basic {
   constructor(props) {
     super(props)
 
-    for (let m of [
+    this.bindAll([
       'startTransaction',
       'goHome'
-    ]) {
-      this[m] = this[m].bind(this)
-    }
+    ])
   }
 
   goHome() {

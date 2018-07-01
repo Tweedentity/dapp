@@ -7,10 +7,6 @@ class WalletStats extends Basic {
     return val >= (lim || 4) ? 'danger' : val > 1 ? 'warning' : 'success'
   }
 
-  getEtherscan(address, netId) {
-    return `https://${netId === '3' ? 'ropsten.' : ''}etherscan.io/address/${address}`
-  }
-
   formatStats(stats, netId, address) {
     return (
       <span>
