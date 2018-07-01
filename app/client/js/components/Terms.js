@@ -8,11 +8,9 @@ class Terms extends Basic {
   constructor(props) {
     super(props)
 
-    for (let m of [
+    this.bindAll([
       'handleTerms'
-    ]) {
-      this[m] = this[m].bind(this)
-    }
+    ])
   }
 
   handleTerms(e) {
@@ -129,9 +127,9 @@ class Terms extends Basic {
             would happen in the Blockchain, nor if someone uses the <i>tweedentity</i> for identity theft and/or any
             other
             illegal activities.
-            You agree that the DApp is a pure tool and setting/unsetting a <i>tweedentity</i>, and/or whatever happens
-            to a
-            <i>tweedentity</i>, and/or however a <i>tweedentity</i> is used in the future, is under your own
+            You agree that the DApp is a pure tool and setting/unsetting a <i>tweedentity</i>,
+              and/or whatever happens to a <i>tweedentity</i>,
+              and/or however a <i>tweedentity</i> is used in the future, is under your own
             responsibility. If you
             disagree, you MUST not use the DApp.
           </p>

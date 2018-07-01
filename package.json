@@ -5,7 +5,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "update-and-start": "scripts/update-and-start.sh",
-    "dapp-local": "(cd app && npm run local)"
+    "dapp-local": "(cd app && npm run local)",
+    "install-all": "(cd ethereum-bridge && npm i) && (cd app && npm i) && (cd api && npm i) && (cd store && npm i)",
+    "test-server": "ganache-cli --mnemonic 'tweedentity'",
+    "bridge": "cd ethereum-bridge && node bridge -H localhost:8545 -a 9 --dev",
+    "test-store": "cd store && truffle test",
+    "test-api": "cd api && npm test"
   },
   "repository": {
     "type": "git",
