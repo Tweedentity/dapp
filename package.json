@@ -23,7 +23,5 @@
     "url": "https://github.com/Tweedentity/dapp/issues"
   },
   "homepage": "https://tweedentity.com",
-  "devDependencies": {
-    "deep-diff": "^1.0.1"
-  }
+  "devDependencies": {}
 }

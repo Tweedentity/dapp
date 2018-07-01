@@ -3,12 +3,10 @@ import createHistory from "history/createBrowserHistory"
 const history = window.History = createHistory()
 const config = require('../config')
 
-const registryAbi = require(`../../../contracts/TweedentityRegistry`).abi
-const storeAbi = require(`../../../contracts/Datastore`).abi
-
-const managerAbi = require(`../../../contracts/StoreManager`).abi
-
-const claimerAbi = require(`../../../contracts/OwnershipClaimer`).abi
+const registryAbi = require(`../abi/TweedentityRegistry`)
+const storeAbi = require(`../abi/Datastore`)
+const managerAbi = require(`../abi/StoreManager`)
+const claimerAbi = require(`../abi/OwnershipClaimer`)
 
 const {Modal, Button} = ReactBootstrap
 

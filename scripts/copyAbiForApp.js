@@ -1,24 +1,83 @@
 const fs = require('fs')
 const path = require('path')
-const diff = require('deep-diff').diff
 
 const contracts = [
-    'Datastore',
-    'StoreManager',
-    'OwnershipClaimer',
-    'TweedentityRegistry'
+  'Datastore',
+  'StoreManager',
+  'OwnershipClaimer',
+  'TweedentityRegistry'
 ]
 
 for (let c of contracts) {
 
-  let existentAbiPath = path.resolve(__dirname, '../app/client/js/abi', `${c}.json`)
   let abi = require(`../store/build/contracts/${c}`).abi
-  let existentAbi = fs.readFileSync(existentAbiPath)
 
-  let differences = diff ()
+  let existentAbiPath = path.resolve(__dirname, '../app/client/js/abi', `${c}.json`)
+  let existentAbi = require(existentAbiPath)
 
+  let modified = false
 
-  // fs.writeFileSync(existentAbiPath, JSON.stringify(abi, null, 2))
+  if (abi.length !== existentAbi.length) {
+
+    modified = true
+
+  } else {
+
+    for (let j = 0; j < abi.length; j++) {
+
+      let a = abi[j]
+      let b = existentAbi[j]
+      for (let p of [
+        'constant', 'name', 'payable', 'stateMutability', 'type', 'anonymous'
+      ]) {
+        if (a[p] !== b[p]) {
+          modified = true
+          break
+        }
+      }
+      if (a.inputs && !b.inputs || !a.inputs && b.inputs || a.outputs && !b.outputs || !a.outputs && b.outputs) {
+        modified = true
+        break
+      }
+      if (a.inputs) {
+        if (a.inputs.length !== b.inputs.length) {
+
+          modified = true
+          break
+
+        }
+        for (let i = 0; i < a.inputs.length; i++) {
+          let A = a.inputs[i]
+          let B = b.inputs[i]
+          if (A.name !== B.name || A.type !== B.type) {
+            modified = true
+            break
+          }
+        }
+      }
+      if (a.outputs) {
+        if (a.outputs.length !== b.outputs.length) {
+
+          modified = true
+          break
+
+        }
+        for (let i = 0; i < a.outputs.length; i++) {
+          let A = a.outputs[i]
+          let B = b.outputs[i]
+          if (A.name !== B.name || A.type !== B.type) {
+            modified = true
+            break
+          }
+        }
+      }
+    }
+  }
+
+  if (modified) {
+    console.log('Writing', existentAbiPath)
+    fs.writeFileSync(existentAbiPath, JSON.stringify(abi, null, 2))
+  }
 
 
 }
