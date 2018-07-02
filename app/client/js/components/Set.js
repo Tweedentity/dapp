@@ -528,8 +528,8 @@ class Set extends Basic {
                 as.err
                   ?
                   <BigAlert
-                    title="Whoops"
-                    message={as.err}
+                    title={as.err}
+                    message={as.errMessage}
                     link={() => {
                       this.setGlobalState({}, {err: null})
                       this.setGlobalState({
