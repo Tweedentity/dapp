@@ -26,8 +26,6 @@ class Account extends Basic {
 
     let content = <p>Coming soon...</p>
 
-    console.log(data)
-
     if (this.props.active) {
 
       if (data.userId) {
