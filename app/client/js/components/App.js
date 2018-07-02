@@ -232,12 +232,8 @@ class App extends React.Component {
           replace: true
         })
       }
-      if (setConnection) {
-        this.setState({
-          connectionChecked: true
-        })
-      }
-    } else {
+    }
+    if (setConnection) {
       this.setState({
         connectionChecked: true
       })
