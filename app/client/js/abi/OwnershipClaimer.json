@@ -28,6 +28,15 @@
     "type": "function"
   },
   {
+    "constant": false,
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "constant": true,
     "inputs": [],
     "name": "apiUrl",
@@ -82,7 +91,7 @@
     "constant": false,
     "inputs": [
       {
-        "name": "newOwner",
+        "name": "_newOwner",
         "type": "address"
       }
     ],
@@ -146,6 +155,30 @@
       }
     ],
     "name": "VerificatioFailed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [],
+    "name": "RequirementPassed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [],
+    "name": "ApiUrlBuilt",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "previousOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipRenounced",
     "type": "event"
   },
   {

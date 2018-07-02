@@ -71,6 +71,9 @@ is usingOraclize, HasNoEther
     bytes32 indexed oraclizeId
   );
 
+  event RequirementPassed();
+
+  event ApiUrlBuilt();
 
 
   // modifiers
@@ -97,7 +100,7 @@ is usingOraclize, HasNoEther
     require(_address != address(0));
     managerAddress = _address;
     manager = ManagerInterface(_address);
-    ManagerSet(_address);
+    emit ManagerSet(_address);
   }
 
 
@@ -125,6 +128,8 @@ is usingOraclize, HasNoEther
     require(bytes(_postId).length > 0);
     require(msg.value >= _gasPrice * _gasLimit);
 
+    emit RequirementPassed();
+
     oraclize_setCustomGasPrice(_gasPrice);
 
     string[6] memory str;
@@ -134,13 +139,16 @@ is usingOraclize, HasNoEther
     str[3] = _postId;
     str[4] = "/0x";
     str[5] = __addressToString(msg.sender);
+    string memory url = __concat(str);
+
+    emit ApiUrlBuilt();
 
     bytes32 oraclizeID = oraclize_query(
       "URL",
-      __concat(str),
+      url,
       _gasLimit
     );
-    VerificationStarted(oraclizeID, msg.sender, _appNickname, _postId);
+    emit VerificationStarted(oraclizeID, msg.sender, _appNickname, _postId);
     __tempData[oraclizeID] = TempData(msg.sender, manager.getAppId(_appNickname));
   }
 
@@ -160,7 +168,7 @@ is usingOraclize, HasNoEther
     if (bytes(_result).length > 0) {
       manager.setIdentity(__tempData[_oraclizeID].appId, __tempData[_oraclizeID].sender, _result);
     } else {
-      VerificatioFailed(_oraclizeID);
+      emit VerificatioFailed(_oraclizeID);
     }
   }
 

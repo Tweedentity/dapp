@@ -155,7 +155,7 @@ is Pausable, HasNoEther
   onlyOwner
   {
     require(bytes(_appNickname).length > 0);
-    bytes32 _appNickname32 = keccak256(_appNickname);
+    bytes32 _appNickname32 = keccak256(abi.encodePacked(_appNickname));
     require(_address != address(0));
     StoreInterface _store = StoreInterface(_address);
     require(_store.getAppNickname() == _appNickname32);
@@ -171,8 +171,8 @@ is Pausable, HasNoEther
       true
     );
     totalStores++;
-    StoreSet(_appNickname, _address);
-    StoreActive(_appNickname, _address, true);
+    emit StoreSet(_appNickname, _address);
+    emit StoreActive(_appNickname, _address, true);
   }
 
 
@@ -188,7 +188,7 @@ is Pausable, HasNoEther
   {
     require(_address != address(0));
     claimer = _address;
-    ClaimerSet(_address, false);
+    emit ClaimerSet(_address, false);
   }
 
 
@@ -204,7 +204,7 @@ is Pausable, HasNoEther
   {
     require(_address != address(0) && claimer != address(0));
     newClaimer = _address;
-    ClaimerSet(_address, true);
+    emit ClaimerSet(_address, true);
   }
 
 
@@ -216,7 +216,7 @@ is Pausable, HasNoEther
   onlyOwner
   {
     require(newClaimer != address(0));
-    ClaimerSwitch(claimer, newClaimer);
+    emit ClaimerSwitch(claimer, newClaimer);
     claimer = newClaimer;
     newClaimer = address(0);
   }
@@ -246,7 +246,7 @@ is Pausable, HasNoEther
     if (!found) {
       __customerServiceAddress.push(_address);
     }
-    CustomerServiceSet(_address);
+    emit CustomerServiceSet(_address);
   }
 
 
@@ -270,7 +270,7 @@ is Pausable, HasNoEther
       __stores[_appId].addr,
       _active
     );
-    StoreActive(_appNickname, __stores[_appId].addr, _active);
+    emit StoreActive(_appNickname, __stores[_appId].addr, _active);
   }
 
 
@@ -475,7 +475,7 @@ is Pausable, HasNoEther
     if (isUpgradable(_store, _address, _uid)) {
       _store.setIdentity(_address, _uid);
     } else {
-      IdentityNotUpgradable(appNicknames[_appId], _address, _uid);
+      emit IdentityNotUpgradable(appNicknames[_appId], _address, _uid);
     }
   }
 
@@ -526,7 +526,7 @@ is Pausable, HasNoEther
   onlyOwner
   {
     minimumTimeBeforeUpdate = _newMinimumTime;
-    MinimumTimeBeforeUpdateChanged(_newMinimumTime);
+    emit MinimumTimeBeforeUpdateChanged(_newMinimumTime);
   }
 
 }

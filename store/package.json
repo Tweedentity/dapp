@@ -1,12 +1,12 @@
 {
   "name": "tweestore",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "tweedentity",
   "dependencies": {},
   "devDependencies": {
     "growl": "^1.10.5",
     "lodash": "^4.17.4",
-    "openzeppelin-solidity": "^1.8.0",
+    "openzeppelin-solidity": "^1.10.0",
     "sleep": "^5.1.1",
     "truffle-flattener": "^1.2.5",
     "truffle-hdwallet-provider": "0.0.5"

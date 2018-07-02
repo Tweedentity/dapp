@@ -114,6 +114,15 @@
   {
     "constant": false,
     "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
     "name": "pause",
     "outputs": [],
     "payable": false,
@@ -194,7 +203,7 @@
     "constant": false,
     "inputs": [
       {
-        "name": "newOwner",
+        "name": "_newOwner",
         "type": "address"
       }
     ],
@@ -371,6 +380,18 @@
     "anonymous": false,
     "inputs": [],
     "name": "Unpause",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "previousOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipRenounced",
     "type": "event"
   },
   {

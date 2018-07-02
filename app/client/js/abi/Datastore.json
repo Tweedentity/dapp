@@ -56,6 +56,15 @@
     "type": "function"
   },
   {
+    "constant": false,
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "constant": true,
     "inputs": [],
     "name": "appId",
@@ -138,7 +147,7 @@
     "constant": false,
     "inputs": [
       {
-        "name": "newOwner",
+        "name": "_newOwner",
         "type": "address"
       }
     ],
@@ -241,6 +250,18 @@
       }
     ],
     "name": "IdentityUnset",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "previousOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipRenounced",
     "type": "event"
   },
   {
