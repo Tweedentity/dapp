@@ -27,7 +27,7 @@ class GasPrice extends React.Component {
     }
     const max = a + (a - min)
 
-    if ((a - sl) / 10 < min) {
+    if ((a - sl) / 10 < sl - min) {
       marks[min] = min
     } else {
       min = sl
