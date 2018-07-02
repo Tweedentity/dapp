@@ -152,7 +152,7 @@ class LandingPage extends Basic {
         <Row>
           <Col md={6}>
             <h3>Tweedentity vs uPort, Origin, Civic...</h3>
-            <p>There are many projects who are working on identity in the Ethereum VM. Most of them adopts the great <a href="https://github.com/ethereum/EIPs/issues/725" target="_blank">EIP-725</a> standard, which allows wallets to do a claim, for example "I own a Twitter account", and issuers to verify and confirm the claim. While it is a good approach to decentralized identity, it still requires that we trust the issuers.</p>
+            <p>There are many projects which are working on identity in the Ethereum VM. Most of them adopt the great <a href="https://github.com/ethereum/EIPs/issues/725" target="_blank">EIP-725</a> standard, which allows wallets to make a claim, for example "I own a Twitter account", and issuers to verify and confirm the claim. While it is a good approach to decentralized identity, it still requires that we trust the issuers.</p>
             <p>Tweedentity differs from them because it is a self-claim system, which allows people to claim the ownership of a public account and verifies that the claim is true without the need for a trusted issuer.</p>
             <p>To do that it uses public smart contracts and a minimalistic Open Source, serverless API. The DApp itself is Open Source and can be forked and improved by the community.</p>
           </Col>
