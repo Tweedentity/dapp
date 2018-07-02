@@ -256,7 +256,7 @@ class Set extends Basic {
                 () => {
                   this.setGlobalState({}, {
                     err: 'The transaction has been reverted',
-                    errMessage: 'If you like to set your tweedentity, click the button above to try again.',
+                    errMessage: 'Usually, this happens when the network is congested. We suggest you to wait a better moment before trying again.',
                   })
                 }
               )
@@ -380,8 +380,8 @@ class Set extends Basic {
                     {
                       a > 4
                         ?
-                        <p>If you aren't in a rush and can wait a better moment to set up your tweedentity, you can save
-                          money because often the gas price is around 1 or 2 Gwei.</p>
+                        <p><span className="danger">If you aren't in a rush and can wait a better moment to set up your tweedentity, you can save
+                          money because often the gas price is around 1 or 2 Gwei.</span></p>
                         : null
                     }
                   </Col>
