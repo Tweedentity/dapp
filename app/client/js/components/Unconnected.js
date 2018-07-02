@@ -13,6 +13,7 @@ class Unconnected extends Basic {
 
     const as = this.appState()
 
+
     if (as.connectionChecked) {
 
       if (as.connected !== -1) {

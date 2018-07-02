@@ -77,7 +77,7 @@ class App extends React.Component {
     }
 
     if (!www) {
-      this.getNetwork()
+      setTimeout(this.getNetwork, 100)
     }
 
   }
@@ -98,10 +98,6 @@ class App extends React.Component {
   }
 
   getNetwork() {
-
-    this.setState({
-      connectionChecked: false
-    })
 
     if (typeof web3 !== 'undefined') {
       console.log('Using web3 detected from external source like MetaMask')
@@ -163,12 +159,13 @@ class App extends React.Component {
       })
 
     } else {
-      this.state.connected = 0
+      console.log('web3 not detected')
+
       this.setState({
+        connected: 0,
         connectionChecked: true
       })
     }
-
   }
 
   getContracts() {
@@ -240,6 +237,10 @@ class App extends React.Component {
           connectionChecked: true
         })
       }
+    } else {
+      this.setState({
+        connectionChecked: true
+      })
     }
   }
 
