@@ -1,3 +1,5 @@
+const ENS = require('ethereum-ens')
+
 import createHistory from "history/createBrowserHistory"
 
 const history = window.History = createHistory()
@@ -71,7 +73,8 @@ class App extends React.Component {
       'callMethod',
       'handleClose',
       'handleShow',
-      'isProfile'
+      'isProfile',
+      'getStores'
     ]) {
       this[m] = this[m].bind(this)
     }
@@ -105,6 +108,7 @@ class App extends React.Component {
       this.web3js = new Web3(web3.currentProvider)
       this.web3js.eth.getTransactionReceiptMined = require("../utils/getTransactionReceiptMined")
 
+
       this.web3js.version.getNetwork((err, netId) => {
 
         let env
@@ -135,22 +139,14 @@ class App extends React.Component {
             env
           })
 
-          const registry = this.web3js.eth.contract(registryAbi).at(config.registry.address[env])
-          registry.getStore('twitter', (err, twitterStore) => {
-
-            registry.getStore('reddit', (err, redditStore) => {
-
-              this.contracts = {
-                registry,
-                twitterStore: this.web3js.eth.contract(storeAbi).at(twitterStore),
-                redditStore: this.web3js.eth.contract(storeAbi).at(redditStore)
-              }
-              this.getEthInfo()
-              this.watchAccounts0(true)
-              setInterval(this.watchAccounts0, 1000)
-              this.getContracts()
+          if (env === 'main') {
+            new ENS(this.web3js).resolver('tweedentity.eth').addr().then(function(addr) {
+              this.getStores(addr)
             })
-          })
+          } else {
+            this.getStores(config.registry.address[env])
+          }
+
         } else {
           this.setState({
             connectionChecked: true
@@ -166,6 +162,25 @@ class App extends React.Component {
         connectionChecked: true
       })
     }
+  }
+
+  getStores(registryAddress) {
+    const registry = this.web3js.eth.contract(registryAbi).at(registryAddress)
+    registry.getStore('twitter', (err, twitterStore) => {
+
+      registry.getStore('reddit', (err, redditStore) => {
+
+        this.contracts = {
+          registry,
+          twitterStore: this.web3js.eth.contract(storeAbi).at(twitterStore),
+          redditStore: this.web3js.eth.contract(storeAbi).at(redditStore)
+        }
+        this.getEthInfo()
+        this.watchAccounts0(true)
+        setInterval(this.watchAccounts0, 1000)
+        this.getContracts()
+      })
+    })
   }
 
   getContracts() {

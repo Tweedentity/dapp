@@ -1,11 +1,11 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.23;
 
 
 import 'openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
 import 'openzeppelin-solidity/contracts/ownership/HasNoEther.sol';
 
 
-interface StoreInterface {
+contract StoreInterface {
 
   function getAppNickname()
   external
@@ -67,7 +67,7 @@ contract StoreManager
 is Pausable, HasNoEther
 {
 
-  string public fromVersion = "1.0.0";
+  string public fromVersion = "1.1.0";
 
   struct Store {
     StoreInterface store;

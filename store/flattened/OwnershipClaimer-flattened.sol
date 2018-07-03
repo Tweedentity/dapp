@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.23;
 
 // File: ../ethereum-api/oraclizeAPI_0.5.sol
 
@@ -34,7 +34,7 @@ THE SOFTWARE.
 
 
 
-pragma solidity >=0.4.18 <=0.4.20;// Incompatible compiler version... please select one stated within pragma solidity or use different oraclizeAPI version
+pragma solidity >=0.4.18;// Incompatible compiler version... please select one stated within pragma solidity or use different oraclizeAPI version
 
 contract OraclizeI {
     address public cbAddress;
@@ -89,13 +89,15 @@ library Buffer {
         uint capacity;
     }
 
-    function init(buffer memory buf, uint capacity) internal pure {
+    function init(buffer memory buf, uint _capacity) internal pure {
+        uint capacity = _capacity;
         if(capacity % 32 != 0) capacity += 32 - (capacity % 32);
         // Allocate space for the buffer data
         buf.capacity = capacity;
         assembly {
             let ptr := mload(0x40)
             mstore(buf, ptr)
+            mstore(ptr, 0)
             mstore(0x40, add(ptr, capacity))
         }
     }
@@ -114,7 +116,7 @@ library Buffer {
     }
 
     /**
-     * @dev Appends a byte array to the end of the buffer. Reverts if doing so
+     * @dev Appends a byte array to the end of the buffer. Resizes if doing so
      *      would exceed the capacity of the buffer.
      * @param buf The buffer to append to.
      * @param data The data to append.
@@ -161,7 +163,7 @@ library Buffer {
     }
 
     /**
-     * @dev Appends a byte to the end of the buffer. Reverts if doing so would
+     * @dev Appends a byte to the end of the buffer. Resizes if doing so would
      * exceed the capacity of the buffer.
      * @param buf The buffer to append to.
      * @param data The data to append.
@@ -186,7 +188,7 @@ library Buffer {
     }
 
     /**
-     * @dev Appends a byte to the end of the buffer. Reverts if doing so would
+     * @dev Appends a byte to the end of the buffer. Resizes if doing so would
      * exceed the capacity of the buffer.
      * @param buf The buffer to append to.
      * @param data The data to append.
@@ -291,8 +293,8 @@ contract usingOraclize {
     uint constant month = 60*60*24*30;
     byte constant proofType_NONE = 0x00;
     byte constant proofType_TLSNotary = 0x10;
-    byte constant proofType_Android = 0x20;
     byte constant proofType_Ledger = 0x30;
+    byte constant proofType_Android = 0x40;
     byte constant proofType_Native = 0xF0;
     byte constant proofStorage_IPFS = 0x01;
     uint8 constant networkID_auto = 0;
@@ -361,9 +363,13 @@ contract usingOraclize {
     function __callback(bytes32 myid, string result) public {
         __callback(myid, result, new bytes(0));
     }
+
+    event CompilerSilencer();
+
     function __callback(bytes32 myid, string result, bytes proof) public {
-      return;
-      myid; result; proof; // Silence compiler warnings
+        emit CompilerSilencer();
+        return;
+        myid; result; proof; // Silence compiler warnings
     }
 
     function oraclize_getPrice(string datasource) oraclizeAPI internal returns (uint){
@@ -904,6 +910,7 @@ contract usingOraclize {
 
     using CBOR for Buffer.buffer;
     function stra2cbor(string[] arr) internal pure returns (bytes) {
+        safeMemoryCleaner();
         Buffer.buffer memory buf;
         Buffer.init(buf, 1024);
         buf.startArray();
@@ -915,6 +922,7 @@ contract usingOraclize {
     }
 
     function ba2cbor(bytes[] arr) internal pure returns (bytes) {
+        safeMemoryCleaner();
         Buffer.buffer memory buf;
         Buffer.init(buf, 1024);
         buf.startArray();
@@ -978,7 +986,7 @@ contract usingOraclize {
 
         }
 
-        oraclize_randomDS_setCommitment(queryId, keccak256(delay_bytes8_left, args[1], sha256(args[0]), args[2]));
+        oraclize_randomDS_setCommitment(queryId, keccak256(abi.encodePacked(delay_bytes8_left, args[1], sha256(args[0]), args[2])));
         return queryId;
     }
 
@@ -1090,7 +1098,7 @@ contract usingOraclize {
         uint ledgerProofLength = 3+65+(uint(proof[3+65+1])+2)+32;
         bytes memory keyhash = new bytes(32);
         copyBytes(proof, ledgerProofLength, 32, keyhash, 0);
-        if (!(keccak256(keyhash) == keccak256(sha256(context_name, queryId)))) return false;
+        if (!(keccak256(abi.encodePacked(keyhash)) == keccak256(abi.encodePacked(sha256(abi.encodePacked(context_name, queryId)))))) return false;
 
         bytes memory sig1 = new bytes(uint(proof[ledgerProofLength+(32+8+1+32)+1])+2);
         copyBytes(proof, ledgerProofLength+(32+8+1+32), sig1.length, sig1, 0);
@@ -1108,7 +1116,7 @@ contract usingOraclize {
         copyBytes(proof, sig2offset-64, 64, sessionPubkey, 0);
 
         bytes32 sessionPubkeyHash = sha256(sessionPubkey);
-        if (oraclize_randomDS_args[queryId] == keccak256(commitmentSlice1, sessionPubkeyHash)){ //unonce, nbytes and sessionKeyHash match
+        if (oraclize_randomDS_args[queryId] == keccak256(abi.encodePacked(commitmentSlice1, sessionPubkeyHash))){ //unonce, nbytes and sessionKeyHash match
             delete oraclize_randomDS_args[queryId];
         } else return false;
 
@@ -1219,6 +1227,13 @@ contract usingOraclize {
         return safer_ecrecover(hash, v, r, s);
     }
 
+    function safeMemoryCleaner() internal pure {
+        assembly {
+            let fmem := mload(0x40)
+            codecopy(fmem, codesize, sub(msize, fmem))
+        }
+    }
+
 }
 // </ORACLIZE_API>
 
@@ -1233,14 +1248,18 @@ contract Ownable {
   address public owner;
 
 
-  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+  event OwnershipRenounced(address indexed previousOwner);
+  event OwnershipTransferred(
+    address indexed previousOwner,
+    address indexed newOwner
+  );
 
 
   /**
    * @dev The Ownable constructor sets the original `owner` of the contract to the sender
    * account.
    */
-  function Ownable() public {
+  constructor() public {
     owner = msg.sender;
   }
 
@@ -1253,15 +1272,30 @@ contract Ownable {
   }
 
   /**
-   * @dev Allows the current owner to transfer control of the contract to a newOwner.
-   * @param newOwner The address to transfer ownership to.
+   * @dev Allows the current owner to relinquish control of the contract.
    */
-  function transferOwnership(address newOwner) public onlyOwner {
-    require(newOwner != address(0));
-    OwnershipTransferred(owner, newOwner);
-    owner = newOwner;
+  function renounceOwnership() public onlyOwner {
+    emit OwnershipRenounced(owner);
+    owner = address(0);
   }
 
+  /**
+   * @dev Allows the current owner to transfer control of the contract to a newOwner.
+   * @param _newOwner The address to transfer ownership to.
+   */
+  function transferOwnership(address _newOwner) public onlyOwner {
+    _transferOwnership(_newOwner);
+  }
+
+  /**
+   * @dev Transfers control of the contract to a newOwner.
+   * @param _newOwner The address to transfer ownership to.
+   */
+  function _transferOwnership(address _newOwner) internal {
+    require(_newOwner != address(0));
+    emit OwnershipTransferred(owner, _newOwner);
+    owner = _newOwner;
+  }
 }
 
 // File: openzeppelin-solidity/contracts/ownership/HasNoEther.sol
@@ -1271,11 +1305,11 @@ contract Ownable {
  * @author Remco Bloemen <remco@2π.com>
  * @dev This tries to block incoming ether to prevent accidental loss of Ether. Should Ether end up
  * in the contract, it will allow the owner to reclaim this ether.
- * @notice Ether can still be send to this contract by:
+ * @notice Ether can still be sent to this contract by:
  * calling functions labeled `payable`
  * `selfdestruct(contract_address)`
  * mining directly to the contract address
-*/
+ */
 contract HasNoEther is Ownable {
 
   /**
@@ -1285,7 +1319,7 @@ contract HasNoEther is Ownable {
   * constructor. By doing it this way we prevent a payable constructor from working. Alternatively
   * we could use assembly to access msg.value.
   */
-  function HasNoEther() public payable {
+  constructor() public payable {
     require(msg.value == 0);
   }
 
@@ -1299,7 +1333,7 @@ contract HasNoEther is Ownable {
    * @dev Transfer all Ether held by the contract to the owner.
    */
   function reclaimEther() external onlyOwner {
-    assert(owner.send(this.balance));
+    owner.transfer(address(this).balance);
   }
 }
 
@@ -1336,7 +1370,7 @@ contract OwnershipClaimer
 is usingOraclize, HasNoEther
 {
 
-  string public fromVersion = "1.0.0";
+  string public fromVersion = "1.1.0";
 
   string public apiUrl = "https://api.tweedentity.net/";
 
@@ -1372,6 +1406,17 @@ is usingOraclize, HasNoEther
     bytes32 indexed oraclizeId
   );
 
+  event NotEnoughValueForOracle(
+    uint provided,
+    uint requested
+  );
+
+
+  event NotEnoughValueForCallback();
+  event AppNotSet();
+  event PostIdEmpty();
+
+  event ApiUrlBuilt();
 
 
   // modifiers
@@ -1398,7 +1443,7 @@ is usingOraclize, HasNoEther
     require(_address != address(0));
     managerAddress = _address;
     manager = ManagerInterface(_address);
-    ManagerSet(_address);
+    emit ManagerSet(_address);
   }
 
 
@@ -1420,30 +1465,45 @@ is usingOraclize, HasNoEther
     uint _gasLimit
   )
   public
-  whenAppSet(_appNickname)
   payable
   {
-    require(bytes(_postId).length > 0);
-    require(msg.value >= _gasPrice * _gasLimit);
+
+    if (bytes(_postId).length < 1) {
+      emit PostIdEmpty();
+    } else if (manager.getAppId(_appNickname) == 0) {
+      emit AppNotSet();
+    }
 
     oraclize_setCustomGasPrice(_gasPrice);
+    uint oraclePrice = oraclize_getPrice("URL", _gasLimit);
 
-    string[6] memory str;
-    str[0] = apiUrl;
-    str[1] = _appNickname;
-    str[2] = "/";
-    str[3] = _postId;
-    str[4] = "/0x";
-    str[5] = __addressToString(msg.sender);
+    if (msg.value < oraclePrice) {
+      emit NotEnoughValueForOracle(msg.value, oraclePrice);
+    } else if (msg.value < _gasPrice * _gasLimit) {
+      emit NotEnoughValueForCallback();
+    } else {
 
-    bytes32 oraclizeID = oraclize_query(
-      "URL",
-      __concat(str),
-      _gasLimit
-    );
-    VerificationStarted(oraclizeID, msg.sender, _appNickname, _postId);
-    __tempData[oraclizeID] = TempData(msg.sender, manager.getAppId(_appNickname));
+      string[6] memory str;
+      str[0] = apiUrl;
+      str[1] = _appNickname;
+      str[2] = "/";
+      str[3] = _postId;
+      str[4] = "/0x";
+      str[5] = __addressToString(msg.sender);
+      string memory url = __concat(str);
+
+      emit ApiUrlBuilt();
+
+      bytes32 oraclizeID = oraclize_query(
+        "URL",
+        url,
+        _gasLimit
+      );
+      emit VerificationStarted(oraclizeID, msg.sender, _appNickname, _postId);
+      __tempData[oraclizeID] = TempData(msg.sender, manager.getAppId(_appNickname));
+    }
   }
+
 
 
   /**
@@ -1461,7 +1521,7 @@ is usingOraclize, HasNoEther
     if (bytes(_result).length > 0) {
       manager.setIdentity(__tempData[_oraclizeID].appId, __tempData[_oraclizeID].sender, _result);
     } else {
-      VerificatioFailed(_oraclizeID);
+      emit VerificatioFailed(_oraclizeID);
     }
   }
 

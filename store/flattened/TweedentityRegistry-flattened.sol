@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.23;
 
 // File: openzeppelin-solidity/contracts/ownership/Ownable.sol
 
@@ -11,14 +11,18 @@ contract Ownable {
   address public owner;
 
 
-  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+  event OwnershipRenounced(address indexed previousOwner);
+  event OwnershipTransferred(
+    address indexed previousOwner,
+    address indexed newOwner
+  );
 
 
   /**
    * @dev The Ownable constructor sets the original `owner` of the contract to the sender
    * account.
    */
-  function Ownable() public {
+  constructor() public {
     owner = msg.sender;
   }
 
@@ -31,15 +35,30 @@ contract Ownable {
   }
 
   /**
-   * @dev Allows the current owner to transfer control of the contract to a newOwner.
-   * @param newOwner The address to transfer ownership to.
+   * @dev Allows the current owner to relinquish control of the contract.
    */
-  function transferOwnership(address newOwner) public onlyOwner {
-    require(newOwner != address(0));
-    OwnershipTransferred(owner, newOwner);
-    owner = newOwner;
+  function renounceOwnership() public onlyOwner {
+    emit OwnershipRenounced(owner);
+    owner = address(0);
   }
 
+  /**
+   * @dev Allows the current owner to transfer control of the contract to a newOwner.
+   * @param _newOwner The address to transfer ownership to.
+   */
+  function transferOwnership(address _newOwner) public onlyOwner {
+    _transferOwnership(_newOwner);
+  }
+
+  /**
+   * @dev Transfers control of the contract to a newOwner.
+   * @param _newOwner The address to transfer ownership to.
+   */
+  function _transferOwnership(address _newOwner) internal {
+    require(_newOwner != address(0));
+    emit OwnershipTransferred(owner, _newOwner);
+    owner = _newOwner;
+  }
 }
 
 // File: openzeppelin-solidity/contracts/ownership/HasNoEther.sol
@@ -49,11 +68,11 @@ contract Ownable {
  * @author Remco Bloemen <remco@2π.com>
  * @dev This tries to block incoming ether to prevent accidental loss of Ether. Should Ether end up
  * in the contract, it will allow the owner to reclaim this ether.
- * @notice Ether can still be send to this contract by:
+ * @notice Ether can still be sent to this contract by:
  * calling functions labeled `payable`
  * `selfdestruct(contract_address)`
  * mining directly to the contract address
-*/
+ */
 contract HasNoEther is Ownable {
 
   /**
@@ -63,7 +82,7 @@ contract HasNoEther is Ownable {
   * constructor. By doing it this way we prevent a payable constructor from working. Alternatively
   * we could use assembly to access msg.value.
   */
-  function HasNoEther() public payable {
+  constructor() public payable {
     require(msg.value == 0);
   }
 
@@ -77,13 +96,13 @@ contract HasNoEther is Ownable {
    * @dev Transfer all Ether held by the contract to the owner.
    */
   function reclaimEther() external onlyOwner {
-    assert(owner.send(this.balance));
+    owner.transfer(address(this).balance);
   }
 }
 
 // File: contracts/TweedentityRegistry.sol
 
-interface ManagerInterface {
+contract ManagerInterface {
 
   function paused()
   public
@@ -121,7 +140,7 @@ interface ManagerInterface {
 
 }
 
-interface ClaimerInterface {
+contract ClaimerInterface {
 
   function manager()
   public
@@ -129,7 +148,7 @@ interface ClaimerInterface {
 }
 
 
-interface StoreInterface {
+contract StoreInterface {
 
   function appSet()
   public
@@ -154,7 +173,7 @@ contract TweedentityRegistry
 is HasNoEther
 {
 
-  string public fromVersion = "1.0.0";
+  string public fromVersion = "1.1.0";
 
   address public manager;
   address public claimer;
@@ -174,7 +193,7 @@ is HasNoEther
   {
     require(_manager != address(0));
     manager = _manager;
-    ContractRegistered(keccak256("manager"), "", _manager);
+    emit ContractRegistered(keccak256("manager"), "", _manager);
   }
 
 
@@ -186,7 +205,7 @@ is HasNoEther
   {
     require(_claimer != address(0));
     claimer = _claimer;
-    ContractRegistered(keccak256("claimer"), "", _claimer);
+    emit ContractRegistered(keccak256("claimer"), "", _claimer);
   }
 
 

@@ -1,8 +1,8 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.23;
 
 // File: contracts/UidCheckerInterface.sol
 
-interface UidCheckerInterface {
+contract UidCheckerInterface {
 
   function isUid(
     string _uid
@@ -23,14 +23,18 @@ contract Ownable {
   address public owner;
 
 
-  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+  event OwnershipRenounced(address indexed previousOwner);
+  event OwnershipTransferred(
+    address indexed previousOwner,
+    address indexed newOwner
+  );
 
 
   /**
    * @dev The Ownable constructor sets the original `owner` of the contract to the sender
    * account.
    */
-  function Ownable() public {
+  constructor() public {
     owner = msg.sender;
   }
 
@@ -43,15 +47,30 @@ contract Ownable {
   }
 
   /**
-   * @dev Allows the current owner to transfer control of the contract to a newOwner.
-   * @param newOwner The address to transfer ownership to.
+   * @dev Allows the current owner to relinquish control of the contract.
    */
-  function transferOwnership(address newOwner) public onlyOwner {
-    require(newOwner != address(0));
-    OwnershipTransferred(owner, newOwner);
-    owner = newOwner;
+  function renounceOwnership() public onlyOwner {
+    emit OwnershipRenounced(owner);
+    owner = address(0);
   }
 
+  /**
+   * @dev Allows the current owner to transfer control of the contract to a newOwner.
+   * @param _newOwner The address to transfer ownership to.
+   */
+  function transferOwnership(address _newOwner) public onlyOwner {
+    _transferOwnership(_newOwner);
+  }
+
+  /**
+   * @dev Transfers control of the contract to a newOwner.
+   * @param _newOwner The address to transfer ownership to.
+   */
+  function _transferOwnership(address _newOwner) internal {
+    require(_newOwner != address(0));
+    emit OwnershipTransferred(owner, _newOwner);
+    owner = _newOwner;
+  }
 }
 
 // File: openzeppelin-solidity/contracts/ownership/HasNoEther.sol
@@ -61,11 +80,11 @@ contract Ownable {
  * @author Remco Bloemen <remco@2π.com>
  * @dev This tries to block incoming ether to prevent accidental loss of Ether. Should Ether end up
  * in the contract, it will allow the owner to reclaim this ether.
- * @notice Ether can still be send to this contract by:
+ * @notice Ether can still be sent to this contract by:
  * calling functions labeled `payable`
  * `selfdestruct(contract_address)`
  * mining directly to the contract address
-*/
+ */
 contract HasNoEther is Ownable {
 
   /**
@@ -75,7 +94,7 @@ contract HasNoEther is Ownable {
   * constructor. By doing it this way we prevent a payable constructor from working. Alternatively
   * we could use assembly to access msg.value.
   */
-  function HasNoEther() public payable {
+  constructor() public payable {
     require(msg.value == 0);
   }
 
@@ -89,7 +108,7 @@ contract HasNoEther is Ownable {
    * @dev Transfer all Ether held by the contract to the owner.
    */
   function reclaimEther() external onlyOwner {
-    assert(owner.send(this.balance));
+    owner.transfer(address(this).balance);
   }
 }
 
@@ -107,7 +126,7 @@ contract Datastore
 is HasNoEther
 {
 
-  string public fromVersion = "1.0.0";
+  string public fromVersion = "1.1.0";
 
   uint public appId;
   string public appNickname;
@@ -216,7 +235,7 @@ is HasNoEther
   {
     require(_address != address(0));
     manager = _address;
-    ManagerSet(_address, false);
+    emit ManagerSet(_address, false);
   }
 
 
@@ -232,7 +251,7 @@ is HasNoEther
   {
     require(_address != address(0) && manager != address(0));
     newManager = _address;
-    ManagerSet(_address, true);
+    emit ManagerSet(_address, true);
   }
 
 
@@ -244,7 +263,7 @@ is HasNoEther
   onlyOwner
   {
     require(newManager != address(0));
-    ManagerSwitch(manager, newManager);
+    emit ManagerSwitch(manager, newManager);
     manager = newManager;
     newManager = address(0);
   }
@@ -271,7 +290,7 @@ is HasNoEther
     appNickname = _appNickname;
     checker = UidCheckerInterface(_checker);
     appSet = true;
-    AppSet(_appNickname, _appId, _checker);
+    emit AppSet(_appNickname, _appId, _checker);
   }
 
 
@@ -292,7 +311,7 @@ is HasNoEther
   constant returns (bool)
   {
     if (__addressByUid[_uid].lastAddress != address(0)) {
-      return keccak256(getUid(_address)) == keccak256(_uid);
+      return keccak256(abi.encodePacked(getUid(_address))) == keccak256(abi.encodePacked(_uid));
     }
     return true;
   }
@@ -329,7 +348,7 @@ is HasNoEther
     __uidByAddress[_address] = Uid(_uid, now);
     __addressByUid[_uid] = Address(_address, now);
     identities++;
-    IdentitySet(_address, _uid);
+    emit IdentitySet(_address, _uid);
   }
 
 
@@ -351,7 +370,7 @@ is HasNoEther
     __uidByAddress[_address] = Uid('', __uidByAddress[_address].lastUpdate);
     __addressByUid[uid] = Address(address(0), __addressByUid[uid].lastUpdate);
     identities--;
-    IdentityUnset(_address, uid);
+    emit IdentityUnset(_address, uid);
   }
 
 
@@ -366,7 +385,7 @@ is HasNoEther
   external
   whenAppSet
   constant returns (bytes32) {
-    return keccak256(appNickname);
+    return keccak256(abi.encodePacked(appNickname));
   }
 
 

@@ -159,8 +159,37 @@
   },
   {
     "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "provided",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "requested",
+        "type": "uint256"
+      }
+    ],
+    "name": "NotEnoughValueForOracle",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
     "inputs": [],
-    "name": "RequirementPassed",
+    "name": "NotEnoughValueForCallback",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [],
+    "name": "AppNotSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [],
+    "name": "PostIdEmpty",
     "type": "event"
   },
   {
@@ -196,6 +225,12 @@
       }
     ],
     "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [],
+    "name": "CompilerSilencer",
     "type": "event"
   },
   {

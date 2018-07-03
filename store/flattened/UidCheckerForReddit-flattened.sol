@@ -2,7 +2,7 @@ pragma solidity ^0.4.18;
 
 // File: contracts/UidCheckerInterface.sol
 
-interface UidCheckerInterface {
+contract UidCheckerInterface {
 
   function isUid(
     string _uid
