@@ -4,7 +4,7 @@ const eventWatcher = require('./helpers/EventWatcher')
 const UidCheckerForTwitter = artifacts.require('./UidCheckerForTwitter.sol')
 const Datastore = artifacts.require('./Datastore.sol')
 const StoreManager = artifacts.require('./StoreManager.sol')
-const OwnershipClaimer = artifacts.require('./OwnershipClaimer.sol')
+const OwnershipClaimer = artifacts.require('./mocks/OwnershipClaimerMock.sol')
 
 const Wait = require('./helpers/wait')
 const Counter = artifacts.require('./helpers/Counter')
@@ -21,6 +21,8 @@ contract('OwnershipClaimer', accounts => {
   let manager
   let store
   let claimer
+
+  let ethPrice = 480
 
   let wait
 
@@ -88,26 +90,10 @@ contract('OwnershipClaimer', accounts => {
     assert.equal(await claimer.managerAddress(), manager.address)
   })
 
-  it('should revert if the tweet id is empty', async () => {
-
-    const gasPrice = 4e9
-    const gasLimit = 20e4
-
-    await assertRevert(claimer.claimAccountOwnership(
-      appNickname,
-      '',
-      21e9,
-      16e4,
-      {
-        from: accounts[1],
-        value: gasPrice * gasLimit,
-        gas: 300e3
-      }))
-  })
 
   it('should call Oraclize, recover the signature from the tweet and verify that it is correct', async () => {
 
-
+    const oraclizeCost = Math.round(1e18 * 0.01 /ethPrice)
     const gasPrice = 4e9
     const gasLimit = 18e4
 
@@ -118,7 +104,7 @@ contract('OwnershipClaimer', accounts => {
       gasLimit,
       {
         from: accounts[1],
-        value: gasPrice * gasLimit,
+        value: (gasPrice * gasLimit) + oraclizeCost,
         gas: 270e3
       })
 
@@ -147,7 +133,8 @@ contract('OwnershipClaimer', accounts => {
 
   it('should call Oraclize, recover the signature from the tweet but be unable to update because the identity is not upgradable', async () => {
 
-    const gasPrice = 4e9
+    const oraclizeCost = Math.round(1e18 * 0.01 /ethPrice)
+    const gasPrice = 60e9
     const gasLimit = 17e4
 
     await claimer.claimAccountOwnership(
@@ -157,7 +144,7 @@ contract('OwnershipClaimer', accounts => {
       gasLimit,
       {
         from: accounts[1],
-        value: gasPrice * gasLimit * 100,
+        value: (gasPrice * gasLimit) + oraclizeCost,
         gas: 270e3
       })
 
@@ -173,16 +160,6 @@ contract('OwnershipClaimer', accounts => {
     })
     clearTimeout(timerId)
     assert.isTrue(typeof result !== 'undefined')
-
-
-  })
-
-  it('should recover ether sent to the contract by mistake', async () => {
-
-    const balanceBefore = (await web3.eth.getBalance(accounts[0])).valueOf()
-    await claimer.reclaimEther()
-    const balanceAfter = (await web3.eth.getBalance(accounts[0])).valueOf()
-    assert.isTrue(balanceAfter > balanceBefore)
 
   })
 

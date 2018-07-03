@@ -4,8 +4,9 @@ import Basic from './Basic'
 import EventWatcher from '../utils/EventWatcher'
 import BigAlert from './extras/BigAlert'
 import GasPrice from './GasPrice'
+import NoSubmit from "./extras/NoSubmit";
 
-const {Panel, Grid, Row, Col, Button, Alert, Badge} = ReactBootstrap
+const {Panel, Grid, Row, Col, Button, Alert, Badge, Form, ControlLabel, FormGroup, FormControl} = ReactBootstrap
 
 class Set extends Basic {
   constructor(props) {
@@ -18,7 +19,10 @@ class Set extends Basic {
       'checkUpgradability',
       'investigateNotUpgradability',
       'setCost',
-      'handlePrice'
+      'getCost',
+      'handlePrice',
+      'handlePriceManually',
+      'onSubmit'
     ])
     this.state = {
       upgradability: 0
@@ -73,6 +77,7 @@ class Set extends Basic {
       })
       if (upgradability === 0) {
         const average = this.formatFloat(as.gasInfo.average / 10, 1)
+        console.log(average)
         this.setCost(parseFloat(average, 10))
       }
 
@@ -124,6 +129,7 @@ class Set extends Basic {
 
   startTransaction(appState) {
 
+
     this.setGlobalState({
       step: 0
     }, {
@@ -141,10 +147,9 @@ class Set extends Basic {
 
       let contracts = this.props.app.contracts
 
-      const oraclizeCost = Math.round(1e7 / ethPrice)
+      const oraclizeCost = Math.round(1e18 * 0.01 /ethPrice)
       const gasPrice = this.state.price * 1e9
-      const gasLimitBase = 170e3 + oraclizeCost
-      const gasLimit = gasLimitBase + Math.round(100 * Math.random())
+      const gasLimit = 170e3
 
       this.web3js.eth.getBlockNumber((err, blockNumber) => {
 
@@ -218,6 +223,30 @@ class Set extends Basic {
               timerId = setTimeout(watchTxs, 30000)
             },
             fromBlock: blockNumber
+          },
+          {
+            event: contracts.claimer.NotEnoughValueForOracle,
+            filter: {addr: appState.wallet},
+            callback: () => {
+              this.setGlobalState({}, {
+                err: 'The oracle has not been called',
+                errMessage: 'Weird, the value was too low to cover the costs. Let us know at support@tweedentity.com',
+                NotEnoughValueForOracle: true
+              })
+            },
+            fromBlock: blockNumber
+          },
+          {
+            event: contracts.claimer.NotEnoughValueForCallback,
+            filter: {addr: appState.wallet},
+            callback: () => {
+              this.setGlobalState({}, {
+                err: 'The oracle has not been called',
+                errMessage: 'Weird, the value was too low to cover the cost of the callback. Let us know at support@tweedentity.com',
+                NotEnoughValueForCallback: true
+              })
+            },
+            fromBlock: blockNumber
           }
         ]
 
@@ -227,7 +256,7 @@ class Set extends Basic {
           gasPrice,
           gasLimit,
           {
-            value: gasPrice * gasLimit,
+            value: (gasPrice * gasLimit) + oraclizeCost,
             gas: 290e3,
             gasPrice
           }, (err, txHash) => {
@@ -279,19 +308,28 @@ class Set extends Basic {
   }
 
   setCost(price) {
+    console.log(price, typeof price)
     const as = this.appState()
-    if (as.price.value) {
-      const gasPrice = price * 1e8
-      const ethPrice = parseFloat(as.price.value, 10)
-      const oraclizeCost = Math.round(1e7 / ethPrice)
+    if (as.price) {
+      const gasPrice = price * 1e9
+      console.log(gasPrice)
+      const ethPrice = as.price.value
+      console.log(ethPrice)
+      const oraclizeCost = Math.round(1e18 * 0.01 /ethPrice)
+      console.log(oraclizeCost)
       const gasLimitTx = 290e3
-      const gasLimitOraclize = oraclizeCost + 170e3
+      const gasLimitOraclize = 170e3
       const gasLimit = gasLimitTx + gasLimitOraclize
+
+      console.log(gasLimit)
+      const value = (oraclizeCost + (gasPrice * gasLimit)) / 1e18
+
+      console.log(value)
 
       this.setState({
         price,
-        eth: this.formatFloat(gasPrice * gasLimit / 1e17, 6),
-        usd: this.formatFloat(ethPrice * gasPrice * gasLimit / 1e17, 3)
+        eth: this.formatFloat(value, 6),
+        usd: this.formatFloat(ethPrice * value, 3)
       })
     }
     else {
@@ -304,13 +342,57 @@ class Set extends Basic {
     }
   }
 
+
+  getCost() {
+
+    if (this.state.eth) {
+      return {
+        eth: this.state.eth,
+        usd: this.state.usd
+      }
+    }
+    const as = this.appState()
+    if (as.price) {
+      const gasPrice = as.gasInfo.average * 1e8
+      const ethPrice = as.price.value
+      const oraclizeCost = Math.round(1e18 * 0.01 /ethPrice)
+      const gasLimitTx = 290e3
+      const gasLimitOraclize = 170e3
+      const gasLimit = gasLimitTx + gasLimitOraclize
+
+      const value = (oraclizeCost + (gasPrice * gasLimit)) / 1e17
+      return {
+        eth: this.formatFloat(value, 6),
+        usd: this.formatFloat(ethPrice * value, 3)
+      }
+    }
+    else {
+      return {
+        eth: 0,
+        usd: 0
+      }
+    }
+  }
+
   handlePrice(price) {
     this.setCost(price)
+  }
+
+  handlePriceManually(e) {
+    this.setState({
+      inputPrice: parseInt(e.target.value, 10)
+    })
+  }
+
+  onSubmit(e) {
+    e.preventDefault()
   }
 
   render() {
 
     const as = this.appState()
+
+    const {eth, usd} = this.getCost()
 
     const state = as.data[this.shortWallet()]
     const appNickname = this.appNickname()
@@ -380,8 +462,9 @@ class Set extends Basic {
                     {
                       a > 4
                         ?
-                        <p><span className="danger">If you aren't in a rush and can wait a better moment to set up your tweedentity, you can save
-                          money because often the gas price is around 1 or 2 Gwei.</span></p>
+                        <p><Alert bsStyle={a > 10 ? 'danger' : 'warning'}>If you aren't in a rush and can wait a better
+                          moment to set up your tweedentity, you can save
+                          money because often the gas price is around 1 or 2 Gwei.</Alert></p>
                         : null
                     }
                   </Col>
@@ -395,7 +478,26 @@ class Set extends Basic {
                         average={a}
                       />
                     </p>
-                    <p>Total cost: {this.state.eth} ETH ( ~${this.state.usd} )</p>
+                    <p>Gas price: <strong>{this.state.price}</strong> &nbsp; Total cost: <strong>{eth} ETH ( ~${usd} )</strong></p>
+                  </Col>
+                  <Col md={6}>
+                    <p style={{paddingTop: 28}}>Alternatively, set the gas price our of the suggested range</p>
+                    <p>
+                      <Form inline>
+                        <FormGroup controlId="formInlineName">
+                          <FormControl type="text" placeholder="Price in Gwei" onChange={this.handlePriceManually} width={100}/>
+                          <NoSubmit/>
+                        </FormGroup>
+                        {' '}
+                        <Button
+                          bsStyle="success"
+                          type="submit"
+                          onClick={e => {
+                            e.preventDefault()
+                            this.setCost(this.state.inputPrice)
+                          }}>Set</Button>
+                      </Form>
+                    </p>
                   </Col>
                 </Row>
                 <Row>

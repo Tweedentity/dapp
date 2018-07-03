@@ -1,6 +1,6 @@
-[submodule "ethereum-api"]
-	path = ethereum-api
-	url = https://github.com/oraclize/ethereum-api.git
 [submodule "ethereum-bridge"]
 	path = ethereum-bridge
 	url = git@github.com:Tweedentity/ethereum-bridge.git
+[submodule "ethereum-api"]
+	path = ethereum-api
+	url = git@github.com:Tweedentity/ethereum-api.git

@@ -27,10 +27,8 @@ class Signed extends Basic {
   }
 
   findPost() {
-    this.setGlobalState({}, {
-      loading: true,
-      err: null
-    })
+    let contracts = this.props.app.contracts
+
     return fetch(window.location.origin + `/api/scan/${this.appNickname()}?r=` + Math.random(), {
       method: 'POST',
       headers: {
@@ -80,11 +78,16 @@ class Signed extends Basic {
     const appNicknameUrl = as.config.forPost[appNickname](state.post)
 
     const sentence = appName === 'Twitter'
-    ? <p>Please, click the button to open Twitter in a new
-        tab. Tweedentity does not use the Twitter api, but you will be ready to post the signature via the standard Twitter intent.<br/><span className="red smaller2">To avoid errors later in the process, don't add anything to the comment and don't post it to start a new thread.</span></p>
+      ? <p>Please, click the button to open Twitter in a new
+        tab. Tweedentity does not use the Twitter api, but you will be ready to post the signature via the standard
+        Twitter intent.<br/><span className="red smaller2">To avoid errors later in the process, don't add anything to the comment and don't post it to start a new thread.</span>
+      </p>
 
       : <p>Please, copy the signature and click the button to open Reddit in a new
-        tab. It will redirect you to a special post by Tweedentity. You can comment with the signature. Though, if you don't find the post or prefer to do otherwise, just comment the signature on any Reddit thread.<br/><span className="red smaller2">To avoid errors later in the process, don't add anything to the comment and don't post it to start a new thread.</span></p>
+        tab. It will redirect you to a special post by Tweedentity. You can comment with the signature. Though, if you
+        don't find the post or prefer to do otherwise, just comment the signature on any Reddit thread.<br/><span
+          className="red smaller2">To avoid errors later in the process, don't add anything to the comment and don't post it to start a new thread.</span>
+      </p>
 
     return (
       <Grid>
@@ -96,7 +99,8 @@ class Signed extends Basic {
                 <p><strong>Your signature is ready</strong></p>
                 {sentence}
                 <p>When you have done, come back and continue.</p>
-                <p><span style={{fontSize:'80%'}}>NOTE: after that the tweedentity has been set, you can cancel the post, if you like.</span></p>
+                <p><span style={{fontSize: '80%'}}>NOTE: after that the tweedentity has been set, you can cancel the post, if you like.</span>
+                </p>
                 <div style={{padding: 24}}>
                   <form>
                     <FormGroup
@@ -163,20 +167,20 @@ class Signed extends Basic {
                             }}
                             linkMessage="Input the username again"
                           />
-                        : <p><a
-                          href={appNicknameUrl}
-                          target="_blank">
-                          <Button bsStyle="primary">
-                            Open {appName} now
-                          </Button></a>
-                          <span className="spacer"></span>
-                          <LoadingButton
-                            text="I posted it, continue"
-                            loadingText="Finding the post"
-                            loading={as.loading}
-                            cmd={this.findPost}
-                          />
-                        </p>
+                          : <p><a
+                            href={appNicknameUrl}
+                            target="_blank">
+                            <Button bsStyle="primary">
+                              Open {appName} now
+                            </Button></a>
+                            <span className="spacer"></span>
+                            <LoadingButton
+                              text="I posted it, continue"
+                              loadingText="Finding the post"
+                              loading={as.loading}
+                              cmd={this.findPost}
+                            />
+                          </p>
 
                 }
 

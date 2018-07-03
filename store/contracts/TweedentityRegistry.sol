@@ -1,10 +1,10 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.23;
 
 
 import 'openzeppelin-solidity/contracts/ownership/HasNoEther.sol';
 
 
-interface ManagerInterface {
+contract ManagerInterface {
 
   function paused()
   public
@@ -42,7 +42,7 @@ interface ManagerInterface {
 
 }
 
-interface ClaimerInterface {
+contract ClaimerInterface {
 
   function manager()
   public
@@ -50,7 +50,7 @@ interface ClaimerInterface {
 }
 
 
-interface StoreInterface {
+contract StoreInterface {
 
   function appSet()
   public
@@ -75,7 +75,7 @@ contract TweedentityRegistry
 is HasNoEther
 {
 
-  string public fromVersion = "1.0.0";
+  string public fromVersion = "1.1.0";
 
   address public manager;
   address public claimer;
@@ -95,7 +95,7 @@ is HasNoEther
   {
     require(_manager != address(0));
     manager = _manager;
-    ContractRegistered(keccak256("manager"), "", _manager);
+    emit ContractRegistered(keccak256("manager"), "", _manager);
   }
 
 
@@ -107,7 +107,7 @@ is HasNoEther
   {
     require(_claimer != address(0));
     claimer = _claimer;
-    ContractRegistered(keccak256("claimer"), "", _claimer);
+    emit ContractRegistered(keccak256("claimer"), "", _claimer);
   }
 
 

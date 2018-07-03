@@ -1,8 +1,7 @@
 module.exports = {
   registry: {
     address: {
-      ropsten: "0xf7BD7B1A06EBC32012A6A8B5fF1572fB821A043F",
-      main: "0xa22c435c3e7c29298bf743f842e56d16511d7bc8"
+      ropsten: "0xf7BD7B1A06EBC32012A6A8B5fF1572fB821A043F"
     }
   },
   defaultAvatar: {

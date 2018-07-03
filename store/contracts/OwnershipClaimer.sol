@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.23;
 
 
 import '../../ethereum-api/oraclizeAPI_0.5.sol';
@@ -35,7 +35,7 @@ contract OwnershipClaimer
 is usingOraclize, HasNoEther
 {
 
-  string public fromVersion = "1.0.0";
+  string public fromVersion = "1.1.0";
 
   string public apiUrl = "https://api.tweedentity.net/";
 
@@ -71,6 +71,17 @@ is usingOraclize, HasNoEther
     bytes32 indexed oraclizeId
   );
 
+  event NotEnoughValueForOracle(
+    uint provided,
+    uint requested
+  );
+
+
+  event NotEnoughValueForCallback();
+  event AppNotSet();
+  event PostIdEmpty();
+
+  event ApiUrlBuilt();
 
 
   // modifiers
@@ -97,7 +108,7 @@ is usingOraclize, HasNoEther
     require(_address != address(0));
     managerAddress = _address;
     manager = ManagerInterface(_address);
-    ManagerSet(_address);
+    emit ManagerSet(_address);
   }
 
 
@@ -119,30 +130,45 @@ is usingOraclize, HasNoEther
     uint _gasLimit
   )
   public
-  whenAppSet(_appNickname)
   payable
   {
-    require(bytes(_postId).length > 0);
-    require(msg.value >= _gasPrice * _gasLimit);
+
+    if (bytes(_postId).length < 1) {
+      emit PostIdEmpty();
+    } else if (manager.getAppId(_appNickname) == 0) {
+      emit AppNotSet();
+    }
 
     oraclize_setCustomGasPrice(_gasPrice);
+    uint oraclePrice = oraclize_getPrice("URL", _gasLimit);
 
-    string[6] memory str;
-    str[0] = apiUrl;
-    str[1] = _appNickname;
-    str[2] = "/";
-    str[3] = _postId;
-    str[4] = "/0x";
-    str[5] = __addressToString(msg.sender);
+    if (msg.value < oraclePrice) {
+      emit NotEnoughValueForOracle(msg.value, oraclePrice);
+    } else if (msg.value < _gasPrice * _gasLimit) {
+      emit NotEnoughValueForCallback();
+    } else {
 
-    bytes32 oraclizeID = oraclize_query(
-      "URL",
-      __concat(str),
-      _gasLimit
-    );
-    VerificationStarted(oraclizeID, msg.sender, _appNickname, _postId);
-    __tempData[oraclizeID] = TempData(msg.sender, manager.getAppId(_appNickname));
+      string[6] memory str;
+      str[0] = apiUrl;
+      str[1] = _appNickname;
+      str[2] = "/";
+      str[3] = _postId;
+      str[4] = "/0x";
+      str[5] = __addressToString(msg.sender);
+      string memory url = __concat(str);
+
+      emit ApiUrlBuilt();
+
+      bytes32 oraclizeID = oraclize_query(
+        "URL",
+        url,
+        _gasLimit
+      );
+      emit VerificationStarted(oraclizeID, msg.sender, _appNickname, _postId);
+      __tempData[oraclizeID] = TempData(msg.sender, manager.getAppId(_appNickname));
+    }
   }
+
 
 
   /**
@@ -160,7 +186,7 @@ is usingOraclize, HasNoEther
     if (bytes(_result).length > 0) {
       manager.setIdentity(__tempData[_oraclizeID].appId, __tempData[_oraclizeID].sender, _result);
     } else {
-      VerificatioFailed(_oraclizeID);
+      emit VerificatioFailed(_oraclizeID);
     }
   }
 

@@ -13,7 +13,7 @@ git clone --recurse-submodules -j8 https://github.com/Tweedentity/dapp.git
 Install Ganache-cli and Truffle globally:
 
 ```
-npm install -g ganache-cli truffle@4.1.3
+npm install -g ganache-cli truffle
 ```
 
 Install the dependencies:

@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.23;
 
 
 import 'openzeppelin-solidity/contracts/ownership/HasNoEther.sol';
@@ -17,7 +17,7 @@ contract Datastore
 is HasNoEther
 {
 
-  string public fromVersion = "1.0.0";
+  string public fromVersion = "1.1.0";
 
   uint public appId;
   string public appNickname;
@@ -126,7 +126,7 @@ is HasNoEther
   {
     require(_address != address(0));
     manager = _address;
-    ManagerSet(_address, false);
+    emit ManagerSet(_address, false);
   }
 
 
@@ -142,7 +142,7 @@ is HasNoEther
   {
     require(_address != address(0) && manager != address(0));
     newManager = _address;
-    ManagerSet(_address, true);
+    emit ManagerSet(_address, true);
   }
 
 
@@ -154,7 +154,7 @@ is HasNoEther
   onlyOwner
   {
     require(newManager != address(0));
-    ManagerSwitch(manager, newManager);
+    emit ManagerSwitch(manager, newManager);
     manager = newManager;
     newManager = address(0);
   }
@@ -181,7 +181,7 @@ is HasNoEther
     appNickname = _appNickname;
     checker = UidCheckerInterface(_checker);
     appSet = true;
-    AppSet(_appNickname, _appId, _checker);
+    emit AppSet(_appNickname, _appId, _checker);
   }
 
 
@@ -202,7 +202,7 @@ is HasNoEther
   constant returns (bool)
   {
     if (__addressByUid[_uid].lastAddress != address(0)) {
-      return keccak256(getUid(_address)) == keccak256(_uid);
+      return keccak256(abi.encodePacked(getUid(_address))) == keccak256(abi.encodePacked(_uid));
     }
     return true;
   }
@@ -239,7 +239,7 @@ is HasNoEther
     __uidByAddress[_address] = Uid(_uid, now);
     __addressByUid[_uid] = Address(_address, now);
     identities++;
-    IdentitySet(_address, _uid);
+    emit IdentitySet(_address, _uid);
   }
 
 
@@ -261,7 +261,7 @@ is HasNoEther
     __uidByAddress[_address] = Uid('', __uidByAddress[_address].lastUpdate);
     __addressByUid[uid] = Address(address(0), __addressByUid[uid].lastUpdate);
     identities--;
-    IdentityUnset(_address, uid);
+    emit IdentityUnset(_address, uid);
   }
 
 
@@ -276,7 +276,7 @@ is HasNoEther
   external
   whenAppSet
   constant returns (bytes32) {
-    return keccak256(appNickname);
+    return keccak256(abi.encodePacked(appNickname));
   }
 
 
