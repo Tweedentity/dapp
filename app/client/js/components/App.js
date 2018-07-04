@@ -140,9 +140,13 @@ class App extends React.Component {
           })
 
           if (env === 'main') {
-            new ENS(this.web3js).resolver('tweedentity.eth').addr().then(function(addr) {
-              this.getStores(addr)
-            })
+            (new ENS(this.web3js))
+              .resolver('tweedentity.eth')
+              .addr()
+              .then(addr => {
+                console.log(addr)
+                this.getStores(addr)
+              })
           } else {
             this.getStores(config.registry.address[env])
           }
@@ -233,6 +237,7 @@ class App extends React.Component {
   watchAccounts0(setConnection) {
     const wallet = this.web3js.eth.accounts[0]
     if (this.state.wallet !== wallet) {
+      console.log(wallet)
       this.setState({
         wallet
       })
@@ -246,6 +251,11 @@ class App extends React.Component {
           section: this.state.hash0 || 'welcome',
           replace: true
         })
+        if (this.state.hash0) {
+          this.setState({
+            hash0: null
+          })
+        }
       }
     }
     if (setConnection) {
