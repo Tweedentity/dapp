@@ -4,7 +4,7 @@ const eventWatcher = require('./helpers/EventWatcher')
 const UidCheckerForTwitter = artifacts.require('./UidCheckerForTwitter.sol')
 const Datastore = artifacts.require('./Datastore.sol')
 const StoreManager = artifacts.require('./StoreManager.sol')
-const OwnershipClaimer = artifacts.require('./mocks/OwnershipClaimerMock.sol')
+const OwnershipClaimer = artifacts.require('./OwnershipClaimer.sol')
 
 const Wait = require('./helpers/wait')
 const Counter = artifacts.require('./helpers/Counter')
@@ -40,6 +40,28 @@ contract('OwnershipClaimer', accounts => {
     await manager.setAStore(appNickname, store.address)
 
     wait = (new Wait(await Counter.new())).wait
+  })
+
+  it('should get the oraclize price', async () => {
+
+    const balanceBefore = (await web3.eth.getBalance(accounts[2])).valueOf()
+
+    let gasPrice = 21e9
+    let gasLimit = 200001
+
+    let fullPrice = await claimer.calcQueryCost(gasPrice, gasLimit, {from: accounts[2]})
+
+    let price = fullPrice.valueOf() - gasPrice * gasLimit
+
+    assert.equal(await web3.eth.getBalance(accounts[2]), balanceBefore)
+
+    gasPrice = 2e9
+    gasLimit = 17e4
+
+    fullPrice = await claimer.calcQueryCost(gasPrice, gasLimit, {from: accounts[2]})
+
+    assert.equal(fullPrice, price + gasPrice * gasLimit)
+
   })
 
   it('should authorize the manager to handle the store', async () => {
@@ -90,12 +112,12 @@ contract('OwnershipClaimer', accounts => {
     assert.equal(await claimer.managerAddress(), manager.address)
   })
 
-
   it('should call Oraclize, recover the signature from the tweet and verify that it is correct', async () => {
 
-    const oraclizeCost = Math.round(1e18 * 0.01 /ethPrice)
     const gasPrice = 4e9
     const gasLimit = 18e4
+
+    const price = await claimer.calcQueryCost(gasPrice, gasLimit)
 
     await claimer.claimAccountOwnership(
       appNickname,
@@ -104,9 +126,18 @@ contract('OwnershipClaimer', accounts => {
       gasLimit,
       {
         from: accounts[1],
-        value: (gasPrice * gasLimit) + oraclizeCost,
+        value: price,
         gas: 270e3
       })
+
+    await eventWatcher.watch(claimer, {
+      event: 'VerificationStarted',
+      args: {},
+      fromBlock: web3.eth.blockNumer,
+      toBlock: 'latest'
+    })
+
+    console.log('VerificationStarted emitted')
 
     let timerId = setInterval(() => {
       console.log('Waiting for result')
@@ -133,9 +164,10 @@ contract('OwnershipClaimer', accounts => {
 
   it('should call Oraclize, recover the signature from the tweet but be unable to update because the identity is not upgradable', async () => {
 
-    const oraclizeCost = Math.round(1e18 * 0.01 /ethPrice)
-    const gasPrice = 60e9
+    const gasPrice = 6e9
     const gasLimit = 17e4
+
+    const price = await claimer.calcQueryCost(gasPrice, gasLimit)
 
     await claimer.claimAccountOwnership(
       appNickname,
@@ -144,7 +176,7 @@ contract('OwnershipClaimer', accounts => {
       gasLimit,
       {
         from: accounts[1],
-        value: (gasPrice * gasLimit) + oraclizeCost,
+        value: price,
         gas: 270e3
       })
 

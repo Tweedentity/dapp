@@ -17,25 +17,12 @@ class GasPrice extends React.Component {
       marks[sl] = <strong>{sl}<br/>(safe low & average)</strong>
     }
 
-    let odd = 10 * sl % 2;
     let step = 0.1
-    let min
-    if (sl < 2) {
-      min = sl - 2 * step
-    } else {
-      min = sl - 5 * step
-    }
-    const max = a + (a - min)
-
-    if ((a - sl) / 10 < sl - min) {
-      marks[min] = min
-    } else {
-      min = sl
-    }
+    let max = Math.round(a + (a < 10 ? a / 2 : a/3))
     marks[max] = max
 
     return (<div style={{margin: '32px 8px 64px'}}>
-      <SliderWithTooltip min={min} marks={marks} step={step} included={false} onChange={this.props.handlePrice} defaultValue={a} max={max}/>
+      <SliderWithTooltip min={sl} marks={marks} step={step} included={false} onChange={this.props.handlePrice} defaultValue={a} max={max}/>
       </div>
     )
 

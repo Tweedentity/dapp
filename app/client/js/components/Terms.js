@@ -11,6 +11,10 @@ class Terms extends Basic {
     this.bindAll([
       'handleTerms'
     ])
+
+    setTimeout(() => {
+      window.scroll(0,0)
+    }, 100)
   }
 
   handleTerms(e) {

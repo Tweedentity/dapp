@@ -363,13 +363,9 @@ contract usingOraclize {
     function __callback(bytes32 myid, string result) public {
         __callback(myid, result, new bytes(0));
     }
-
-    event CompilerSilencer();
-
     function __callback(bytes32 myid, string result, bytes proof) public {
-        emit CompilerSilencer();
-        return;
-        myid; result; proof; // Silence compiler warnings
+      return;
+      myid; result; proof; // Silence compiler warnings
     }
 
     function oraclize_getPrice(string datasource) oraclizeAPI internal returns (uint){
@@ -986,7 +982,7 @@ contract usingOraclize {
 
         }
 
-        oraclize_randomDS_setCommitment(queryId, keccak256(abi.encodePacked(delay_bytes8_left, args[1], sha256(args[0]), args[2])));
+        oraclize_randomDS_setCommitment(queryId, keccak256(delay_bytes8_left, args[1], sha256(args[0]), args[2]));
         return queryId;
     }
 
@@ -1098,7 +1094,7 @@ contract usingOraclize {
         uint ledgerProofLength = 3+65+(uint(proof[3+65+1])+2)+32;
         bytes memory keyhash = new bytes(32);
         copyBytes(proof, ledgerProofLength, 32, keyhash, 0);
-        if (!(keccak256(abi.encodePacked(keyhash)) == keccak256(abi.encodePacked(sha256(abi.encodePacked(context_name, queryId)))))) return false;
+        if (!(keccak256(keyhash) == keccak256(sha256(context_name, queryId)))) return false;
 
         bytes memory sig1 = new bytes(uint(proof[ledgerProofLength+(32+8+1+32)+1])+2);
         copyBytes(proof, ledgerProofLength+(32+8+1+32), sig1.length, sig1, 0);
@@ -1116,7 +1112,7 @@ contract usingOraclize {
         copyBytes(proof, sig2offset-64, 64, sessionPubkey, 0);
 
         bytes32 sessionPubkeyHash = sha256(sessionPubkey);
-        if (oraclize_randomDS_args[queryId] == keccak256(abi.encodePacked(commitmentSlice1, sessionPubkeyHash))){ //unonce, nbytes and sessionKeyHash match
+        if (oraclize_randomDS_args[queryId] == keccak256(commitmentSlice1, sessionPubkeyHash)){ //unonce, nbytes and sessionKeyHash match
             delete oraclize_randomDS_args[queryId];
         } else return false;
 
@@ -1236,6 +1232,48 @@ contract usingOraclize {
 
 }
 // </ORACLIZE_API>
+
+// File: contracts/Oraclized.sol
+
+contract Oraclized is usingOraclize {
+
+  /**
+   * @dev returns wei charged by next single oraclize query,
+   *      assumes a constant prooftype, if not constant, amend as param
+   * @param _gasPrice The gas price for the Oraclize query
+   * @param _gasLimit The gas limit for the Oraclize query
+   */
+  function calcQueryCost(
+    uint _gasPrice,
+    uint _gasLimit
+  )
+  public
+  view
+  returns (uint)
+  {
+
+    oraclize_setCustomGasPrice(_gasPrice);
+    uint fullPrice = oraclize_getPrice("URL", _gasLimit);
+    if (fullPrice == 0 && _gasLimit < 200001) {
+      uint price = oraclize_getPrice("URL", 200001) - _gasPrice * 200001;
+      fullPrice = price + _gasPrice * _gasLimit;
+    }
+    return fullPrice;
+  }
+
+
+  /**
+   * @dev returns the cost of the Oraclize fee
+   */
+  function getOraclizeFee()
+  public
+  view
+  returns (uint)
+  {
+    oraclize_setCustomGasPrice(21e4);
+    return oraclize_getPrice("URL", 200001) - 21e4 * 200001;
+  }
+}
 
 // File: openzeppelin-solidity/contracts/ownership/Ownable.sol
 
@@ -1358,32 +1396,6 @@ contract ManagerInterface {
 }
 
 
-contract Oracle
-is usingOraclize
-{
-
-  /**
- * @dev returns wei charged by next single oraclize query,
- *      assumes a constant prooftype, if not constant, amend as param
- * @param _gasPrice The gas price for the Oraclize query
- * @param _gasLimit The gas limit for the Oraclize query
- */
-  function calcQueryCost(
-    uint _gasPrice,
-    uint _gasLimit
-  )
-  external
-  view
-  constant returns (uint)
-  {
-    oraclize_setCustomGasPrice(_gasPrice);
-    return oraclize_getPrice("URL", _gasLimit);
-  }
-
-}
-
-
-
 
 /**
  * @title OwnershipClaimer
@@ -1394,7 +1406,7 @@ is usingOraclize
 
 
 contract OwnershipClaimer
-is Oracle, HasNoEther
+is Oraclized, HasNoEther
 {
 
   string public fromVersion = "1.1.0";
@@ -1433,13 +1445,10 @@ is Oracle, HasNoEther
     bytes32 indexed oraclizeId
   );
 
-  event NotEnoughValueForOracle(
+  event NotEnoughValue(
     uint provided,
     uint requested
   );
-  event NotEnoughValueForCallback();
-  event PostIdEmpty();
-
 
   // modifiers
 
@@ -1490,38 +1499,56 @@ is Oracle, HasNoEther
   payable
   {
 
-    if (bytes(_postId).length < 1) {
-      emit PostIdEmpty();
+    require(bytes(_postId).length > 0);
+
+    oraclize_setCustomGasPrice(_gasPrice);
+    uint oraclePrice = oraclize_getPrice("URL", _gasLimit);
+
+    if (oraclePrice > 0 && msg.value < oraclePrice) {
+
+      emit NotEnoughValue(msg.value, oraclePrice);
+
     } else {
-      oraclize_setCustomGasPrice(_gasPrice);
-      uint oraclePrice = oraclize_getPrice("URL", _gasLimit);
 
-      if (oraclePrice > 0 && msg.value < oraclePrice) {
-        emit NotEnoughValueForOracle(msg.value, oraclePrice);
-      } else if (msg.value < _gasPrice * _gasLimit) {
-        emit NotEnoughValueForCallback();
-      } else {
+      string[6] memory str;
+      str[0] = apiUrl;
+      str[1] = _appNickname;
+      str[2] = "/";
+      str[3] = _postId;
+      str[4] = "/0x";
+      str[5] = __addressToString(msg.sender);
+      string memory url = __concat(str);
 
-        string[6] memory str;
-        str[0] = apiUrl;
-        str[1] = _appNickname;
-        str[2] = "/";
-        str[3] = _postId;
-        str[4] = "/0x";
-        str[5] = __addressToString(msg.sender);
-        string memory url = __concat(str);
-
-        bytes32 oraclizeID = oraclize_query(
-          "URL",
-          url,
-          _gasLimit
-        );
-        emit VerificationStarted(oraclizeID, msg.sender, _appNickname, _postId);
-        __tempData[oraclizeID] = TempData(msg.sender, manager.getAppId(_appNickname));
-      }
+      bytes32 oraclizeID = oraclize_query(
+        "URL",
+        url,
+        _gasLimit
+      );
+      emit VerificationStarted(oraclizeID, msg.sender, _appNickname, _postId);
+      __tempData[oraclizeID] = TempData(msg.sender, manager.getAppId(_appNickname));
     }
   }
 
+
+
+  /**
+   * @dev Receive the call from Oraclize
+   * @param _oraclizeID The oraclize id
+   * @param _result The text resulting from requesting the url
+   */
+  function __callback(
+    bytes32 _oraclizeID,
+    string _result
+  )
+  public
+  {
+    require(msg.sender == oraclize_cbAddress());
+    if (bytes(_result).length > 0) {
+      manager.setIdentity(__tempData[_oraclizeID].appId, __tempData[_oraclizeID].sender, _result);
+    } else {
+      emit VerificatioFailed(_oraclizeID);
+    }
+  }
 
 
   // private methods

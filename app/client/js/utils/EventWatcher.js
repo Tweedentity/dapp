@@ -35,7 +35,7 @@ class EventWatcher {
         })
 
         self.events[index].watch((err, result) => {
-          if (/localhost/.test(location.host)) {
+          if (window.DEV) {
             console.log(result)
           }
           (e.callback || noop)(result)
@@ -51,7 +51,7 @@ class EventWatcher {
       .eth
       .getTransactionReceiptMined(txHash)
       .then(receipt => {
-        if (/localhost/.test(location.host)) {
+        if (window.DEV) {
           console.log(receipt)
         }
         if (onReceipt(receipt)) {

@@ -14,6 +14,8 @@ const {Modal, Button} = ReactBootstrap
 
 const Db = require('../utils/Db')
 
+window.DEV = /localhost/.test(location.host)
+
 import Header from './Header'
 import Footer from './Footer'
 import Unconnected from "./Unconnected"
@@ -120,7 +122,7 @@ class App extends React.Component {
             }
             break
           case '3':
-            if (config.registry.address.ropsten && /localhost/.test(location.host)) {
+            if (config.registry.address.ropsten) {
               env = 'ropsten'
               break
             }
@@ -145,7 +147,6 @@ class App extends React.Component {
               .resolver('tweedentity.eth')
               .addr()
               .then(addr => {
-                console.log(addr)
                 this.getStores(addr)
               })
           } else {
@@ -176,6 +177,7 @@ class App extends React.Component {
           twitterStore: this.web3js.eth.contract(storeAbi).at(twitterStore),
           redditStore: this.web3js.eth.contract(storeAbi).at(redditStore)
         }
+
         this.getEthInfo()
         this.watchAccounts0(true)
         setInterval(this.watchAccounts0, 1000)
@@ -234,7 +236,6 @@ class App extends React.Component {
   watchAccounts0(setConnection) {
     const wallet = this.web3js.eth.accounts[0]
     if (this.state.wallet !== wallet) {
-      console.log(wallet)
       this.setState({
         wallet
       })

@@ -76,11 +76,48 @@
   {
     "constant": true,
     "inputs": [],
+    "name": "getOraclizeFee",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
     "name": "managerAddress",
     "outputs": [
       {
         "name": "",
         "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_gasPrice",
+        "type": "uint256"
+      },
+      {
+        "name": "_gasLimit",
+        "type": "uint256"
+      }
+    ],
+    "name": "calcQueryCost",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
       }
     ],
     "payable": false,
@@ -171,31 +208,7 @@
         "type": "uint256"
       }
     ],
-    "name": "NotEnoughValueForOracle",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [],
-    "name": "NotEnoughValueForCallback",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [],
-    "name": "AppNotSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [],
-    "name": "PostIdEmpty",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [],
-    "name": "ApiUrlBuilt",
+    "name": "NotEnoughValue",
     "type": "event"
   },
   {
@@ -225,12 +238,6 @@
       }
     ],
     "name": "OwnershipTransferred",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [],
-    "name": "CompilerSilencer",
     "type": "event"
   },
   {
