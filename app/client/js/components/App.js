@@ -120,14 +120,15 @@ class App extends React.Component {
             }
             break
           case '3':
-            if (config.registry.address.ropsten) {
+            if (config.registry.address.ropsten && /localhost/.test(location.host)) {
               env = 'ropsten'
+              break
             }
-            break
           default:
             this.setState({
               netId: '0',
-              connected: 0
+              connected: 0,
+              connectionChecked: true
             })
         }
 
@@ -151,10 +152,6 @@ class App extends React.Component {
             this.getStores(config.registry.address[env])
           }
 
-        } else {
-          this.setState({
-            connectionChecked: true
-          })
         }
       })
 

@@ -252,7 +252,7 @@ class Set extends Basic {
 
         contracts.claimer.claimAccountOwnership(
           this.appNickname(),
-          this.getGlobalState('postId'),
+          '', //this.getGlobalState('postId'),
           gasPrice,
           gasLimit,
           {
@@ -308,23 +308,15 @@ class Set extends Basic {
   }
 
   setCost(price) {
-    console.log(price, typeof price)
     const as = this.appState()
     if (as.price) {
       const gasPrice = price * 1e9
-      console.log(gasPrice)
       const ethPrice = as.price.value
-      console.log(ethPrice)
       const oraclizeCost = Math.round(1e18 * 0.01 /ethPrice)
-      console.log(oraclizeCost)
       const gasLimitTx = 290e3
       const gasLimitOraclize = 170e3
       const gasLimit = gasLimitTx + gasLimitOraclize
-
-      console.log(gasLimit)
       const value = (oraclizeCost + (gasPrice * gasLimit)) / 1e18
-
-      console.log(value)
 
       this.setState({
         price,

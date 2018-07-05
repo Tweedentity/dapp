@@ -1339,7 +1339,7 @@ contract HasNoEther is Ownable {
 
 // File: contracts/OwnershipClaimer.sol
 
-interface ManagerInterface {
+contract ManagerInterface {
 
   function getAppId(
     string _appNickname
@@ -1358,6 +1358,33 @@ interface ManagerInterface {
 }
 
 
+contract Oracle
+is usingOraclize
+{
+
+  /**
+ * @dev returns wei charged by next single oraclize query,
+ *      assumes a constant prooftype, if not constant, amend as param
+ * @param _gasPrice The gas price for the Oraclize query
+ * @param _gasLimit The gas limit for the Oraclize query
+ */
+  function calcQueryCost(
+    uint _gasPrice,
+    uint _gasLimit
+  )
+  external
+  view
+  constant returns (uint)
+  {
+    oraclize_setCustomGasPrice(_gasPrice);
+    return oraclize_getPrice("URL", _gasLimit);
+  }
+
+}
+
+
+
+
 /**
  * @title OwnershipClaimer
  * @author Francesco Sullo <francesco@sullo.co>
@@ -1367,7 +1394,7 @@ interface ManagerInterface {
 
 
 contract OwnershipClaimer
-is usingOraclize, HasNoEther
+is Oracle, HasNoEther
 {
 
   string public fromVersion = "1.1.0";
@@ -1410,13 +1437,8 @@ is usingOraclize, HasNoEther
     uint provided,
     uint requested
   );
-
-
   event NotEnoughValueForCallback();
-  event AppNotSet();
   event PostIdEmpty();
-
-  event ApiUrlBuilt();
 
 
   // modifiers
@@ -1470,58 +1492,33 @@ is usingOraclize, HasNoEther
 
     if (bytes(_postId).length < 1) {
       emit PostIdEmpty();
-    } else if (manager.getAppId(_appNickname) == 0) {
-      emit AppNotSet();
-    }
-
-    oraclize_setCustomGasPrice(_gasPrice);
-    uint oraclePrice = oraclize_getPrice("URL", _gasLimit);
-
-    if (msg.value < oraclePrice) {
-      emit NotEnoughValueForOracle(msg.value, oraclePrice);
-    } else if (msg.value < _gasPrice * _gasLimit) {
-      emit NotEnoughValueForCallback();
     } else {
+      oraclize_setCustomGasPrice(_gasPrice);
+      uint oraclePrice = oraclize_getPrice("URL", _gasLimit);
 
-      string[6] memory str;
-      str[0] = apiUrl;
-      str[1] = _appNickname;
-      str[2] = "/";
-      str[3] = _postId;
-      str[4] = "/0x";
-      str[5] = __addressToString(msg.sender);
-      string memory url = __concat(str);
+      if (oraclePrice > 0 && msg.value < oraclePrice) {
+        emit NotEnoughValueForOracle(msg.value, oraclePrice);
+      } else if (msg.value < _gasPrice * _gasLimit) {
+        emit NotEnoughValueForCallback();
+      } else {
 
-      emit ApiUrlBuilt();
+        string[6] memory str;
+        str[0] = apiUrl;
+        str[1] = _appNickname;
+        str[2] = "/";
+        str[3] = _postId;
+        str[4] = "/0x";
+        str[5] = __addressToString(msg.sender);
+        string memory url = __concat(str);
 
-      bytes32 oraclizeID = oraclize_query(
-        "URL",
-        url,
-        _gasLimit
-      );
-      emit VerificationStarted(oraclizeID, msg.sender, _appNickname, _postId);
-      __tempData[oraclizeID] = TempData(msg.sender, manager.getAppId(_appNickname));
-    }
-  }
-
-
-
-  /**
-   * @dev Receive the call from Oraclize
-   * @param _oraclizeID The oraclize id
-   * @param _result The text resulting from requesting the url
-   */
-  function __callback(
-    bytes32 _oraclizeID,
-    string _result
-  )
-  public
-  {
-    require(msg.sender == oraclize_cbAddress());
-    if (bytes(_result).length > 0) {
-      manager.setIdentity(__tempData[_oraclizeID].appId, __tempData[_oraclizeID].sender, _result);
-    } else {
-      emit VerificatioFailed(_oraclizeID);
+        bytes32 oraclizeID = oraclize_query(
+          "URL",
+          url,
+          _gasLimit
+        );
+        emit VerificationStarted(oraclizeID, msg.sender, _appNickname, _postId);
+        __tempData[oraclizeID] = TempData(msg.sender, manager.getAppId(_appNickname));
+      }
     }
   }
 

@@ -34,7 +34,7 @@ class Unconnected extends Basic {
           welcomeMessage =
             <BigAlert
               title="Unsupported network."
-              message="This beta version supports only Ropsten."
+              message="Please connect to the Main Ethereum Network."
             />
 
         } else if (!as.wallet) {
