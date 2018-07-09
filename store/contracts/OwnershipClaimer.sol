@@ -3,8 +3,10 @@ pragma solidity ^0.4.23;
 
 import '../../ethereum-api/oraclizeAPI_0.5.sol';
 import 'openzeppelin-solidity/contracts/ownership/HasNoEther.sol';
+import './Oraclized.sol';
 
-interface ManagerInterface {
+
+contract ManagerInterface {
 
   function getAppId(
     string _appNickname
@@ -23,6 +25,7 @@ interface ManagerInterface {
 }
 
 
+
 /**
  * @title OwnershipClaimer
  * @author Francesco Sullo <francesco@sullo.co>
@@ -32,7 +35,7 @@ interface ManagerInterface {
 
 
 contract OwnershipClaimer
-is usingOraclize, HasNoEther
+is Oraclized, HasNoEther
 {
 
   string public fromVersion = "1.1.0";
@@ -71,18 +74,10 @@ is usingOraclize, HasNoEther
     bytes32 indexed oraclizeId
   );
 
-  event NotEnoughValueForOracle(
+  event NotEnoughValue(
     uint provided,
     uint requested
   );
-
-
-  event NotEnoughValueForCallback();
-  event AppNotSet();
-  event PostIdEmpty();
-
-  event ApiUrlBuilt();
-
 
   // modifiers
 
@@ -133,19 +128,15 @@ is usingOraclize, HasNoEther
   payable
   {
 
-    if (bytes(_postId).length < 1) {
-      emit PostIdEmpty();
-    } else if (manager.getAppId(_appNickname) == 0) {
-      emit AppNotSet();
-    }
+    require(bytes(_postId).length > 0);
 
     oraclize_setCustomGasPrice(_gasPrice);
     uint oraclePrice = oraclize_getPrice("URL", _gasLimit);
 
-    if (msg.value < oraclePrice) {
-      emit NotEnoughValueForOracle(msg.value, oraclePrice);
-    } else if (msg.value < _gasPrice * _gasLimit) {
-      emit NotEnoughValueForCallback();
+    if (oraclePrice > 0 && msg.value < oraclePrice) {
+
+      emit NotEnoughValue(msg.value, oraclePrice);
+
     } else {
 
       string[6] memory str;
@@ -156,8 +147,6 @@ is usingOraclize, HasNoEther
       str[4] = "/0x";
       str[5] = __addressToString(msg.sender);
       string memory url = __concat(str);
-
-      emit ApiUrlBuilt();
 
       bytes32 oraclizeID = oraclize_query(
         "URL",
@@ -189,7 +178,6 @@ is usingOraclize, HasNoEther
       emit VerificatioFailed(_oraclizeID);
     }
   }
-
 
 
   // private methods

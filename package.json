@@ -28,5 +28,6 @@
     "url": "https://github.com/Tweedentity/dapp/issues"
   },
   "homepage": "https://tweedentity.com",
-  "devDependencies": {}
+  "devDependencies": {},
+  "dependencies": {}
 }

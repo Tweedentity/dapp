@@ -14,6 +14,7 @@
   "dependencies": {
     "append-stream": "^1.2.2",
     "aws-sdk": "^2.110.0",
+    "bignumber.js": "^7.2.1",
     "bluebird": "^3.5.0",
     "body-parser": "^1.18.3",
     "cheerio": "^1.0.0-rc.2",

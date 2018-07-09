@@ -28,5 +28,9 @@ module.exports = {
   profileOnApp: {
     twitter: (username) => `https://twitter.com/${username}`,
     reddit: (username) => `https://www.reddit.com/user/${username}`
+  },
+  gasLimits: {
+    tx: 290e3,
+    callback: 180e3
   }
 }

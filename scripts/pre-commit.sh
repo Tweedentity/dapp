@@ -14,7 +14,7 @@ else
 fi
 
 cd ../store
-
+rm build/contracts/*
 truffle compile
 
 if [[ -n "$SKIP" ]]

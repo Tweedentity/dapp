@@ -19,15 +19,15 @@ class Set extends Basic {
       'checkUpgradability',
       'investigateNotUpgradability',
       'setCost',
-      'getCost',
       'handlePrice',
       'handlePriceManually',
-      'onSubmit'
+      'deleteBasicPrice'
     ])
     this.state = {
       upgradability: 0
     }
     this.checkUpgradability()
+    setTimeout(this.setCost, 100)
   }
 
   investigateNotUpgradability() {
@@ -76,9 +76,8 @@ class Set extends Basic {
         upgradability
       })
       if (upgradability === 0) {
-        const average = this.formatFloat(as.gasInfo.average / 10, 1)
-        console.log(average)
-        this.setCost(parseFloat(average, 10))
+        const average = as.gasInfo.average / 10
+        this.setCost(average)
       }
 
     })
@@ -147,9 +146,10 @@ class Set extends Basic {
 
       let contracts = this.props.app.contracts
 
-      const oraclizeCost = Math.round(1e18 * 0.01 /ethPrice)
       const gasPrice = this.state.price * 1e9
-      const gasLimit = 170e3
+      const gasLimitTx = as.config.gasLimits.tx
+      const gasLimitCallback = as.config.gasLimits.callback
+
 
       this.web3js.eth.getBlockNumber((err, blockNumber) => {
 
@@ -161,7 +161,7 @@ class Set extends Basic {
             appState.netId,
             as.claimer,
             blockNumber,
-            gasLimit,
+            gasLimitTx,
             tx => {
               if (tx && tx.isError) {
                 if (tx.isError === "1") {
@@ -225,25 +225,13 @@ class Set extends Basic {
             fromBlock: blockNumber
           },
           {
-            event: contracts.claimer.NotEnoughValueForOracle,
+            event: contracts.claimer.NotEnoughValue,
             filter: {addr: appState.wallet},
             callback: () => {
               this.setGlobalState({}, {
                 err: 'The oracle has not been called',
-                errMessage: 'Weird, the value was too low to cover the costs. Let us know at support@tweedentity.com',
-                NotEnoughValueForOracle: true
-              })
-            },
-            fromBlock: blockNumber
-          },
-          {
-            event: contracts.claimer.NotEnoughValueForCallback,
-            filter: {addr: appState.wallet},
-            callback: () => {
-              this.setGlobalState({}, {
-                err: 'The oracle has not been called',
-                errMessage: 'Weird, the value was too low to cover the cost of the callback. Let us know at support@tweedentity.com',
-                NotEnoughValueForCallback: true
+                errMessage: 'The value was too low to cover the costs. This should not happen. Report it at support@tweedentity.com',
+                NotEnoughValue: true
               })
             },
             fromBlock: blockNumber
@@ -254,10 +242,10 @@ class Set extends Basic {
           this.appNickname(),
           this.getGlobalState('postId'),
           gasPrice,
-          gasLimit,
+          gasLimitCallback,
           {
-            value: (gasPrice * gasLimit) + oraclizeCost,
-            gas: 290e3,
+            value: parseInt(this.state.value, 10),
+            gas: gasLimitTx,
             gasPrice
           }, (err, txHash) => {
             if (err) {
@@ -307,30 +295,70 @@ class Set extends Basic {
     return f[0] + (f[1] ? '.' + f[1].substring(0, d) : '')
   }
 
+  deleteBasicPrice() {
+    this.setState({
+      basicPrice: null
+    })
+  }
+
   setCost(price) {
-    console.log(price, typeof price)
     const as = this.appState()
+
     if (as.price) {
-      const gasPrice = price * 1e9
-      console.log(gasPrice)
+
       const ethPrice = as.price.value
-      console.log(ethPrice)
-      const oraclizeCost = Math.round(1e18 * 0.01 /ethPrice)
-      console.log(oraclizeCost)
-      const gasLimitTx = 290e3
-      const gasLimitOraclize = 170e3
-      const gasLimit = gasLimitTx + gasLimitOraclize
 
-      console.log(gasLimit)
-      const value = (oraclizeCost + (gasPrice * gasLimit)) / 1e18
+      if (price < as.gasInfo.safeLow / 10) {
+        this.setGlobalState({}, {
+          show: true,
+          modalTitle: 'Be careful',
+          modalBody: `Setting the gas to a price lower than the safeLow can end up in a transaction that will never be mined. Most importantly, it is possible that the transaction succeeds but the Oracle never broadcasts the callback, and the identity won't be set.`
+        })
+      }
 
-      console.log(value)
 
-      this.setState({
-        price,
-        eth: this.formatFloat(value, 6),
-        usd: this.formatFloat(ethPrice * value, 3)
-      })
+      if (price) {
+        price = parseInt(price, 10)
+      } else {
+        price = as.gasInfo.average / 10
+      }
+
+      const gasPrice = price * 1e9
+      const gasPrice21 = 21e9
+      const gasLimitTx = as.config.gasLimits.tx
+      const gasLimitCallback = as.config.gasLimits.callback
+      const txCost = gasPrice * gasLimitTx
+
+      const estimatedOraclizeCost = Math.round(1e18 * 0.01 / ethPrice)
+      let value = (estimatedOraclizeCost + (gasPrice * gasLimitCallback)).toString()
+
+      if (this.state.basicPrice) {
+        value = this.state.basicPrice + (gasPrice * gasLimitCallback)
+        let eth = (parseInt(value) + txCost) / 1e18
+        let usd = eth * ethPrice
+        this.setState({
+          price,
+          value,
+          eth: this.formatFloat(eth, 6),
+          usd: this.formatFloat(usd, 3)
+        })
+
+      } else {
+
+        this.props.app.contracts.claimer.calcQueryCost(gasPrice21, gasLimitCallback, (err, result) => {
+
+          if (result !== 0) {
+
+            this.setState({
+              basicPrice: parseInt(result.toString()) - gasPrice21 * gasLimitCallback
+            })
+            // caches the value for 5 minutes
+            setTimeout(this.deleteBasicPrice, 300000)
+            this.setCost(price)
+          }
+        })
+      }
+
     }
     else {
       this.props.getEthInfo()
@@ -339,38 +367,6 @@ class Set extends Basic {
         errMessage: 'Reloading them. Try again in a moment.',
         loading: false
       })
-    }
-  }
-
-
-  getCost() {
-
-    if (this.state.eth) {
-      return {
-        eth: this.state.eth,
-        usd: this.state.usd
-      }
-    }
-    const as = this.appState()
-    if (as.price) {
-      const gasPrice = as.gasInfo.average * 1e8
-      const ethPrice = as.price.value
-      const oraclizeCost = Math.round(1e18 * 0.01 /ethPrice)
-      const gasLimitTx = 290e3
-      const gasLimitOraclize = 170e3
-      const gasLimit = gasLimitTx + gasLimitOraclize
-
-      const value = (oraclizeCost + (gasPrice * gasLimit)) / 1e17
-      return {
-        eth: this.formatFloat(value, 6),
-        usd: this.formatFloat(ethPrice * value, 3)
-      }
-    }
-    else {
-      return {
-        eth: 0,
-        usd: 0
-      }
     }
   }
 
@@ -384,15 +380,11 @@ class Set extends Basic {
     })
   }
 
-  onSubmit(e) {
-    e.preventDefault()
-  }
-
   render() {
 
     const as = this.appState()
 
-    const {eth, usd} = this.getCost()
+    const {eth, usd} = this.state
 
     const state = as.data[this.shortWallet()]
     const appNickname = this.appNickname()
@@ -456,15 +448,13 @@ class Set extends Basic {
                         : <span>safe low and average price are <strong>{safeLow} Gwei</strong></span>
                     }.
                     </p>
-                    <p>Usually the average price is the best choice. Going lower than the safe low price can require
-                      hours to complete the set up. Prices higher than the average should complete the set up in a
-                      couple of minutes. Going too higher than the average is not very useful.</p>
+                    <p>Theoretically, the average price is the best choice. Going lower than the safe low price can make the transaction impossible because the miner could not mine it, or the callback from the Oracle could not be broadcasted because more priced callbacks have priority. Prices higher than the average should complete the set up in a couple of minutes.</p>
                     {
-                      a > 4
+                      a > 6
                         ?
-                        <p><Alert bsStyle={a > 10 ? 'danger' : 'warning'}>If you aren't in a rush and can wait a better
+                        <p><Alert bsStyle={a > 12 ? 'danger' : 'warning'}>If you aren't in a rush and can wait a better
                           moment to set up your tweedentity, you can save
-                          money because often the gas price is around 1 or 2 Gwei.</Alert></p>
+                          money because sometimes the gas price is much lower.</Alert></p>
                         : null
                     }
                   </Col>

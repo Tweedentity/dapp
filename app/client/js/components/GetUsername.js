@@ -1,5 +1,6 @@
 import LoadingButton from './extras/LoadingButton'
 import Basic from './Basic'
+import NoSubmit from "./extras/NoSubmit";
 
 const {Panel, Grid, Row, Col, FormGroup, ControlLabel, FormControl, InputGroup, HelpBlock} = ReactBootstrap
 
@@ -109,6 +110,7 @@ class GetUsername extends Basic {
                         : null
                     }
                   </FormGroup>
+                  <NoSubmit/>
                 </form>
                 <LoadingButton
                   text={`Look up for ${appName} user-id`}
