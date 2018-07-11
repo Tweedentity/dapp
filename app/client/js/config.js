@@ -31,6 +31,7 @@ module.exports = {
   },
   gasLimits: {
     tx: 290e3,
+    txUsage: 195e3,
     callback: 180e3
   }
 }
