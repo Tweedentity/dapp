@@ -316,7 +316,6 @@ class Set extends Basic {
         })
       }
 
-
       if (price) {
         price = parseInt(price, 10)
       } else {
@@ -325,22 +324,21 @@ class Set extends Basic {
 
       const gasPrice = price * 1e9
       const gasPrice21 = 21e9
-      const gasLimitTx = as.config.gasLimits.tx
       const gasLimitCallback = as.config.gasLimits.callback
-      const txCost = gasPrice * gasLimitTx
-
-      const estimatedOraclizeCost = Math.round(1e18 * 0.01 / ethPrice)
-      let value = (estimatedOraclizeCost + (gasPrice * gasLimitCallback)).toString()
 
       if (this.state.basicPrice) {
-        value = this.state.basicPrice + (gasPrice * gasLimitCallback)
-        let eth = (parseInt(value) + txCost) / 1e18
+        let value = this.state.basicPrice + (gasPrice * gasLimitCallback)
+        let eth = (parseInt(value, 10) + gasPrice * as.config.gasLimits.tx) / 1e18
         let usd = eth * ethPrice
+        let eth2 = (parseInt(value, 10) + gasPrice * as.config.gasLimits.txUsage) / 1e18
+        let usd2 = eth2 * ethPrice
         this.setState({
           price,
           value,
           eth: this.formatFloat(eth, 6),
-          usd: this.formatFloat(usd, 3)
+          usd: this.formatFloat(usd, 3),
+          eth2: this.formatFloat(eth2, 6),
+          usd2: this.formatFloat(usd2, 3)
         })
 
       } else {
@@ -384,7 +382,7 @@ class Set extends Basic {
 
     const as = this.appState()
 
-    const {eth, usd} = this.state
+    const {eth, usd, eth2, usd2} = this.state
 
     const state = as.data[this.shortWallet()]
     const appNickname = this.appNickname()
@@ -468,7 +466,7 @@ class Set extends Basic {
                         average={a}
                       />
                     </p>
-                    <p>Gas price: <strong>{this.state.price}</strong> &nbsp; Total cost: <strong>{eth} ETH ( ~${usd} )</strong></p>
+                    <p>Gas price: <strong>{this.state.price}</strong> &nbsp; Total value: <strong>{eth} ETH ( ~${usd} )</strong><br/>Expected final cost: <strong>{eth2} ETH ( ~${usd2} )</strong> (because the transaction, if successful, will use ~195,000 gas of the 290,000 set as gas limit)</p>
                   </Col>
                   <Col md={6}>
                     <p style={{paddingTop: 28}}>Alternatively, set the gas price our of the suggested range</p>
