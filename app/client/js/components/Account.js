@@ -41,8 +41,8 @@ class Account extends Basic {
             </p>
             <p className="user-data">
               {data.name}<br/>
-              <a href={this.appState().config.profileOnApp[this.props.webApp](data.username)}
-                 target="_blank">{as.config.decoration[this.appNickname()]}{data.username}</a>
+              <a href={as.config.profileOnApp[this.props.webApp](data.username)}
+                 target="_blank">{as.config.decoration[this.props.webApp]}{data.username}</a>
             </p>
           {idData}
           </span>
