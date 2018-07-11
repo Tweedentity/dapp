@@ -33,9 +33,10 @@ class Header extends Basic {
     const as = this.appState()
     const wallet = as.wallet
 
+    let exists = false
+
     if (wallet) {
 
-      let exists = false
       for (let webApp in dropDown) {
         let data = this.getGlobalState(webApp)
         if (data && data.username) {
@@ -83,6 +84,17 @@ class Header extends Basic {
     </Nav>
       : null
 
+    const publicProfile =
+      exists && section != 'profile'
+        ? <Nav onSelect={() => {
+          this.historyPush(`profile/${wallet}`)
+        }}>
+          <NavItem eventKey={1}>
+            <i className="fas fa-th"></i> Public profile
+          </NavItem>
+        </Nav>
+        : null
+
     return (
       <div>
         <NetworkStatus appState={this.props.app.appState}/>
@@ -100,6 +112,7 @@ class Header extends Basic {
             </Navbar.Brand>
             <Navbar.Toggle/>
             {dashboard}
+            {publicProfile}
           </Navbar.Header>
           <Navbar.Collapse>
             <Nav pullRight>
