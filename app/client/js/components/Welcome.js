@@ -40,7 +40,7 @@ class Welcome extends Basic {
           .fetch('wallet-stats', 'POST', {
             network: as.netId,
             address: state.wallet,
-            claimer: this.props.contracts.claimer.address
+            claimer: this.props.app.contracts.claimer.address
           })
           .then((responseJson) => {
             this.setGlobalState({
@@ -120,11 +120,11 @@ class Welcome extends Basic {
                 } {
                 this.state.expandWallet
                   ? <span>{as.wallet} <i onClick={this.expandWallet}
-                                         className="command fa fa-minus-circle"></i>
+                                         className="command fa fa-minus-circle" style={{cursor: 'pointer'}}></i>
                   </span>
 
                   : <span>{as.wallet.substring(0, 6)} <i onClick={this.expandWallet}
-                                                         className="command fa fa-plus-circle"></i>
+                                                         className="command fa fa-plus-circle" style={{cursor: 'pointer'}}></i>
                   </span>
               }</h4>
               {
@@ -179,24 +179,6 @@ class Welcome extends Basic {
               />
             </Col>
           </Row>
-          {/*<Row>*/}
-          {/*<Col md={4}>*/}
-          {/*<Account*/}
-          {/*app={this.props.app}*/}
-          {/*webApp="facebook"*/}
-          {/*icon="facebook"*/}
-          {/*active={false}*/}
-          {/*/>*/}
-          {/*</Col>*/}
-          {/*<Col md={4}>*/}
-          {/*<Account*/}
-          {/*app={this.props.app}*/}
-          {/*icon="google"*/}
-          {/*webApp="google"*/}
-          {/*active={false}*/}
-          {/*/>*/}
-          {/*</Col>*/}
-          {/*</Row>*/}
         </Grid>
       )
 
