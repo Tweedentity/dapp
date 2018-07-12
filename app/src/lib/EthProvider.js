@@ -71,13 +71,7 @@ class Provider {
             .then(info => {
               let gasInfo = {}
               try {
-                gasInfo = {
-                  safeLow: info.body.safeLow,
-                  block_time: info.body.block_time,
-                  safeLowWait: info.body.safeLowWait,
-                  average: info.body.average,
-                  avgWait: info.body.avgWait
-                }
+                gasInfo = info.body
                 db.set('gasInfo', JSON.stringify(gasInfo), 'EX', 300)
                 gasInfo.lastUpdate = Date.now()
                 db.set('gasLastInfo', JSON.stringify(gasInfo))
@@ -100,7 +94,7 @@ class Provider {
 
   }
 
-  scanTx(result, address) {
+  scanTx(result, address, claimer) {
 
     let txs = 0
     let froms = {}
@@ -109,6 +103,7 @@ class Provider {
     let valueTo = 0
     let execs = 0
     let deployes = 0
+    let claims = []
 
     for (let r of result) {
       txs++
@@ -116,6 +111,9 @@ class Provider {
         if (r.value != '0') {
           valueTo += parseInt(r.value.replace(/\d{12}$/, ''), 10) / 1e6
           tos[r.to] = 1
+          if (claimer && r.to.toLowerCase() === claimer.toLowerCase()) {
+            claims.push(r)
+          }
         } else {
           if (r.to) {
             execs++
@@ -137,12 +135,13 @@ class Provider {
       tos: _.keys(tos).length,
       valueFrom: valueFrom,
       valueTo: valueTo,
+      claims,
       execs,
       deployes
     }
   }
 
-  walletStats(network, address) {
+  walletStats(network, address, claimer) {
 
     const apiUrl = this.getApiUrl('txlist', network, address)
     const apiUrl2 = this.getApiUrl('balance', network, address)
@@ -154,7 +153,7 @@ class Provider {
           .set('Accept', 'application/json')
           .then(res2 => {
 
-            let stats = this.scanTx(res2.body.result, address)
+            let stats = this.scanTx(res2.body.result, address, claimer)
             stats.price = price
 
             return Promise.resolve(stats)

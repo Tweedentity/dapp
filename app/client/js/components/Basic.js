@@ -1,4 +1,4 @@
-
+const clientApi = require('../utils/ClientApi')
 
 class Basic extends React.Component {
   constructor(props) {
@@ -19,6 +19,10 @@ class Basic extends React.Component {
     ])
     this.db = this.props.app.db
     this.web3js = this.props.app.web3js
+  }
+
+  fetch(api, method, body) {
+    return clientApi.fetch(api, method, body)
   }
 
   bindAll(methods) {

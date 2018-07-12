@@ -29,19 +29,12 @@ class Signed extends Basic {
   findPost() {
     let contracts = this.props.app.contracts
 
-    return fetch(window.location.origin + `/api/scan/${this.appNickname()}?r=` + Math.random(), {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    return this
+      .fetch(`scan/${this.appNickname()}`, 'POST', {
         network: this.appState().netId,
         username: this.getGlobalState('username'),
         sig: this.getGlobalState('post')
-      }),
-    })
-      .then((response) => response.json())
+      })
       .then((responseJson) => {
         if (responseJson.error) {
           throw new Error(responseJson.error)

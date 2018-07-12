@@ -31,8 +31,8 @@ router.post('/wallet-stats', jsonParser, function (req, res, next) {
   const address = req.body.address
 
   Promise.all([
-    ethProvider.walletStats('1', address),
-    ethProvider.walletStats('3', address)
+    ethProvider.walletStats('1', address, req.body.network === '1' ? req.body.claimer : null),
+    ethProvider.walletStats('3', address, req.body.network === '3' ? req.body.claimer : null)
   ])
     .then(values => {
       res.status(200).json({

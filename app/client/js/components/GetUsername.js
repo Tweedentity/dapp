@@ -33,18 +33,11 @@ class GetUsername extends Basic {
     this.setGlobalState({}, {
       loading: true
     })
-    return fetch(window.location.origin + `/api/user-id/${this.appNickname()}?r=` + Math.random(), {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    return this
+      .fetch(`user-id/${this.appNickname()}`, 'POST', {
         network: this.appState().netId,
         username: this.getGlobalState('username')
-      }),
-    })
-      .then((response) => response.json())
+      })
       .then((responseJson) => {
         const r = responseJson.result
 

@@ -1,28 +1,59 @@
-import Slider, { createSliderWithTooltip } from 'rc-slider';
+const Utils = require('../utils')
+import Slider, {createSliderWithTooltip} from 'rc-slider';
+
 const SliderWithTooltip = createSliderWithTooltip(Slider);
 
 class GasPrice extends React.Component {
 
   render() {
 
-    const sl = this.props.safeLow
-    const a = this.props.average
-
-    const marks = {}
-
-    if (sl != a) {
-      marks[sl] = <strong>{sl}<br/>(safe low)</strong>
-      marks[a] = <strong>{a}<br/>(average)</strong>
-    } else {
-      marks[sl] = <strong>{sl}<br/>(safe low & average)</strong>
+    const gasInfo = {}
+    for (let k in this.props.gasInfo) {
+      if ('safeLow,average,fast'.split(',').indexOf(k) !== -1) {
+        gasInfo[k] = this.props.gasInfo[k] / 10
+      }
     }
 
-    let step = 0.1
-    let max = Math.round(a + (a < 10 ? a / 2 : a/3))
-    marks[max] = max
+    const step = 0.1
+    const marks = {}
+
+    let defValue = Utils.bestPrice(gasInfo)
+
+    console.log('Utils.bestPrice(as.gasInfo)', Utils.bestPrice(gasInfo))
+
+
+    marks[defValue] = <span><strong>{defValue}</strong></span>
+
+    const format = spec => {
+      const val = gasInfo[spec]
+      let captions = []
+      let br
+      for (let k in gasInfo) {
+        if (k === spec) {
+          captions.push(spec)
+        } else if (gasInfo[k] === val) {
+          captions.push(k)
+        }
+      }
+      marks[val] = <span><strong>{val}</strong><br/><span style={{fontSize: '70%'}}>{
+        captions.map(spec2 => <div key={spec + spec2}>{spec2}</div>)
+      }</span></span>
+    }
+
+    for (let k in gasInfo) {
+      format(k)
+    }
 
     return (<div style={{margin: '32px 8px 64px'}}>
-      <SliderWithTooltip min={sl} marks={marks} step={step} included={false} onChange={this.props.handlePrice} defaultValue={a} max={max}/>
+        <SliderWithTooltip
+          min={gasInfo.safeLow}
+          marks={marks}
+          step={step}
+          included={false}
+          onChange={this.props.handlePrice}
+          defaultValue={defValue}
+          max={gasInfo.fast}
+        />
       </div>
     )
 

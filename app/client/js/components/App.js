@@ -4,6 +4,7 @@ import createHistory from "history/createBrowserHistory"
 
 const history = window.History = createHistory()
 const config = require('../config')
+const clientApi = require('../utils/ClientApi')
 
 const registryAbi = require(`../abi/TweedentityRegistry`)
 const storeAbi = require(`../abi/Datastore`)
@@ -76,7 +77,8 @@ class App extends React.Component {
       'handleClose',
       'handleShow',
       'isProfile',
-      'getStores'
+      'getStores',
+      'checkPendingTxs'
     ]) {
       this[m] = this[m].bind(this)
     }
@@ -210,17 +212,11 @@ class App extends React.Component {
   }
 
   getEthInfo() {
-    return fetch(window.location.origin + '/api/eth-info?r=' + Math.random(), {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        network: this.state.netId
-      })
-    })
-      .then((response) => response.json())
+    return clientApi
+      .fetch('eth-info', 'POST', {
+          network: this.state.netId
+        }
+      )
       .then((responseJson) => {
         this.setState(responseJson)
       })
@@ -323,53 +319,43 @@ class App extends React.Component {
             let userId = typeof result === 'string' ? result : result.valueOf()
 
             if (userId !== '') {
-              return fetch(window.location.origin + '/api/data/' + appNickname + '?r=' + Math.random(), {
-                method: 'POST',
-                headers: {
-                  Accept: 'application/json',
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
+              return clientApi
+                .fetch(`data/${appNickname}`, 'POST', {
                   network: this.state.netId,
                   userId
                 })
-              }).then(response => {
-                return response.json()
-              }).then(json => {
-                count++
-                const {name, username, avatar, userId} = json.result
-                const profile = {
-                  userId,
-                  name,
-                  username,
-                  avatar
-                }
-                if (isProfile) {
-                  const profiles = this.state.profiles
-                  profiles[address][appNickname] = profile
-                  if (count === 2) {
-                    profiles[address].loaded = true
+                .then(json => {
+                  count++
+                  const {name, username, avatar, userId} = json.result
+                  const profile = {
+                    userId,
+                    name,
+                    username,
+                    avatar
                   }
-                  this.setState({
-                    profiles
-                  })
-                } else {
-                  data[appNickname] = profile
-                  this.db.put(shortWallet, data)
-                }
-              }).catch(function (ex) {
-                console.log('parsing failed', ex)
-              })
+                  if (isProfile) {
+                    const profiles = this.state.profiles
+                    profiles[address][appNickname] = profile
+                    if (count === 2) {
+                      profiles[address].loaded = true
+                      this.checkPendingTxs(profiles)
+                    }
+                  } else {
+                    data[appNickname] = profile
+                    this.db.put(shortWallet, data)
+                  }
+                })
+                .catch(function (ex) {
+                  console.log('parsing failed', ex)
+                })
             }
           } else if (isProfile) {
             count++
             const profiles = this.state.profiles
             if (count === 2) {
               profiles[address].loaded = true
+              this.checkPendingTxs(profiles)
             }
-            this.setState({
-              profiles
-            })
           } else {
             this.db.put(shortWallet, data)
           }
@@ -377,6 +363,25 @@ class App extends React.Component {
         })
       }
     }
+  }
+
+  checkPendingTxs(profiles) {
+    // const claimer = this.contracts.claimer.address
+    // return clientApi
+    //   .fetch('wallet-stats', 'POST', {
+    //     network: this.state.netId,
+    //     address: this.state.wallet,
+    //     claimer: this.props.contracts.claimer.address
+    //   })
+    //   .then((responseJson) => {
+    //
+    //     console.log(responseJson)
+        this.setState({
+          profiles
+        })
+
+      // })
+
   }
 
   setAppState(states) {
