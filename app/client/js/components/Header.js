@@ -90,7 +90,7 @@ class Header extends Basic {
           this.historyPush(`profile/${wallet}`)
         }}>
           <NavItem eventKey={1}>
-            <i className="fas fa-th"></i> Public profile
+            <i className="fas fa-user-circle"></i> Public profile
           </NavItem>
         </Nav>
         : null

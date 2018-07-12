@@ -49,7 +49,7 @@ class Account extends Basic {
       } else if (this.props.profile) {
         content = <span>
           <p>
-              <img style={{borderRadius: 100}} src="img/anonymous-avatar.png" width="120" height="120"/>
+              <i style={{fontSize:120, color: '#d5eaf2'}} className="fas fa-user-circle"></i>
             </p>
         <p className="user-data">
         Tweedentity not set, yet
@@ -57,8 +57,10 @@ class Account extends Basic {
       </span>
       } else {
         content = <span>
-          <p>
-              <img style={{borderRadius: 100}} src="img/anonymous-avatar.png" width="120" height="120"/>
+          <p>{
+            <i style={{fontSize:120, color: '#d5eaf2'}} className="fas fa-user-circle"></i>
+          }
+
             </p>
         <p className="user-data">
         Ready to claim your tweedentity?
