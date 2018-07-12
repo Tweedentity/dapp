@@ -50,8 +50,7 @@ app.use(function (req, res, next) {
 
 if (app.get('env') == 'development') {
   app.use((err, req, res, next) => {
-    res.status(err.status || 500)
-    res.render('error', {
+    res.status(err.status || 500).json({
       title: 'Error',
       message: err.message,
       error: err

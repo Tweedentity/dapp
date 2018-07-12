@@ -4,7 +4,6 @@ import Account from './Account'
 const {Panel, Alert, Grid, Row, Col} = ReactBootstrap
 import Basic from './Basic'
 
-
 class Welcome extends Basic {
   constructor(props) {
     super(props)
@@ -37,18 +36,12 @@ class Welcome extends Basic {
           loading: true
         })
 
-        return fetch(window.location.origin + '/api/wallet-stats?r=' + Math.random(), {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            network: this.appState().netId,
-            address: state.wallet
+        return this
+          .fetch('wallet-stats', 'POST', {
+            network: as.netId,
+            address: state.wallet,
+            claimer: this.props.contracts.claimer.address
           })
-        })
-          .then((response) => response.json())
           .then((responseJson) => {
             this.setGlobalState({
               stats: responseJson
@@ -141,7 +134,7 @@ class Welcome extends Basic {
                     marginTop: -30
                   }}>
                     <span className="danger"><i className="fas fa-exclamation-circle"></i> The Tweedentity smart contracts are under maintainance and right now it is not possible to set or unset a tweedentity.</span>
-                </p>
+                  </p>
                   : null
               }
             </Col>
@@ -187,22 +180,22 @@ class Welcome extends Basic {
             </Col>
           </Row>
           {/*<Row>*/}
-            {/*<Col md={4}>*/}
-              {/*<Account*/}
-                {/*app={this.props.app}*/}
-                {/*webApp="facebook"*/}
-                {/*icon="facebook"*/}
-                {/*active={false}*/}
-              {/*/>*/}
-            {/*</Col>*/}
-            {/*<Col md={4}>*/}
-              {/*<Account*/}
-                {/*app={this.props.app}*/}
-                {/*icon="google"*/}
-                {/*webApp="google"*/}
-                {/*active={false}*/}
-              {/*/>*/}
-            {/*</Col>*/}
+          {/*<Col md={4}>*/}
+          {/*<Account*/}
+          {/*app={this.props.app}*/}
+          {/*webApp="facebook"*/}
+          {/*icon="facebook"*/}
+          {/*active={false}*/}
+          {/*/>*/}
+          {/*</Col>*/}
+          {/*<Col md={4}>*/}
+          {/*<Account*/}
+          {/*app={this.props.app}*/}
+          {/*icon="google"*/}
+          {/*webApp="google"*/}
+          {/*active={false}*/}
+          {/*/>*/}
+          {/*</Col>*/}
           {/*</Row>*/}
         </Grid>
       )

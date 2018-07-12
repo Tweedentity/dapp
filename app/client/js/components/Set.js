@@ -1,3 +1,5 @@
+const Utils = require('../utils')
+
 import LoadingButton from './extras/LoadingButton'
 import LoadingBadge from './extras/LoadingBadge'
 import Basic from './Basic'
@@ -76,8 +78,7 @@ class Set extends Basic {
         upgradability
       })
       if (upgradability === 0) {
-        const average = as.gasInfo.average / 10
-        this.setCost(average)
+        this.setCost(Utils.bestPrice(as.gasInfo) / 10)
       }
 
     })
@@ -107,20 +108,13 @@ class Set extends Basic {
   }
 
   watchOracleTransactions(network, address, startBlock, gas, callback) {
-    return fetch(window.location.origin + '/api/get-txs?r=' + Math.random(), {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    return this
+      .fetch('/get-txs', 'POST', {
         network: this.appState().netId,
         address,
         startBlock,
         gas
       })
-    })
-      .then((response) => response.json())
       .then(tx => {
         callback(tx)
       })
@@ -171,7 +165,7 @@ class Set extends Basic {
               } else {
                 timerId = setTimeout(watchTxs, 30000)
                 if (count > 5) {
-                  this.setGlobalState({}, {warn: 'The oracle sometimes takes time. Please wait.'})
+                  this.setGlobalState({}, {warn: 'The oracle sometimes takes time, even hours. We suggest you to focus on something else and come back later to see if the tweedentity has been set.'})
                 }
                 count++
               }
@@ -439,14 +433,6 @@ class Set extends Basic {
                 <Row>
                   <Col md={12}>
                     <p><strong>Choose how much you like to spend</strong></p>
-                    <p>Based on <a href="https://ethgasstation.info" target="_blank">ETH Gas Station</a>, currently {
-                      sl != a
-                        ? <span>the safe low price is <strong>{safeLow} Gwei</strong> while the
-                      average price is <strong>{average} Gwei</strong></span>
-                        : <span>safe low and average price are <strong>{safeLow} Gwei</strong></span>
-                    }.
-                    </p>
-                    <p>Theoretically, the average price is the best choice. Going lower than the safe low price can make the transaction impossible because the miner could not mine it, or the callback from the Oracle could not be broadcasted because more priced callbacks have priority. Prices higher than the average should complete the set up in a couple of minutes.</p>
                     {
                       a > 6
                         ?
@@ -462,18 +448,17 @@ class Set extends Basic {
                     <p>
                       <GasPrice
                         handlePrice={this.handlePrice}
-                        safeLow={sl}
-                        average={a}
+                        gasInfo={as.gasInfo}
                       />
                     </p>
-                    <p>Gas price: <strong>{this.state.price}</strong> &nbsp; Total value: <strong>{eth} ETH ( ~${usd} )</strong><br/>Expected final cost: <strong>{eth2} ETH ( ~${usd2} )</strong> (because the transaction, if successful, will use ~195,000 gas of the 290,000 set as gas limit)</p>
                   </Col>
                   <Col md={6}>
-                    <p style={{paddingTop: 28}}>Alternatively, set the gas price our of the suggested range</p>
+                    <p style={{paddingTop: 28}}>Alternatively, set the gas price off the suggested range</p>
                     <p>
                       <Form inline>
                         <FormGroup controlId="formInlineName">
-                          <FormControl type="text" placeholder="Price in Gwei" onChange={this.handlePriceManually} width={100}/>
+                          <FormControl type="text" placeholder="Price in Gwei" onChange={this.handlePriceManually}
+                                       width={100}/>
                           <NoSubmit/>
                         </FormGroup>
                         {' '}
@@ -486,6 +471,14 @@ class Set extends Basic {
                           }}>Set</Button>
                       </Form>
                     </p>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col md={12}>
+                    <p>Gas price: <strong>{this.state.price}</strong> &nbsp; Total value: <strong>{eth} ETH (
+                      ~${usd} )</strong><br/>Expected final cost: <strong>{eth2} ETH ( ~${usd2} )</strong> (because the
+                      transaction, if successful, will use ~195,000 gas of the 290,000 set as gas limit)</p>
+
                   </Col>
                 </Row>
                 <Row>

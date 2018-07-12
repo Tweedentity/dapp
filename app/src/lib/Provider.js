@@ -102,11 +102,13 @@ class Provider {
 
   getTwitterUserId(username) {
     let errorMessage
+
     return request
       .get(`https://twitter.com/${username}`)
       .then(tweet => {
         if (tweet.text) {
           const $ = cheerio.load(tweet.text)
+
 
           const name = $('.ProfileHeaderCard-name a').text()
           if (name) {

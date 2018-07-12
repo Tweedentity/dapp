@@ -25,6 +25,11 @@ class Utils {
     return res[0] //+ (res[1] ? '.' + res[1].substring(0, 2) : '')
   }
 
+  static bestPrice(gasInfo) {
+    return gasInfo.average === gasInfo.fast ? gasInfo.average
+      : Math.round(((gasInfo.fast - gasInfo.average) / 3 + gasInfo.average) * 10) / 10
+  }
+
 }
 
 module.exports = Utils
