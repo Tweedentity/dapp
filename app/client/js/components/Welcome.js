@@ -179,24 +179,6 @@ class Welcome extends Basic {
               />
             </Col>
           </Row>
-          {/*<Row>*/}
-          {/*<Col md={4}>*/}
-          {/*<Account*/}
-          {/*app={this.props.app}*/}
-          {/*webApp="facebook"*/}
-          {/*icon="facebook"*/}
-          {/*active={false}*/}
-          {/*/>*/}
-          {/*</Col>*/}
-          {/*<Col md={4}>*/}
-          {/*<Account*/}
-          {/*app={this.props.app}*/}
-          {/*icon="google"*/}
-          {/*webApp="google"*/}
-          {/*active={false}*/}
-          {/*/>*/}
-          {/*</Col>*/}
-          {/*</Row>*/}
         </Grid>
       )
 
