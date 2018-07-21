@@ -33,13 +33,12 @@ class Set extends Basic {
   }
 
   investigateNotUpgradability() {
-    const store = this.appNickname() + 'Store'
     const upgradability = this.state.upgradability
     const wallet = this.appState().wallet
     const userId = this.getGlobalState('userId')
 
     if (upgradability === 1) {
-      this.props.app.contracts[store].getAddress(this.getGlobalState('userId'), (err, result) => {
+      this.props.app.contracts.stores[this.appNickname()].getAddress(this.getGlobalState('userId'), (err, result) => {
         const address = result.valueOf()
         if (address.toLowerCase() != wallet.toLowerCase()) {
           this.setState({
@@ -49,9 +48,9 @@ class Set extends Basic {
       })
     } else {
 
-      this.props.app.contracts[store].getAddressLastUpdate(wallet, (err, result) => {
+      this.props.app.contracts.stores[this.appNickname()].getAddressLastUpdate(wallet, (err, result) => {
         const addressLastUpdate = parseInt(result.valueOf(), 10)
-        this.props.app.contracts[store].getUidLastUpdate(this.getGlobalState('userId'), (err, result) => {
+        this.props.app.contracts.stores[this.appNickname()].getUidLastUpdate(this.getGlobalState('userId'), (err, result) => {
           const uidLastUpdate = parseInt(result.valueOf(), 10)
           this.props.app.contracts.manager.minimumTimeBeforeUpdate((err, result) => {
             const minimumTimeBeforeUpdate = parseInt(result.valueOf(), 10)
@@ -174,7 +173,7 @@ class Set extends Basic {
 
         let callbackEvents = [
           {
-            event: contracts[this.appNickname() + 'Store'].IdentitySet,
+            event: contracts.stores[this.appNickname()].IdentitySet,
             filter: {addr: appState.wallet},
             callback: () => {
               this.setGlobalState({step: 3}, {warn: null})

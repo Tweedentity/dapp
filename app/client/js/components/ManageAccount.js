@@ -22,7 +22,6 @@ class ManageAccount extends Basic {
   }
 
   checkUpgradability() {
-    const store = this.appNickname()+'Store'
     const wallet = this.appState().wallet
     const userId = this.getGlobalState(this.appNickname()).userId
 
@@ -31,9 +30,9 @@ class ManageAccount extends Basic {
 
       if (upgradability === 2) {
 
-        this.props.app.contracts[store].getAddressLastUpdate(wallet, (err, result) => {
+        this.props.app.contracts.stores[this.appNickname()].getAddressLastUpdate(wallet, (err, result) => {
           const addressLastUpdate = parseInt(result.valueOf(), 10)
-          this.props.app.contracts[store].getUidLastUpdate(userId, (err, result) => {
+          this.props.app.contracts.stores[this.appNickname()].getUidLastUpdate(userId, (err, result) => {
             const uidLastUpdate = parseInt(result.valueOf(), 10)
             this.props.app.contracts.manager.minimumTimeBeforeUpdate((err, result) => {
               const minimumTimeBeforeUpdate = parseInt(result.valueOf(), 10)
