@@ -25,6 +25,10 @@ module.exports = {
     twitter: 1,
     reddit: 2
   },
+  appNickname: {
+    1: 'twitter',
+    2: 'reddit'
+  },
   profileOnApp: {
     twitter: (username) => `https://twitter.com/${username}`,
     reddit: (username) => `https://www.reddit.com/user/${username}`
