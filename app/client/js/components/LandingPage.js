@@ -43,13 +43,13 @@ class LandingPage extends Basic {
           <Col md={3}>
             <h3>What it is</h3>
             <p>Tweedentity is a secure identity solution that connects the centralized and
-              the decentralized world, associating univocally a Twitter user-id to an Ethereum address.
+              the decentralized world, associating univocally either a Twitter user-id or a Reddit username to an Ethereum address.
             </p>
           </Col>
           <Col md={3}>
             <h3>What it allows</h3>
-            <p>After setting up your <i>tweedentity</i>, anytime that you open a ÐApp, it will recognizes
-              your Twitter user-id and authenticate yourself. Automatically.
+            <p>After setting up your <i>tweedentity</i>, anytime that you open a ÐApp integrating Tweedentity, the ÐApp will recognizes
+              your Twitter user-id or your Reddit username and authenticate yourself. Automatically.
             </p>
           </Col>
           <Col md={3}>
@@ -63,7 +63,7 @@ class LandingPage extends Basic {
             <p className="centered trynow">
               <Button bsStyle="info" bsSize="large"
             onClick={ this.goToApp}
-            >Try the beta!</Button>
+              >Set your <i>tweedentity</i> now!</Button>
             </p>
           </Col>
         </Row>
@@ -77,6 +77,7 @@ class LandingPage extends Basic {
           <Col md={12}>
             <div className="centered">
             <h1>How it works</h1>
+            <p>The Twitter case</p>
             </div>
           </Col>
         </Row>
@@ -158,17 +159,16 @@ class LandingPage extends Basic {
           </Col>
 
           <Col md={6}>
-            <h3>Development</h3>
-            <p><b>Tweedentity API</b><br/>A
-              simple API to retrieve the tweet and verify the signature.<br/><em>Done.</em></p>
-            <p><b>Tweedentity
-              Store</b><br/>A set of smart contract to verify and save the <i>tweedentity</i>.<br/>
-              <em>Done.</em></p>
+            <h3>Components</h3>
+            <p><b><a target="_blank" href="https://github.com/Tweedentity/dapp/tree/master/api">Tweedentity API</a></b><br/>A
+              simple API to retrieve a post and verify the signature.</p>
+            <p><b><a target="_blank" href="https://github.com/Tweedentity/dapp/tree/master/store">Tweedentity
+              Store</a></b><br/>A set of smart contract to verify and save the <i>tweedentities</i>.</p>
             <p><b><a target="_blank" href="https://dapp.tweedentity.com">Tweedentity ÐApp</a></b><br/>A
               decentralized app to set a tweedentity and remove an existent
-              one. <br/><em>Done.</em></p>
-            <p><b>Tweedentity.js</b><br/>A Javascript library for ÐApp developers. <br/>
-              <em>Coming soon.</em></p>
+              one.</p>
+            <p><b><a target="_blank" href="https://npmjs.com/package/tweedentity">Tweedentity.js</a></b><br/>A Javascript library for ÐApp developers. <br/>
+              <em>First, untested version for brave hearts.</em></p>
             <p>All the code is in our <a target="_blank" href="https://github.com/tweedentity/dapp">repository on Github</a>.</p>
           </Col>
         </Row>
