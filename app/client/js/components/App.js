@@ -264,7 +264,6 @@ class App extends React.Component {
         })
         .then(results => {
 
-          console.log(results)
           let data = {}
 
           for (let profile of results) {
@@ -296,7 +295,6 @@ class App extends React.Component {
       })
       .then((responseJson) => {
 
-        console.log(responseJson)
         this.setState({
           profiles
         })
