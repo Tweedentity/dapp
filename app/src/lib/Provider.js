@@ -96,51 +96,61 @@ class Provider {
     if (webApp === 'twitter') {
       return this.getTwitterUserId(username)
     } else {
-      return this.getRedditUserId(username)
+      return this.getDataByTID('reddit', username)
     }
   }
 
   getTwitterUserId(username) {
     let errorMessage
 
-    return request
-      .get(`https://twitter.com/${username}`)
-      .then(tweet => {
-        if (tweet.text) {
-          const $ = cheerio.load(tweet.text)
+    const key = `twitter:${username}`
+    return db.getAsync(key)
+      .then(data => {
+        if (data) {
+          return Promise.resolve({
+            result: JSON.parse(data)
+          })
+        } else {
+          return request
+            .get(`https://twitter.com/${username}`)
+            .then(tweet => {
 
+              if (tweet.text) {
+                const $ = cheerio.load(tweet.text)
+                const name = $('.ProfileHeaderCard-name a').text()
+                if (name) {
+                  const avatar = $('img.ProfileAvatar-image ').attr('src')
+                  username = $('.ProfileHeaderCard-screenname b').text()
+                  const userId = $('.ProfileNav').attr('data-user-id')
 
-          const name = $('.ProfileHeaderCard-name a').text()
-          if (name) {
+                  const data = {
+                    userId,
+                    username,
+                    name,
+                    avatar
+                  }
+                  db.set(key, JSON.stringify(data), 'EX', 3600)
+                  return Promise.resolve({
+                    result: data
+                  })
+                } else {
 
-            const avatar = $('img.ProfileAvatar-image ').attr('src')
-            const sn = $('.ProfileHeaderCard-screenname b').text()
-            const userId = $('.ProfileNav').attr('data-user-id')
-
-            return Promise.resolve({
-              result: {
-                userId,
-                sn,
-                name,
-                avatar
+                  if (/<h1>Account suspended<\/h1>/.test(tweet.text)) {
+                    throw(errorMessage = 'Account suspended')
+                  } else {
+                    throw(errorMessage = 'User not found')
+                  }
+                }
+              } else {
+                throw(errorMessage = 'User not found')
               }
             })
-          } else {
-
-            if (/<h1>Account suspended<\/h1>/.test(tweet.text)) {
-              throw(errorMessage = 'Account suspended')
-            } else {
-              throw(errorMessage = 'User not found')
-            }
-          }
-        } else {
-          throw(errorMessage = 'User not found')
+            .catch((err) => {
+              return Promise.resolve({
+                error: errorMessage || 'User not found'
+              })
+            })
         }
-      })
-      .catch((err) => {
-        return Promise.resolve({
-          error: errorMessage || 'User not found'
-        })
       })
   }
 
@@ -151,7 +161,7 @@ class Provider {
         if (user) {
           return Promise.resolve(JSON.parse(user))
         } else {
-          return tServer.getRedditUserAbout()
+          return this.tServer.getDataByRedditUsername(username)
             .then(data => {
               db.set(key, JSON.stringify(data), 'EX', 3600)
               return Promise.resolve(data)
@@ -166,14 +176,11 @@ class Provider {
 
     return this.getRedditUserAbout(username)
       .then(data => {
-
         return request
           .get(`https://reddit.com/user/${username}/comments.json`)
           .set('Accept', 'application/json')
           .then(res => {
-
             let userData = res.body
-
             if (userData.error) {
               throw(errorMessage = 'Post not found')
             } else if (userData.data && Array.isArray(userData.data.children)) {
@@ -215,43 +222,7 @@ class Provider {
 
   }
 
-  getRedditUserId(username) {
-    return db.getAsync('2/' + username)
-      .then(user => {
-        if (user) {
-          return Promise.resolve({
-            result: JSON.parse(user)
-          })
-        } else {
-
-          let errorMessage
-          return this.getRedditUserAbout(username)
-            .then(data => {
-
-              return request
-                .get(`https://www.reddit.com/user/${username}`)
-                .then(redditor => {
-                  if (redditor.text) {
-                    const $ = cheerio.load(redditor.text)
-                    data.name = $('h4').text()
-                  }
-                  db.set('2/' + username, JSON.stringify(data), 'EX', 3600)
-                  return Promise.resolve({
-                    result: data
-                  })
-                })
-            })
-            .catch((err) => {
-              return Promise.resolve({
-                error: errorMessage || 'User not found'
-              })
-            })
-        }
-      })
-
-  }
-
-  getDataFromUserId(webApp, userId) {
+  getDataByTID(webApp, userId) {
     const key = `${tweedentity.config.appIds[webApp]}/${userId}`
     return db.getAsync(key)
       .then(user => {
