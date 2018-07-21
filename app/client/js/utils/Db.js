@@ -8,6 +8,7 @@ class Db {
   }
 
   put(key, val) {
+
     try {
       let db = this.data
       let data
@@ -36,10 +37,11 @@ class Db {
 
   set(key, val) {
     try {
+      if (this.data[key]) {
+        delete this.data[key]
+      }
       if (val) {
         this.data[key] = val
-      } else {
-        delete this.data[key]
       }
       ls('db', JSON.stringify(this.data))
       this.setState(this.data)

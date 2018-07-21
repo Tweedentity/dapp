@@ -202,7 +202,6 @@ class Unset extends Basic {
                       this.startTransaction(as)
                     }}
                   /></p>
-
                 </Panel.Body>
               </Panel>
             </Col>

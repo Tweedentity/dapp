@@ -19,9 +19,6 @@ class GasPrice extends React.Component {
 
     let defValue = Utils.bestPrice(gasInfo)
 
-    console.log('Utils.bestPrice(as.gasInfo)', Utils.bestPrice(gasInfo))
-
-
     marks[defValue] = <span><strong>{defValue}</strong></span>
 
     const format = spec => {

@@ -138,12 +138,12 @@ router.post('/data/:webApp', jsonParser, function (req, res, next) {
   const webApp = req.params.webApp
   const provider = new Provider()
 
-  provider.getDataFromUserId(webApp, req.body.userId)
+  provider.getDataByTID(webApp, req.body.userId)
     .then(result => {
       res.status(200).json(result)
     })
     .catch(err => {
-      res.status(500)
+      res.status(200).json({error: err.message})
     })
 
 })

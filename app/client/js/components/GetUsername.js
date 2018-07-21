@@ -41,9 +41,9 @@ class GetUsername extends Basic {
       .then((responseJson) => {
         const r = responseJson.result
 
-        if (r.sn) {
+        if (r.userId) {
           this.setGlobalState({
-            username: r.sn,
+            username: r.username,
             userId: r.userId,
             name: r.name,
             avatar: r.avatar
