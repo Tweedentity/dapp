@@ -1,6 +1,6 @@
 {
   "name": "tweedentity",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "main": "index.js",
   "author": "Francesco Sullo <francesco@sullo.co>",
@@ -19,6 +19,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Tweedentity/dapp.git/tweedentity-js"
+    "url": "https://github.com/Tweedentity/dapp/tree/master/tweedentity-js"
   }
 }
