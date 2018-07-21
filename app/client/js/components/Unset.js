@@ -64,9 +64,9 @@ class Unset extends Basic {
 
       this.web3js.eth.getBlockNumber((err, blockNumber) => {
 
-        let event = contracts[this.appNickname() + 'Store'].IdentityUnset
+        let event = contracts.stores[this.appNickname()].IdentityUnset
         if (typeof event === 'undefined') {
-          event = contracts[this.appNickname() + 'Store'].IdentityRemoved
+          event = contracts.stores[this.appNickname()].IdentityRemoved
         }
 
         let startEvents = [
