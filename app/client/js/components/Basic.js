@@ -66,7 +66,7 @@ class Basic extends React.Component {
     if (webApp === 'twitter') {
       return data.userId
     } else {
-      return data.username.toLowerCase()
+      return data.username ? data.username.toLowerCase() : null
     }
   }
 
