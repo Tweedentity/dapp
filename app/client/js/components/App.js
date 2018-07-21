@@ -1,15 +1,10 @@
 const ENS = require('ethereum-ens')
-
-import createHistory from "history/createBrowserHistory"
-
+const _ = require('lodash')
+import createHistory from 'history/createBrowserHistory'
 const history = window.History = createHistory()
+const tweedentityClient = require('tweedentity/Client')
 const config = require('../config')
 const clientApi = require('../utils/ClientApi')
-
-const registryAbi = require(`../abi/TweedentityRegistry`)
-const storeAbi = require(`../abi/Datastore`)
-const managerAbi = require(`../abi/StoreManager`)
-const claimerAbi = require(`../abi/OwnershipClaimer`)
 
 const {Modal, Button} = ReactBootstrap
 
@@ -70,14 +65,13 @@ class App extends React.Component {
       'getNetwork',
       'watchAccounts0',
       'getAccounts',
+      'getAccountData',
       'setAppState',
       'getEthInfo',
-      'getContracts',
       'callMethod',
       'handleClose',
       'handleShow',
       'isProfile',
-      'getStores',
       'checkPendingTxs'
     ]) {
       this[m] = this[m].bind(this)
@@ -112,51 +106,29 @@ class App extends React.Component {
       this.web3js = new Web3(web3.currentProvider)
       this.web3js.eth.getTransactionReceiptMined = require("../utils/getTransactionReceiptMined")
 
+      this.tClient = new tweedentityClient(this.web3js)
 
-      this.web3js.version.getNetwork((err, netId) => {
-
-        let env
-
-        switch (netId) {
-          case '1':
-            if (config.registry.address.main) {
-              env = 'main'
-            }
-            break
-          case '3':
-            if (config.registry.address.ropsten) {
-              env = 'ropsten'
-              break
-            }
-          default:
-            this.setState({
-              netId: '0',
-              connected: 0,
-              connectionChecked: true
-            })
-        }
-
-        if (env) {
-
+      this.tClient.load()
+        .then(() => {
+          this.contracts = this.tClient.contracts
           this.setState({
-            netId,
+            netId: this.tClient.netId,
             connected: 1,
-            env
+            env: this.tClient.env,
+            ready: this.tClient.ready ? 1 : 0
           })
-
-          if (env === 'main') {
-            (new ENS(this.web3js))
-              .resolver('tweedentity.eth')
-              .addr()
-              .then(addr => {
-                this.getStores(addr)
-              })
-          } else {
-            this.getStores(config.registry.address[env])
-          }
-
-        }
-      })
+          this.getEthInfo()
+          this.watchAccounts0(true)
+          setInterval(this.watchAccounts0, 1000)
+        })
+        .catch(err => {
+          console.log(err)
+          this.setState({
+            netId: '0',
+            connected: 0,
+            connectionChecked: true
+          })
+        })
 
     } else {
       console.log('web3 not detected')
@@ -166,49 +138,6 @@ class App extends React.Component {
         connectionChecked: true
       })
     }
-  }
-
-  getStores(registryAddress) {
-    const registry = this.web3js.eth.contract(registryAbi).at(registryAddress)
-    registry.getStore('twitter', (err, twitterStore) => {
-
-      registry.getStore('reddit', (err, redditStore) => {
-
-        this.contracts = {
-          registry,
-          twitterStore: this.web3js.eth.contract(storeAbi).at(twitterStore),
-          redditStore: this.web3js.eth.contract(storeAbi).at(redditStore)
-        }
-
-        this.getEthInfo()
-        this.watchAccounts0(true)
-        setInterval(this.watchAccounts0, 1000)
-        this.getContracts()
-      })
-    })
-  }
-
-  getContracts() {
-
-    const registry = this.contracts.registry
-
-    registry.isReady((err, ready) => {
-      if (ready.valueOf() === '0') {
-        this.setState({
-          ready: 1
-        })
-        registry.manager((err, result) => {
-          this.contracts.manager = this.web3js.eth.contract(managerAbi).at(result)
-          registry.claimer((err, result) => {
-            this.contracts.claimer = this.web3js.eth.contract(claimerAbi).at(result)
-          })
-        })
-      } else {
-        this.setState({
-          ready: 0
-        })
-      }
-    })
   }
 
   getEthInfo() {
@@ -280,14 +209,33 @@ class App extends React.Component {
     }
   }
 
+  getAccountData(appNickname, userId) {
+    return clientApi
+      .fetch(`data/${appNickname}`, 'POST', {
+        network: this.state.netId,
+        userId
+      })
+      .then(json => {
+        const {name, username, avatar, userId} = json.result
+        const profile = {
+          userId,
+          name,
+          username,
+          avatar,
+          appId: config.appId[appNickname]
+        }
+        return Promise.resolve(profile)
+      })
+  }
+
   getAccounts(params = {}) {
 
     let isProfile = false
 
     let address = params.address
+    const profiles = {}
     if (address) {
       isProfile = true
-      const profiles = {}
       profiles[address] = {
         twitter: {},
         reddit: {},
@@ -303,84 +251,58 @@ class App extends React.Component {
     if (address) {
 
       let shortWallet = address.substring(0, 6)
-
       let count = 0
 
-      for (let appNickname of ['twitter', 'reddit']) {
-        const store = appNickname + 'Store'
-
-        this.contracts[store].getUid(address, (err, result) => {
-
-          let data = {}
-          data[appNickname] = {}
-
-          if (result !== '') {
-
-            let userId = typeof result === 'string' ? result : result.valueOf()
-
-            if (userId !== '') {
-              return clientApi
-                .fetch(`data/${appNickname}`, 'POST', {
-                  network: this.state.netId,
-                  userId
-                })
-                .then(json => {
-                  count++
-                  const {name, username, avatar, userId} = json.result
-                  const profile = {
-                    userId,
-                    name,
-                    username,
-                    avatar
-                  }
-                  if (isProfile) {
-                    const profiles = this.state.profiles
-                    profiles[address][appNickname] = profile
-                    if (count === 2) {
-                      profiles[address].loaded = true
-                      this.checkPendingTxs(profiles)
-                    }
-                  } else {
-                    data[appNickname] = profile
-                    this.db.put(shortWallet, data)
-                  }
-                })
-                .catch(function (ex) {
-                  console.log('parsing failed', ex)
-                })
-            }
-          } else if (isProfile) {
-            count++
-            const profiles = this.state.profiles
-            if (count === 2) {
-              profiles[address].loaded = true
-              this.checkPendingTxs(profiles)
-            }
-          } else {
-            this.db.put(shortWallet, data)
+      return this.tClient.getIdentities(address)
+        .then(result => {
+          count = _.keys(result).length
+          let promises = []
+          for (let appNickname in result) {
+            promises.push(this.getAccountData(appNickname, result[appNickname]))
           }
-
+          return Promise.all(promises)
         })
-      }
+        .then(results => {
+
+          console.log(results)
+          let data = {}
+
+          for (let profile of results) {
+            const appNickname = config.appNickname[profile.appId]
+            data[appNickname] = {}
+            if (isProfile) {
+              profiles[address][appNickname] = profile
+            } else {
+              data[appNickname] = profile
+              this.db.put(shortWallet, data)
+            }
+
+          }
+          if (isProfile) {
+            profiles[address].loaded = true
+          }
+          return this.checkPendingTxs(profiles)
+        })
     }
   }
 
   checkPendingTxs(profiles) {
-    // const claimer = this.contracts.claimer.address
-    // return clientApi
-    //   .fetch('wallet-stats', 'POST', {
-    //     network: this.state.netId,
-    //     address: this.state.wallet,
-    //     claimer: this.props.contracts.claimer.address
-    //   })
-    //   .then((responseJson) => {
-    //
-    //     console.log(responseJson)
+    const claimer = this.contracts.claimer.address
+    return clientApi
+      .fetch('wallet-stats', 'POST', {
+        network: this.state.netId,
+        address: this.state.wallet,
+        claimer
+      })
+      .then((responseJson) => {
+
+        console.log(responseJson)
         this.setState({
           profiles
         })
 
-      // })
+        return Promise.resolve()
+      })
 
   }
 

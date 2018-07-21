@@ -1,18 +1,18 @@
 const db = require('./db').redis
 const _ = require('lodash')
-const Web3 = require('web3')
 const request = require('superagent')
 const fs = require('./fs')
 const path = require('path')
 const cheerio = require('cheerio')
-const EthProvider = require('./EthProvider')
 const utils = require('./Utils')
 
-const etherscanApiKey = process.env.ETHERSCAN_TWEEDENTITY_API_KEY
-
-let web3
+const tweedentity = require('tweedentity')
 
 class Provider {
+
+  constructor() {
+    this.tServer = tweedentity.Server
+  }
 
   saveHtml(src) {
     fs.writeFileSync(path.resolve(__dirname, '../../log/log' + Math.random() + ".html"), src)
@@ -151,25 +151,8 @@ class Provider {
         if (user) {
           return Promise.resolve(JSON.parse(user))
         } else {
-          return request
-            .get(`https://www.reddit.com/user/${username}/about.json`)
-            .set('Accept', 'application/json')
-            .then(res => {
-              let data = res.body && res.body.data || {}
-              if (data.name) {
-                const name = data.name.toLowerCase()
-                if (name === username.toLowerCase()) {
-                  data = {
-                    userId: data.id,
-                    sn: data.name,
-                    avatar: data.icon_img.replace(/&amp;/g, '&')
-                  }
-                } else {
-                  throw(errorMessage = 'User not found')
-                }
-              } else {
-                throw(errorMessage = 'User not found')
-              }
+          return tServer.getRedditUserAbout()
+            .then(data => {
               db.set(key, JSON.stringify(data), 'EX', 3600)
               return Promise.resolve(data)
             })
@@ -233,7 +216,7 @@ class Provider {
   }
 
   getRedditUserId(username) {
-    return db.getAsync('2/'+username)
+    return db.getAsync('2/' + username)
       .then(user => {
         if (user) {
           return Promise.resolve({
@@ -252,7 +235,7 @@ class Provider {
                     const $ = cheerio.load(redditor.text)
                     data.name = $('h4').text()
                   }
-                  db.set('2/'+username, JSON.stringify(data), 'EX', 3600)
+                  db.set('2/' + username, JSON.stringify(data), 'EX', 3600)
                   return Promise.resolve({
                     result: data
                   })
@@ -268,63 +251,20 @@ class Provider {
 
   }
 
-  getDataFromRedditUsername(username) {
-    return this.getRedditUserId(username)
-      .then(data => {
-        data.result.username = data.result.sn
-        delete data.result.sn
-        return Promise.resolve(data)
-      })
-  }
-
   getDataFromUserId(webApp, userId) {
-    if (webApp === 'twitter') {
-      return this.getDataFromTwitterUserId(userId)
-    } else {
-      return this.getDataFromRedditUsername(userId)
-    }
-  }
-
-  getDataFromTwitterUserId(userId) {
-
-    return db.getAsync('1/'+userId)
+    const key = `${tweedentity.config.appIds[webApp]}/${userId}`
+    return db.getAsync(key)
       .then(user => {
         if (user) {
           return Promise.resolve({
             result: JSON.parse(user)
           })
         } else {
-          let errorMessage
-          return request
-            .get(`https://twitter.com/intent/user?user_id=${userId}`)
-            .then(tweet => {
-              if (tweet.text) {
-
-                const $ = cheerio.load(tweet.text)
-
-                let title = $('title').text().split(' (@')
-                let name = title[0]
-                let username = title[1].split(')')[0]
-                let avatar = $('img.photo').attr('src')
-
-                const result = {
-                  userId,
-                  name,
-                  username,
-                  avatar
-                }
-                db.set('1/'+userId, JSON.stringify(result), 'EX', 3600)
-                return Promise.resolve({
-                  result
-                })
-              } else {
-                throw(errorMessage = 'User not found')
-              }
-            })
-            .catch((err) => {
-              console.log(err)
+          return this.tServer.getDataById(webApp, userId)
+            .then(result => {
+              db.set(key, JSON.stringify(result.userData), 'EX', 3600)
               return Promise.resolve({
-                error: 'User not found'
+                result: result.userData
               })
             })
         }

@@ -2,7 +2,7 @@
 
 This is a repo containing all the components of the tweedentity system.
 
-### Getting start
+### Getting started
 
 Clone the repo:
 

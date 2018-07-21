@@ -12,12 +12,12 @@ for (let c of contracts) {
 
   let abi = require(`../store/build/contracts/${c}`).abi
 
-  let existentAbiPath = path.resolve(__dirname, '../app/client/js/abi', `${c}.json`)
-  let existentAbi = require(existentAbiPath)
+  let appAbiPath = path.resolve(__dirname, '../tweedentity-js/config', `${c}.json`)
+  let appAbi = require(appAbiPath)
 
   let modified = false
 
-  if (abi.length !== existentAbi.length) {
+  if (abi.length !== appAbi.length) {
 
     modified = true
 
@@ -26,7 +26,7 @@ for (let c of contracts) {
     for (let j = 0; j < abi.length; j++) {
 
       let a = abi[j]
-      let b = existentAbi[j]
+      let b = appAbi[j]
       for (let p of [
         'constant', 'name', 'payable', 'stateMutability', 'type', 'anonymous'
       ]) {
@@ -75,9 +75,7 @@ for (let c of contracts) {
   }
 
   if (modified) {
-    console.log('Writing', existentAbiPath)
-    fs.writeFileSync(existentAbiPath, JSON.stringify(abi, null, 2))
+    console.log('Writing', appAbiPath)
+    fs.writeFileSync(appAbiPath, JSON.stringify(abi, null, 2))
   }
-
-
 }
