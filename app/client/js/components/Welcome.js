@@ -1,4 +1,5 @@
 import LoadingButton from './extras/LoadingButton'
+import LoadingApp from './LoadingApp'
 import Account from './Account'
 
 const {Panel, Alert, Grid, Row, Col} = ReactBootstrap
@@ -184,16 +185,11 @@ class Welcome extends Basic {
 
     }
 
-    return (
-      <Grid>
-        <Row>
-          <Col md={12}>
-            <p><img src="img/spinner.svg"/></p>
-            <p>Preparing the app...</p>
-          </Col>
-        </Row>
-      </Grid>
-    )
+    return <LoadingApp
+      app={this.props.app}
+      message="Loading the data from the blockchain..."
+    />
+
   }
 }
 
