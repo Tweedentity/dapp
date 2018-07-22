@@ -167,9 +167,8 @@ class LandingPage extends Basic {
             <p><b><a target="_blank" href="https://dapp.tweedentity.com">Tweedentity ÐApp</a></b><br/>A
               decentralized app to set a tweedentity and remove an existent
               one.</p>
-            <p><b><a target="_blank" href="https://npmjs.com/package/tweedentity">Tweedentity.js</a></b><br/>A Javascript library for ÐApp developers. <br/>
-              <em>First, untested version for brave hearts.</em></p>
-            <p>All the code is in our <a target="_blank" href="https://github.com/tweedentity/dapp">repository on Github</a>.</p>
+            <p><b><a target="_blank" href="https://npmjs.com/package/tweedentity">Tweedentity.js</a></b><br/>A Javascript library for ÐApp developers.</p>
+            <p>All the code is in the <a target="_blank" href="https://github.com/tweedentity/dapp">monorepo on Github</a>.</p>
           </Col>
         </Row>
 
