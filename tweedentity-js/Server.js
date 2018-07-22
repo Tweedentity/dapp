@@ -9,7 +9,7 @@ class Server {
     } else if (webApp === 'reddit') {
       return this.getDataByRedditUsername(nameId)
     } else {
-      throw('App not supported')
+      throw(new Error('App not supported'))
     }
   }
 
@@ -18,9 +18,7 @@ class Server {
         .get(`https://twitter.com/intent/user?user_id=${userId}`)
         .then(tweet => {
           if (tweet.text) {
-
             const $ = cheerio.load(tweet.text)
-
             let title = $('title').text().split(' (@')
             if (title.length === 2) {
               let name = title[0]
@@ -37,20 +35,25 @@ class Server {
                 userData
               })
             } else {
-              throw('User not found')
+              throw(new Error('Not found'))
             }
           } else {
-            throw('User not found')
+            throw(new Error('Not found'))
           }
+        })
+        .catch(err => {
+          return Promise.resolve({
+            error: 'Not found'
+          })
         })
   }
 
   getDataByRedditUsername(username) {
+    let userData = {}
     return request
         .get(`https://www.reddit.com/user/${username}/about.json`)
         .set('Accept', 'application/json')
         .then(res => {
-          let userData = {}
           let data = res.body && res.body.data || {}
           if (data.name) {
             const name = data.name.toLowerCase()
@@ -60,15 +63,15 @@ class Server {
                 username: data.name,
                 avatar: data.icon_img.replace(/&amp;/g, '&')
               }
+              return Promise.resolve()
             } else {
-              throw('User not found')
+              throw(new Error('Not found'))
             }
           } else {
-            throw('User not found')
+            throw(new Error('Not found'))
           }
-          return Promise.resolve(userData)
         })
-        .then(userData => {
+        .then(() => {
           return request
               .get(`https://www.reddit.com/user/${username}`)
               .then(redditor => {
@@ -80,6 +83,17 @@ class Server {
                   userData
                 })
               })
+        })
+        .catch(err => {
+          if (userData.userId) {
+            return Promise.resolve({
+              userData
+            })
+          } else {
+            return Promise.resolve({
+              error: 'Not found'
+            })
+          }
         })
   }
 

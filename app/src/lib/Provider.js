@@ -218,8 +218,6 @@ class Provider {
           error: errorMessage || 'Post not found'
         })
       })
-
-
   }
 
   getDataByTID(webApp, userId) {

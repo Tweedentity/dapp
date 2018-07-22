@@ -85,7 +85,7 @@ class Set extends Basic {
 
   goHome() {
     this.db.set(this.shortWallet(), {})
-    this.props.app.callMethod('getAccounts')
+    this.props.app.callMethod('getAccounts', {refresh: true})
     this.historyPush('welcome')
   }
 

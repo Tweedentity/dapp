@@ -19,7 +19,7 @@ class Unset extends Basic {
 
   goHome() {
     this.db.set(this.shortWallet(), {})
-    this.props.app.callMethod('getAccounts')
+    this.props.app.callMethod('getAccounts', {refresh: true})
     this.historyPush('welcome')
   }
 
@@ -186,14 +186,6 @@ class Unset extends Basic {
                     <span className="code">Wallet:</span> <span
                       className="code success">{as.wallet}</span>
                   </p>
-                  {/*{*/}
-                  {/*as.err*/}
-                  {/*? <p><BigAlert*/}
-                  {/*title={as.err}*/}
-                  {/*message={as.errMessage}*/}
-                  {/*/></p>*/}
-                  {/*: ''*/}
-                  {/*}*/}
                   <p><LoadingButton
                     text={as.err ? 'Try again' : 'Unset it now!'}
                     loadingText="Starting transaction"

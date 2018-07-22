@@ -253,7 +253,7 @@ class App extends React.Component {
       let shortWallet = address.substring(0, 6)
       let count = 0
 
-      return this.tClient.getIdentities(address, true)
+      return this.tClient.getIdentities(address, params.refresh)
         .then(result => {
           count = _.keys(result).length
           let promises = []
