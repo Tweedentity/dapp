@@ -1,9 +1,10 @@
 {
   "name": "tweedentity",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "main": "index.js",
   "author": "Francesco Sullo <francesco@sullo.co>",
+  "homepage": "https://tweedentity.com",
   "scripts": {
     "test": "mocha --recursive test/*"
   },
