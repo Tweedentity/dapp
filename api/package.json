@@ -1,6 +1,7 @@
 {
   "name": "tweeapi",
   "description": "A simple API to retrieve and verify a signed tweet for Tweedentity",
+  "homepage": "https://api.tweedentity.net",
   "license": "MIT",
   "version": "1.2.0",
   "main": "handler.js",

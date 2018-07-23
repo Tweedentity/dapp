@@ -4,6 +4,7 @@
   "license": "MIT",
   "main": "index.js",
   "author": "Francesco Sullo <francesco@sullo.co>",
+  "homepage": "https://tweedentity.com",
   "scripts": {
     "test": "mocha --recursive test/*"
   },
