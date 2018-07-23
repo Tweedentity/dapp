@@ -10,20 +10,20 @@ describe('Server', function () {
 
     const nameId = '946957110411005953'
     const result = await server.getDataById('twitter', nameId)
-    assert(result.userData.userId === nameId)
-    assert(result.userData.username === 'tweedentity')
-    assert(result.userData.name === 'Tweedentity')
-    assert(/\.jpg$/i.test(result.userData.avatar))
+    assert(result.userId === nameId)
+    assert(result.username === 'tweedentity')
+    assert(result.name === 'Tweedentity')
+    assert(/\.jpg$/i.test(result.avatar))
   })
 
   it('should recover the reddit data for u/tweedentity', async () => {
 
     const nameId = 'tweedentity'
     const result = await server.getDataById('reddit', nameId)
-    assert(result.userData.userId === '1nihr8b3')
-    assert(result.userData.username === 'tweedentity')
-    assert(result.userData.name === 'Tweedentity')
-    assert(/\.png\?/i.test(result.userData.avatar))
+    assert(result.userId === '1nihr8b3')
+    assert(result.username === 'tweedentity')
+    assert(result.name === 'Tweedentity')
+    assert(/\.png\?/i.test(result.avatar))
   })
 
 

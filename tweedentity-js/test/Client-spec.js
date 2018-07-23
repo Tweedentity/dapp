@@ -8,9 +8,15 @@ let tClient
 
 describe('Client', function () {
 
-  this.timeout(20 * 1000)
+  this.timeout(60 * 1000)
 
   const tweedentityWallet = '0x93a5b8fc1a951894361c4c35523e23ba6bf073b7'
+  const twitterStore = '0x0de9ccba310161c06ae194f65965c309af167913'
+  const redditStore = '0x26c30eb4d6f4e7a06dd00e1226c85c9260555b7a'
+  const twitterId = '946957110411005953'
+  const redditUsername = 'tweedentity'
+
+  let twitterTotal
 
   describe('Unsupported network', function () {
 
@@ -32,8 +38,8 @@ describe('Client', function () {
 
 
   describe('Supported network', function () {
-    before(function () {
 
+    before(function () {
       web3js = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io'))
       tClient = new Client(web3js)
       return Promise.resolve()
@@ -42,25 +48,77 @@ describe('Client', function () {
     it('should load the contracts', async () => {
       await tClient.load()
       assert(_.keys(tClient.contracts).length === 4)
-      assert(tClient.contracts.stores.twitter.address === '0x0de9ccba310161c06ae194f65965c309af167913')
-      assert(tClient.contracts.stores.reddit.address === '0x26c30eb4d6f4e7a06dd00e1226c85c9260555b7a')
+      assert(tClient.contracts.stores.twitter.address === twitterStore)
+      assert(tClient.contracts.stores.reddit.address === redditStore)
       assert(tClient.netId === '3')
       assert(tClient.env === 'ropsten')
       assert(tClient.ready === true)
     })
 
+    it('should recover a Twitter identity for @tweedentity', async () => {
 
-    it('should recover a TID for @tweedentity', async () => {
+      const result = await tClient.getIdentity('twitter',tweedentityWallet)
+      assert(result === '946957110411005953')
+    })
+
+    it('should throw trying recover an unsupported MySpace identity for @tweedentity', async () => {
+
+      try {
+        await tClient.getIdentity('myspace', tweedentityWallet)
+      } catch(err) {
+        assert(err.message === 'App not supported')
+      }
+    })
+
+    it('should recover an identity for @tweedentity', async () => {
 
       const result = await tClient.getIdentities(tweedentityWallet)
       assert(typeof result === 'object')
-      assert(result.twitter === '946957110411005953')
-      assert(result.reddit === 'tweedentity')
+      assert(result.twitter === twitterId)
+      assert(result.reddit === redditUsername)
+    })
+
+    it('should recover the full TID for @tweedentity', async () => {
+
+      const result = await tClient.getFullIdentities(tweedentityWallet)
+      assert(typeof result === 'object')
+      assert(result.twitter === '1/946957110411005953')
+      assert(result.reddit === '2/tweedentity')
+    })
+
+    it('should recover the full twitter TID for @tweedentity', async () => {
+
+      const result = await tClient.getFullIdentity('twitter', tweedentityWallet)
+      assert(result === '1/946957110411005953')
+    })
+
+    it('should recover the total number of tweedentities', async () => {
+
+      const result = await tClient.totalIdentities()
+      twitterTotal = result.twitter
+      assert(result.twitter > 0)
+      assert(result.reddit > 0)
+      assert(result.total === result.twitter + result.reddit)
+    })
+
+    it('should recover the total number of twitter identities', async () => {
+
+      const result = await tClient.totalIdentitiesByApp('twitter')
+      assert(result === twitterTotal)
+    })
+
+    it('should throw trying recover the total identities for unsupported MySpace', async () => {
+
+      try {
+        await tClient.totalIdentitiesByApp('myspace')
+      } catch(err) {
+        assert(err.message === 'App not supported')
+      }
     })
 
     it('should not recover any tweedentity for an unset wallet', async () => {
 
-      const result = await tClient.getIdentities('0x000000fc1a951894361c4c35523e23ba6bf073b7')
+      const result = await tClient.getIdentities(tweedentityWallet.replace(/1/g, 'a'))
       assert(typeof result === 'object')
       assert(result.twitter === undefined)
     })
@@ -94,6 +152,10 @@ describe('Client', function () {
             assert(err.message === 'Invalid address')
           })
 
+    })
+
+    it('should return twitter if passing the TID `1/7867654`', async () => {
+      assert(Client.appByTID('1/7867654'), 'twitter')
     })
 
   })

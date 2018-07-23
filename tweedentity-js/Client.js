@@ -1,46 +1,13 @@
 const ENS = require('ethereum-ens')
+const _ = require('lodash')
 
 const config = require('./config')
 
-class Client {
+class __Private {
 
-  constructor(web3js) {
+  constructor(web3js, contracts) {
     this.web3js = web3js
-    this.ready = false
-    this.profiles = {}
-    this.contracts = {
-      stores: {}
-    }
-    this.netId = '0'
-  }
-
-  load() {
-    return new Promise((resolve, reject) => {
-      this.web3js.version.getNetwork((err, netId) => {
-        if (netId === '1' || netId === '3') {
-          this.env = netId === '1' ? 'main' : 'ropsten'
-          this.netId = netId
-          return this.loadRegistry()
-              .then(() => {
-                return this.loadStores()
-              })
-              .then(() => {
-                return this.loadClaimerAndManager()
-              })
-              .then(() => {
-                return resolve()
-              })
-              .catch(err => {
-                return reject(new Error('Error loading the contracts'));
-              })
-
-        } else if (err) {
-          return reject(new Error('Network error'))
-        } else {
-          return reject(new Error('Unsupported network'));
-        }
-      })
-    })
+    this.contracts = contracts
   }
 
   loadRegistry() {
@@ -49,7 +16,11 @@ class Client {
         .addr()
         .then(addr => {
           this.contracts.registry = this.web3js.eth.contract(config.abi.registry).at(addr)
-          return Promise.resolve(addr)
+          return new Promise(resolve => {
+            this.contracts.registry.isReady((err, ready) => {
+              return resolve(ready.valueOf() === '0')
+            })
+          })
         })
   }
 
@@ -67,78 +38,200 @@ class Client {
         if (err) {
           return reject(err)
         }
-        this.contracts.stores[appNickname] = this.web3js.eth.contract(config.abi.store).at(addr)
+        this.contracts.stores[appNickname] = this.web3js.eth.contract(config.abi.store).at(addr.valueOf())
         return resolve()
       })
     })
   }
 
-  loadClaimerAndManager() {
+  loadClaimerAndManager(ready) {
     return new Promise((resolve, reject) => {
-      this.contracts.registry.isReady((err, ready) => {
-        if (ready.valueOf() === '0') {
+        if (ready) {
           this.contracts.registry.manager((err, result) => {
-            this.contracts.manager = this.web3js.eth.contract(config.abi.manager).at(result)
-            this.contracts.registry.claimer((err, result) => {
-              this.contracts.claimer = this.web3js.eth.contract(config.abi.claimer).at(result)
-              this.ready = true
+            this.contracts.manager = this.web3js.eth.contract(config.abi.manager).at(result.valueOf())
+            this.contracts.registry.claimer((err2, result2) => {
+              this.contracts.claimer = this.web3js.eth.contract(config.abi.claimer).at(result2.valueOf())
               return resolve()
             })
           })
         } else {
-          this.ready = false
           return reject()
+        }
+    })
+  }
+}
+
+class Client {
+
+  constructor(web3js) {
+    this.web3js = web3js
+    this.ready = false
+    this.profiles = {}
+    this.contracts = {
+      stores: {}
+    }
+    this.netId = '0'
+    this.private = new __Private(web3js, this.contracts)
+  }
+
+  load() {
+    return new Promise((resolve, reject) => {
+      this.web3js.version.getNetwork((err, netId) => {
+        if (netId === '1' || netId === '3') {
+          this.env = netId === '1' ? 'main' : 'ropsten'
+          this.netId = netId
+          return this.private.loadRegistry()
+              .then(ready => {
+                this.ready = ready
+                return this.private.loadStores()
+              })
+              .then(() => {
+                return this.private.loadClaimerAndManager(this.ready)
+              })
+              .then(() => {
+                return resolve()
+              })
+              .catch(err => {
+                return reject(new Error('Error loading the contracts'));
+              })
+
+        } else if (err) {
+          return reject(new Error('Network error'))
+        } else {
+          return reject(new Error('Unsupported network'));
         }
       })
     })
   }
 
   getIdentities(address, reload) {
-
     if (address) {
-
       if (/^0x[0-9a-fA-F]{40}$/.test(address)) {
-
         if (!this.profiles[address]) {
           this.profiles[address] = {}
         } else if (!reload) {
           return Promise.resolve(this.profiles[address])
         }
-
         const promises = []
+        const position = {}
+        let count = 0
         for (let appNickname of config.appNicknames) {
+          position[appNickname] = count++
           promises.push(this.getIdentity(appNickname, address))
         }
         return Promise.all(promises)
             .then(results => {
+              for (let appNickname in position) {
+                let identity = results[position[appNickname]]
+                if (identity) {
+                  this.profiles[address][appNickname] = identity
+                }
+              }
               return Promise.resolve(this.profiles[address])
             })
       } else {
         return Promise.reject(new Error('Invalid address'))
       }
-
     }
     return Promise.reject(new Error('No address specified'))
   }
 
-  getIdentity(appNickname, address) {
-    return new Promise((resolve, reject) => {
-      this.contracts.stores[appNickname].getUid(address, (err, result) => {
-
-        if (err) {
-          reject('Error')
-        }
-
-        let data = {}
-        data[appNickname] = {}
-
-        if (result !== '') {
-          let userId = typeof result === 'string' ? result : result.valueOf()
-          this.profiles[address][appNickname] = userId
-        }
-        resolve()
+  getIdentity(app, address) {
+    const appNickname = Client.normalize(app)
+    if (appNickname) {
+      return new Promise(resolve => {
+        this.contracts.stores[appNickname].getUid(address, (err, result) => {
+          if (err) {
+            resolve()
+          }
+          resolve(result.valueOf())
+        })
       })
-    })
+    } else {
+      return Promise.reject(new Error('App not supported'))
+    }
+  }
+
+  getFullIdentities(address, reload) {
+    return this.getIdentities(address, reload)
+        .then(result => {
+          for (let appNickname of config.appNicknames) {
+            result[appNickname] = Client.fullify(appNickname, result[appNickname])
+          }
+          return Promise.resolve(result)
+        })
+  }
+
+  getFullIdentity(appNickname, address) {
+    return this.getIdentity(appNickname, address)
+        .then(result => {
+          return Promise.resolve(Client.fullify(appNickname, result))
+        })
+  }
+
+  totalIdentities() {
+    const promises = []
+    const position = {}
+    let count = 0
+    for (let appNickname of config.appNicknames) {
+      position[appNickname] = count++
+      promises.push(this.totalIdentitiesByApp(appNickname))
+    }
+    return Promise.all(promises)
+        .then(results => {
+          const totals = {
+            total: 0
+          }
+          for (let appNickname in position) {
+            let t = results[position[appNickname]]
+            totals[appNickname] = t
+            totals.total += t
+          }
+          return Promise.resolve(totals)
+        })
+  }
+
+  totalIdentitiesByApp(app) {
+    const appNickname = Client.normalize(app)
+    if (appNickname) {
+      return new Promise((resolve, reject) => {
+        this.contracts.stores[appNickname].identities((err, result) => {
+          resolve(parseInt(result.valueOf(), 10))
+        })
+      })
+    } else {
+      return Promise.reject(new Error('App not supported'))
+    }
+  }
+
+  static fullify(appNickname, id) {
+    if (id) {
+      return `${config.appIds[appNickname]}/${id}`
+    } else {
+      return undefined
+    }
+  }
+
+  static isSupported(app) {
+    if (typeof app === 'number') {
+      return config.appIds[app] !== undefined
+    } else if (typeof app === 'string') {
+      return config.appNicknames.indexOf(app) !== -1
+    }
+    return false
+  }
+
+  static normalize(app) {
+    if (typeof app === 'number') {
+      app = _.invert(config.app)[app]
+    }
+    if (app && Client.isSupported(app)) {
+      return app
+    }
+  }
+
+  static appByTID(tid) {
+    return _.invert(config.appIds)[parseInt(tid.split('/')[0], 10)]
   }
 
 }

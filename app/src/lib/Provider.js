@@ -231,9 +231,9 @@ class Provider {
         } else {
           return this.tServer.getDataById(webApp, userId)
             .then(result => {
-              db.set(key, JSON.stringify(result.userData), 'EX', 3600)
+              db.set(key, JSON.stringify(result), 'EX', 3600)
               return Promise.resolve({
-                result: result.userData
+                result
               })
             })
         }
