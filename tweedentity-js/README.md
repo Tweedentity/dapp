@@ -1,6 +1,6 @@
 # Tweedentity.js
 
-This is a first alpha version. Tests will come soon.
+A library to integrate Tweedentity in any decentralized app.
 
 ## Getting started
 
