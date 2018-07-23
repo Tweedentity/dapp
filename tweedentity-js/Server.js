@@ -31,9 +31,7 @@ class Server {
                 username,
                 avatar
               }
-              return Promise.resolve({
-                userData
-              })
+              return Promise.resolve(userData)
             } else {
               throw(new Error('Not found'))
             }
@@ -79,16 +77,12 @@ class Server {
                   const $ = cheerio.load(redditor.text)
                   userData.name = $('h4').text()
                 }
-                return Promise.resolve({
-                  userData
-                })
+                return Promise.resolve(userData)
               })
         })
         .catch(err => {
           if (userData.userId) {
-            return Promise.resolve({
-              userData
-            })
+            return Promise.resolve(userData)
           } else {
             return Promise.resolve({
               error: 'Not found'
