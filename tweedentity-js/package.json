@@ -1,6 +1,6 @@
 {
   "name": "tweedentity",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "license": "MIT",
   "main": "index.js",
   "author": "Francesco Sullo <francesco@sullo.co>",
@@ -12,10 +12,10 @@
     "cheerio": "^1.0.0-rc.2",
     "eth-sig-util": "^1.4.2",
     "ethereum-ens": "^0.7.4",
+    "lodash": "^4.17.10",
     "superagent": "^3.5.2"
   },
   "devDependencies": {
-    "lodash": "^4.17.10",
     "mocha": "^5.1.1",
     "web3": "^0.20.6"
   },
