@@ -1,0 +1,6 @@
+module.exports = {
+  token: 'yciuvmjgzn',
+  address: '0x32e5c048c3aba1848587f143b069956a48d9b5aa',
+  privateKey: '3c7c728c42414aa31cd92f5ce4afff9a3a4fce4dfbe36d62f027f83cf0fc5763',
+  sig: '0x7ce68ad1814266dc0eac6e64739436de036abb241cc2903127cd4659d0e8591465b8d84ca25e39e4238b871e6ee6f94e537d1e4eaa41fed80096e9aad07655051c'
+}

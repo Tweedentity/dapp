@@ -1,4 +1,3 @@
-const ENS = require('ethereum-ens')
 const _ = require('lodash')
 import createHistory from 'history/createBrowserHistory'
 const history = window.History = createHistory()

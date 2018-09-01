@@ -1,4 +1,5 @@
 const ENS = require('ethereum-ens')
+const sigUtil = require('eth-sig-util')
 const _ = require('lodash')
 
 const config = require('./config')
@@ -46,17 +47,17 @@ class __Private {
 
   loadClaimerAndManager(ready) {
     return new Promise((resolve, reject) => {
-        if (ready) {
-          this.contracts.registry.manager((err, result) => {
-            this.contracts.manager = this.web3js.eth.contract(config.abi.manager).at(result.valueOf())
-            this.contracts.registry.claimer((err2, result2) => {
-              this.contracts.claimer = this.web3js.eth.contract(config.abi.claimer).at(result2.valueOf())
-              return resolve()
-            })
+      if (ready) {
+        this.contracts.registry.manager((err, result) => {
+          this.contracts.manager = this.web3js.eth.contract(config.abi.manager).at(result.valueOf())
+          this.contracts.registry.claimer((err2, result2) => {
+            this.contracts.claimer = this.web3js.eth.contract(config.abi.claimer).at(result2.valueOf())
+            return resolve()
           })
-        } else {
-          return reject()
-        }
+        })
+      } else {
+        return reject()
+      }
     })
   }
 }
@@ -202,6 +203,45 @@ class Client {
     } else {
       return Promise.reject(new Error('App not supported'))
     }
+  }
+
+  getSignedAuthToken(wallet, token) {
+    if (!token) {
+      token = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 12)
+      // console.log(token)
+    }
+    const msgParams = [
+      {
+        type: 'string',
+        name: 'auth',
+        value: token
+      }
+    ]
+    return this.web3js.currentProvider.sendAsync({
+      method: 'eth_signTypedData',
+      params: [
+        msgParams,
+        wallet
+      ],
+      from: wallet,
+    }, (err, result) => {
+      if (err || result.error) {
+        return Promise.reject(new Error('Signature denied'))
+      } else {
+        const recovered = sigUtil.recoverTypedSignature({
+          data: msgParams,
+          sig: result.result
+        })
+        if (recovered === wallet) {
+          return Promise.resolve({
+            signature: result.result,
+            token
+          })
+        } else {
+          return Promise.reject(new Error('Wrong signature'))
+        }
+      }
+    })
   }
 
   static fullify(appNickname, id) {

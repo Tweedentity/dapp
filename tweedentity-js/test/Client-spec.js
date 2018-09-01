@@ -3,6 +3,9 @@ const assert = require('assert')
 const _ = require('lodash')
 const Client = require('../Client')
 const Web3 = require('web3')
+const config = require('./helpers/config')
+const web3jsMock = require('./mocks/webjs-mock')
+
 let web3js
 let tClient
 
@@ -156,6 +159,31 @@ describe('Client', function () {
 
     it('should return twitter if passing the TID `1/7867654`', async () => {
       assert(Client.appByTID('1/7867654'), 'twitter')
+    })
+
+  })
+
+  describe.only('Authentication', function () {
+
+    before(function () {
+      web3js = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io'))
+      web3js = new web3jsMock(web3js).web3js
+      tClient = new Client(web3js)
+      return Promise.resolve()
+    })
+
+    it('should sign a random token to be used to sign in server side', async () => {
+
+      return tClient.getSignedAuthToken(config.address, config.token)
+          .then(result => {
+              console.log(result)
+            assert(result.result === config.sig)
+          })
+          .catch(err => {
+
+            console.log(err)
+            //assert(err.message === 'Unsupported network')
+          })
     })
 
   })
