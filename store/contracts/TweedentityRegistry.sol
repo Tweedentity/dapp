@@ -1,7 +1,7 @@
 pragma solidity ^0.4.23;
 
 
-import 'openzeppelin-solidity/contracts/ownership/HasNoEther.sol';
+import "openzeppelin-solidity/contracts/ownership/HasNoEther.sol";
 
 
 contract ManagerInterface {
