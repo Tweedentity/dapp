@@ -8,6 +8,7 @@
     "lodash": "^4.17.4",
     "openzeppelin-solidity": "^1.10.0",
     "sleep": "^5.1.1",
+    "solium": "^1.1.8",
     "truffle-flattener": "^1.2.5",
     "truffle-hdwallet-provider": "0.0.5"
   },
@@ -19,6 +20,7 @@
     "clear": "rm -rf build/contracts",
     "deployToRopsten": "rm -rf build && source ../testnet.env && source ../infura.env && truffle migrate --network ropsten",
     "deployToMainnet": "rm -rf build && source ../infura.env && truffle migrate --network mainnet",
-    "compile": "rm -rf build && truffle compile"
+    "compile": "rm -rf build && truffle compile",
+    "slint": "solium -d contracts/"
   }
 }

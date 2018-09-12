@@ -24,7 +24,7 @@ class Unconnected extends Basic {
 
           welcomeMessage = <BigAlert
             title="Web3js not found"
-            message="You must either install MetaMask or use a browser compatible with Ethereum like Mist, Parity or Brave. On mobile, you could use TrustWallet."
+            message="You must authorize the injection of Web3 in MetaMask. If you don't have MetaMaks installed, click the following button to download and install it."
             link="https://metamask.io"
             linkMessage="Get MetaMask"
           />
