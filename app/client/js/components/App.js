@@ -81,6 +81,30 @@ class App extends React.Component {
       setTimeout(this.getNetwork, 100)
     }
 
+    const self = this
+
+    window.addEventListener('load', () => {
+      // If web3 is not injected (modern browsers)...
+      if (typeof web3 === 'undefined') {
+        // Listen for provider injection
+        window.addEventListener('message', ({ data }) => {
+          if (data && data.type && data.type === 'ETHEREUM_PROVIDER_SUCCESS') {
+            // Use injected provider, start dapp...
+            let web3js = new Web3(ethereum)
+            this.getNetwork(web3js)
+          }
+        });
+        // Request provider
+        window.postMessage({ type: 'ETHEREUM_PROVIDER_REQUEST' }, '*')
+      }
+      // If web3 is injected (legacy browsers)...
+      else {
+        // Use injected provider, start dapp
+        let web3js = new Web3(web3.currentProvider)
+        this.getNetwork(web3js)
+      }
+    })
+
   }
 
   componentDidMount() {
@@ -98,12 +122,12 @@ class App extends React.Component {
     })
   }
 
-  getNetwork() {
+  getNetwork(web3js) {
 
-    if (typeof web3 !== 'undefined') {
+    if (web3js) {
       console.log('Using web3 detected from external source like MetaMask')
 
-      this.web3js = new Web3(web3.currentProvider)
+      this.web3js = web3js
       this.web3js.eth.getTransactionReceiptMined = require("../utils/getTransactionReceiptMined")
 
       this.tClient = new tweedentityClient(this.web3js)
@@ -130,7 +154,8 @@ class App extends React.Component {
           })
         })
 
-    } else {
+    }
+    else {
       console.log('web3 not detected')
 
       this.setState({
