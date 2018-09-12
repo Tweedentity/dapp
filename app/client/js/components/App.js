@@ -1,6 +1,7 @@
 const ENS = require('ethereum-ens')
 const _ = require('lodash')
 import createHistory from 'history/createBrowserHistory'
+
 const history = window.History = createHistory()
 const tweedentityClient = require('tweedentity/Client')
 const config = require('../config')
@@ -81,6 +82,27 @@ class App extends React.Component {
       setTimeout(this.getNetwork, 100)
     }
 
+    const self = this
+
+    window.addEventListener('load', () => {
+      let web3js
+      if (window.ethereum) {
+        web3js = new Web3(ethereum)
+        return ethereum.enable()
+          .then(() => {
+            this.getNetwork(null, web3js)
+          })
+          .catch(err => {
+            this.getNetwork('User denied account access.')
+          })
+      }
+      else {
+        // Use injected provider, start dapp
+        web3js = new Web3(web3.currentProvider)
+        this.getNetwork(null, web3js)
+      }
+    })
+
   }
 
   componentDidMount() {
@@ -98,12 +120,21 @@ class App extends React.Component {
     })
   }
 
-  getNetwork() {
+  getNetwork(err, web3js) {
 
-    if (typeof web3 !== 'undefined') {
+    if (err) {
+      this.setState({
+        connected: 0,
+        connectionChecked: true,
+        connectionError: err
+      })
+      return;
+    }
+
+    if (web3js) {
       console.log('Using web3 detected from external source like MetaMask')
 
-      this.web3js = new Web3(web3.currentProvider)
+      this.web3js = web3js
       this.web3js.eth.getTransactionReceiptMined = require("../utils/getTransactionReceiptMined")
 
       this.tClient = new tweedentityClient(this.web3js)
@@ -115,7 +146,8 @@ class App extends React.Component {
             netId: this.tClient.netId,
             connected: 1,
             env: this.tClient.env,
-            ready: this.tClient.ready ? 1 : 0
+            ready: this.tClient.ready ? 1 : 0,
+            connectionError: false
           })
           this.getEthInfo()
           this.watchAccounts0(true)
@@ -126,16 +158,17 @@ class App extends React.Component {
           this.setState({
             netId: '0',
             connected: 0,
-            connectionChecked: true
+            connectionChecked: true,
+            connectionError: false
           })
         })
-
-    } else {
+    }
+    else {
       console.log('web3 not detected')
 
       this.setState({
         connected: 0,
-        connectionChecked: true
+        connectionChecked: true,
       })
     }
   }
