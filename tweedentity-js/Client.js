@@ -3,7 +3,7 @@ const _ = require('lodash')
 
 const config = require('./config')
 
-class __Private {
+class Utils {
 
   constructor(web3js, contracts) {
     this.web3js = web3js
@@ -22,7 +22,7 @@ class __Private {
             })
           })
         })
-  }
+  }q
 
   loadStores() {
     const promises = []
@@ -71,7 +71,6 @@ class Client {
       stores: {}
     }
     this.netId = '0'
-    this.private = new __Private(web3js, this.contracts)
   }
 
   load() {
@@ -80,13 +79,14 @@ class Client {
         if (netId === '1' || netId === '3') {
           this.env = netId === '1' ? 'main' : 'ropsten'
           this.netId = netId
-          return this.private.loadRegistry()
+          const priv = new Utils(this.web3js, this.contracts)
+          return priv.loadRegistry()
               .then(ready => {
                 this.ready = ready
-                return this.private.loadStores()
+                return priv.loadStores()
               })
               .then(() => {
-                return this.private.loadClaimerAndManager(this.ready)
+                return priv.loadClaimerAndManager(this.ready)
               })
               .then(() => {
                 return resolve()
