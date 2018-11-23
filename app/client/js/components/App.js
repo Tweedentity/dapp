@@ -1,8 +1,9 @@
 const ENS = require('ethereum-ens')
 const _ = require('lodash')
 import createHistory from 'history/createBrowserHistory'
+
 const history = window.History = createHistory()
-const tweedentityClient = require('tweedentity/Client')
+const tweedentityClient = require('../../../../tweedentity-js/Client')
 const config = require('../config')
 const clientApi = require('../utils/ClientApi')
 
@@ -84,24 +85,21 @@ class App extends React.Component {
     const self = this
 
     window.addEventListener('load', () => {
-      // If web3 is not injected (modern browsers)...
-      if (typeof web3 === 'undefined') {
-        // Listen for provider injection
-        window.addEventListener('message', ({ data }) => {
-          if (data && data.type && data.type === 'ETHEREUM_PROVIDER_SUCCESS') {
-            // Use injected provider, start dapp...
-            let web3js = new Web3(ethereum)
-            this.getNetwork(web3js)
-          }
-        });
-        // Request provider
-        window.postMessage({ type: 'ETHEREUM_PROVIDER_REQUEST' }, '*')
+      let web3js
+      if (window.ethereum) {
+        web3js = new Web3(ethereum)
+        return ethereum.enable()
+          .then(() => {
+            this.getNetwork(null, web3js)
+          })
+          .catch(err => {
+            this.getNetwork('User denied account access.')
+          })
       }
-      // If web3 is injected (legacy browsers)...
       else {
         // Use injected provider, start dapp
-        let web3js = new Web3(web3.currentProvider)
-        this.getNetwork(web3js)
+        web3js = new Web3(web3.currentProvider)
+        this.getNetwork(null, web3js)
       }
     })
 
@@ -122,7 +120,16 @@ class App extends React.Component {
     })
   }
 
-  getNetwork(web3js) {
+  getNetwork(err, web3js) {
+
+    if (err) {
+      this.setState({
+        connected: 0,
+        connectionChecked: true,
+        connectionError: err
+      })
+      return;
+    }
 
     if (web3js) {
       console.log('Using web3 detected from external source like MetaMask')
@@ -139,7 +146,8 @@ class App extends React.Component {
             netId: this.tClient.netId,
             connected: 1,
             env: this.tClient.env,
-            ready: this.tClient.ready ? 1 : 0
+            ready: this.tClient.ready ? 1 : 0,
+            connectionError: false
           })
           this.getEthInfo()
           this.watchAccounts0(true)
@@ -150,17 +158,17 @@ class App extends React.Component {
           this.setState({
             netId: '0',
             connected: 0,
-            connectionChecked: true
+            connectionChecked: true,
+            connectionError: false
           })
         })
-
     }
     else {
       console.log('web3 not detected')
 
       this.setState({
         connected: 0,
-        connectionChecked: true
+        connectionChecked: true,
       })
     }
   }

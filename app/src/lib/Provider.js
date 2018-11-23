@@ -6,7 +6,7 @@ const path = require('path')
 const cheerio = require('cheerio')
 const utils = require('./Utils')
 
-const tweedentity = require('tweedentity')
+const tweedentity = require('../../../tweedentity-js')
 
 class Provider {
 

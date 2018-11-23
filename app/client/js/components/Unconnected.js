@@ -22,12 +22,19 @@ class Unconnected extends Basic {
 
         if (netId == null) {
 
-          welcomeMessage = <BigAlert
-            title="Web3js not found"
-            message="You must authorize the injection of Web3 in MetaMask. If you don't have MetaMaks installed, click the following button to download and install it."
-            link="https://metamask.io"
-            linkMessage="Get MetaMask"
-          />
+          if (as.connectionError) {
+            welcomeMessage = <BigAlert
+              title={as.connectionError}
+              message="You must authorize MetaMask to get access to your account in order to use Tweedentity."
+            />
+          } else {
+            welcomeMessage = <BigAlert
+              title="Web3js not found"
+              message="You must authorize the injection of Web3 in MetaMask. If you don't have MetaMaks installed, click the following button to download and install it."
+              link="https://metamask.io"
+              linkMessage="Get MetaMask"
+            />
+          }
 
         } else if (netId === '0') {
 

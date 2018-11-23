@@ -11,6 +11,7 @@ source ../.default.env && docker run -it \
   --link tweedentity-redis:redis \
   -p 9095 \
   -v $PWD:/usr/src/app \
+  -v $PWD/../tweedentity-js:/usr/src/tweedentity-js \
   -v /vol/log/tweedentity_dapp:/var/log/tweedentity_dapp \
   -e INFURA_ID=$INFURA_ID \
   -e ETHERSCAN_TWEEDENTITY_API_KEY=$ETHERSCAN_TWEEDENTITY_API_KEY \
