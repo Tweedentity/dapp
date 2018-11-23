@@ -8,7 +8,7 @@
     "lodash": "^4.17.4",
     "openzeppelin-solidity": "^1.10.0",
     "sleep": "^5.1.1",
-    "truffle-flattener": "^1.2.5",
+    "truffle-flattener": "^1.2.10",
     "truffle-hdwallet-provider": "0.0.5"
   },
   "scripts": {

@@ -1,17 +1,5 @@
 pragma solidity ^0.4.23;
 
-// File: contracts/UidCheckerInterface.sol
-
-contract UidCheckerInterface {
-
-  function isUid(
-    string _uid
-  )
-  public
-  pure returns (bool);
-
-}
-
 // File: openzeppelin-solidity/contracts/ownership/Ownable.sol
 
 /**
@@ -110,6 +98,18 @@ contract HasNoEther is Ownable {
   function reclaimEther() external onlyOwner {
     owner.transfer(address(this).balance);
   }
+}
+
+// File: contracts/UidCheckerInterface.sol
+
+contract UidCheckerInterface {
+
+  function isUid(
+    string _uid
+  )
+  public
+  pure returns (bool);
+
 }
 
 // File: contracts/Datastore.sol

@@ -13,5 +13,5 @@ contracts=(
 
 for c in "${contracts[@]}"
 do
-  truffle-flattener "contracts/$c.sol" > "flattened/$c-flattened.sol"
+  node_modules/.bin/truffle-flattener "contracts/$c.sol" > "flattened/$c-flattened.sol"
 done
