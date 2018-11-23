@@ -15,6 +15,7 @@ class __Private {
     return ens.resolver('tweedentity.eth')
         .addr()
         .then(addr => {
+          console.log(`Loading registry from `, addr)
           this.contracts.registry = this.web3js.eth.contract(config.abi.registry).at(addr)
           return new Promise(resolve => {
             this.contracts.registry.isReady((err, ready) => {
@@ -27,7 +28,6 @@ class __Private {
   loadStores() {
     const promises = []
     for (let appNickname of config.appNicknames) {
-      console.log(`Loading ${appNickname} store`)
       promises.push(this.loadStore(appNickname))
     }
     return Promise.all(promises)
@@ -49,10 +49,12 @@ class __Private {
   loadClaimerAndManager(ready) {
     return new Promise((resolve, reject) => {
         if (ready) {
-          this.contracts.registry.manager((err, result) => {
-            this.contracts.manager = this.web3js.eth.contract(config.abi.manager).at(result.valueOf())
-            this.contracts.registry.claimer((err2, result2) => {
-              this.contracts.claimer = this.web3js.eth.contract(config.abi.claimer).at(result2.valueOf())
+          this.contracts.registry.manager((err, addr) => {
+            console.log(`Loading manager from `, addr.valueOf())
+            this.contracts.manager = this.web3js.eth.contract(config.abi.manager).at(addr.valueOf())
+            this.contracts.registry.claimer((err2, addr2) => {
+              console.log(`Loading claimer from `, addr.valueOf())
+              this.contracts.claimer = this.web3js.eth.contract(config.abi.claimer).at(addr2.valueOf())
               return resolve()
             })
           })
@@ -141,7 +143,6 @@ class Client {
   getIdentity(app, address) {
     const appNickname = Client.normalize(app)
     if (appNickname) {
-      console.log('identity', app, address)
       return new Promise(resolve => {
         this.contracts.stores[appNickname].getUid(address, (err, result) => {
           if (err) {
