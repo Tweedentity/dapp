@@ -3,6 +3,10 @@ const _ = require('lodash')
 
 const config = require('./config')
 
+function log(what, addr) {
+  console.log(`Loading ${what} from ${typeof addr === 'string' ? addr : addr.valueOf()}`)
+}
+
 class __Private {
 
   constructor(web3js, contracts) {
@@ -15,6 +19,7 @@ class __Private {
     return ens.resolver('tweedentity.eth')
         .addr()
         .then(addr => {
+          log('registry', addr)
           this.contracts.registry = this.web3js.eth.contract(config.abi.registry).at(addr)
           return new Promise(resolve => {
             this.contracts.registry.isReady((err, ready) => {
@@ -38,6 +43,7 @@ class __Private {
         if (err) {
           return reject(err)
         }
+        log(`${appNickname} store`, addr)
         this.contracts.stores[appNickname] = this.web3js.eth.contract(config.abi.store).at(addr.valueOf())
         return resolve()
       })
@@ -47,10 +53,12 @@ class __Private {
   loadClaimerAndManager(ready) {
     return new Promise((resolve, reject) => {
         if (ready) {
-          this.contracts.registry.manager((err, result) => {
-            this.contracts.manager = this.web3js.eth.contract(config.abi.manager).at(result.valueOf())
-            this.contracts.registry.claimer((err2, result2) => {
-              this.contracts.claimer = this.web3js.eth.contract(config.abi.claimer).at(result2.valueOf())
+          this.contracts.registry.manager((err, addr) => {
+            log('manager', addr)
+            this.contracts.manager = this.web3js.eth.contract(config.abi.manager).at(addr.valueOf())
+            this.contracts.registry.claimer((err2, addr2) => {
+              log('claimer', addr)
+              this.contracts.claimer = this.web3js.eth.contract(config.abi.claimer).at(addr2.valueOf())
               return resolve()
             })
           })
