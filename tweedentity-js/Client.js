@@ -144,7 +144,7 @@ class Client {
           if (err) {
             resolve()
           }
-          resolve(result.valueOf())
+          resolve(result ? result.valueOf() : undefined)
         })
       })
     } else {

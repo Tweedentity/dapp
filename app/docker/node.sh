@@ -12,6 +12,7 @@ source ../.default.env && docker run -d \
   -p 9095 \
   --restart unless-stopped \
   -v $PWD:/usr/src/app \
+  -v $PWD/../tweedentity-js:/usr/src/tweedentity-js \
   -v /vol/log/tweedentity_app:/var/log/tweedentity_app \
   -e INFURA_ID=$INFURA_ID \
   -e ETHERSCAN_TWEEDENTITY_API_KEY=$ETHERSCAN_TWEEDENTITY_API_KEY \

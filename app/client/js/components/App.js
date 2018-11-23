@@ -3,7 +3,7 @@ const _ = require('lodash')
 import createHistory from 'history/createBrowserHistory'
 
 const history = window.History = createHistory()
-const tweedentityClient = require('tweedentity/Client')
+const tweedentityClient = require('../../../../tweedentity-js/Client')
 const config = require('../config')
 const clientApi = require('../utils/ClientApi')
 
