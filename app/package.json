@@ -39,7 +39,7 @@
     "lodash": "^4.17.10",
     "log": "^1.4.0",
     "moment-timezone": "^0.5.13",
-    "morgan": "^1.9.0",
+    "morgan": "^1.9.1",
     "node-libs-browser": "^1.0.0",
     "rc-slider": "^8.6.1",
     "react": "^16.3.2",
@@ -52,6 +52,7 @@
     "say": "^0.11.0",
     "sleep": "^5.1.1",
     "superagent": "^3.5.2",
+    "url-parse": "^1.4.4",
     "web3": "^0.20.4"
   },
   "devDependencies": {
@@ -76,7 +77,7 @@
     "supertest": "^3.0.0",
     "webpack": "^2.4.1",
     "webpack-dev-middleware": "^1.6.1",
-    "webpack-dev-server": "^3.1.4",
+    "webpack-dev-server": "^3.1.10",
     "webpack-hot-middleware": "^2.11.0"
   }
 }
