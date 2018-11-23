@@ -27,6 +27,7 @@ class __Private {
   loadStores() {
     const promises = []
     for (let appNickname of config.appNicknames) {
+      console.log(`Loading ${appNickname} store`)
       promises.push(this.loadStore(appNickname))
     }
     return Promise.all(promises)
@@ -38,6 +39,7 @@ class __Private {
         if (err) {
           return reject(err)
         }
+        console.log(`Loading ${appNickname} store from `, addr.valueOf())
         this.contracts.stores[appNickname] = this.web3js.eth.contract(config.abi.store).at(addr.valueOf())
         return resolve()
       })
@@ -139,6 +141,7 @@ class Client {
   getIdentity(app, address) {
     const appNickname = Client.normalize(app)
     if (appNickname) {
+      console.log('identity', app, address)
       return new Promise(resolve => {
         this.contracts.stores[appNickname].getUid(address, (err, result) => {
           if (err) {
