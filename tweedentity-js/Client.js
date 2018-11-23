@@ -38,6 +38,7 @@ class __Private {
         if (err) {
           return reject(err)
         }
+        console.log(JSON.stringify(addr, null, 2))
         this.contracts.stores[appNickname] = this.web3js.eth.contract(config.abi.store).at(addr.valueOf())
         return resolve()
       })
@@ -139,6 +140,8 @@ class Client {
   getIdentity(app, address) {
     const appNickname = Client.normalize(app)
     if (appNickname) {
+
+      console.log(app, address)
       return new Promise(resolve => {
         this.contracts.stores[appNickname].getUid(address, (err, result) => {
           if (err) {
